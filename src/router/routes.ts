@@ -1,6 +1,6 @@
 import { RouteRecordRaw } from "vue-router";
 
-const Dashboard = () => import("@/views/Dashboard/Dashboard.vue");
+const Dashboard = () => import("@/views/dashboard/Dashboard.vue");
 const Settings = () => import("@/views/settings/Settings.vue");
 const Login = () => import("@/views/auth/login/Login.vue");
 const Register = () => import("@/views/auth/register/Register.vue");

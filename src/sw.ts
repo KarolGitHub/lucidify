@@ -5,8 +5,6 @@ declare let self: ServiceWorkerGlobalScope;
 
 const manifest = self.__WB_MANIFEST;
 
-console.debug(manifest);
-
 precacheAndRoute(manifest);
 
 self.skipWaiting();

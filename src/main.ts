@@ -17,47 +17,22 @@ Vue.use(router);
 
 import "./plugins";
 
-/* mount app*/
 Vue.mount("#app");
 
-// @ts-ignore
-import { registerSW } from "virtual:pwa-register";
+import { useRegisterSW } from "virtual:pwa-register/vue";
 
-const updateSW = registerSW({
-  onNeedRefresh() {},
-  onOfflineReady() {},
+const { offlineReady, needRefresh, updateServiceWorker } = useRegisterSW({
+  immediate: true,
+  onRegistered(r) {
+    r &&
+      setInterval(async () => {
+        await r.update();
+      }, 60 * 60 * 1000);
+  },
 });
 
-function handleSWManualUpdates(
-  swRegistration: ServiceWorkerRegistration | undefined
-) {
-  // noop
-}
-
-function handleSWRegisterError(error: any) {
-  // noop
-}
-
-try {
-  const updateSW = registerSW({
-    immediate: true,
-    onOfflineReady() {
-      console.debug("onOfflineReady");
-    },
-    onNeedRefresh() {
-      console.debug("onNeedRefresh");
-    },
-    onRegistered(swRegistration: ServiceWorkerRegistration) {
-      swRegistration && handleSWManualUpdates(swRegistration);
-    },
-    onRegisterError(e: Error) {
-      handleSWRegisterError(e);
-    },
-  });
-} catch {
-  console.debug("PWA disabled.");
-}
-
 if (!import.meta.env.DEV) {
-  console.debug = function () {};
+  console.debug = function () {
+    return;
+  };
 }

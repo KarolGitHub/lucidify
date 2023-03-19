@@ -5,6 +5,7 @@ import { visualizer } from "rollup-plugin-visualizer";
 import { VitePWA } from "vite-plugin-pwa";
 import viteCompression from "vite-plugin-compression";
 const options = { algorithm: "brotliCompress" };
+const { dirname } = require("path");
 /** @type {import('vite').UserConfig} */
 export default defineConfig({
   root: "./",
@@ -15,9 +16,11 @@ export default defineConfig({
   plugins: [
     vue(),
     VitePWA({
+      root: dirname(__dirname),
       mode: "production",
       srcDir: "src",
       filename: "sw.ts",
+      minify: true,
       strategies: "injectManifest",
       includeAssets: [
         "favicon.svg",
@@ -26,8 +29,8 @@ export default defineConfig({
         "apple-touch-icon.png",
       ],
       manifest: {
-        name: "Vue 3 Template",
-        short_name: "Vue 3",
+        name: "Lucify",
+        short_name: "Lucify",
         theme_color: "#ffffff",
         icons: [
           {
