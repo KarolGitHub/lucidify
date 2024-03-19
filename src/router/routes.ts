@@ -5,7 +5,6 @@ const Settings = () => import("@/views/settings/Settings.vue");
 const Login = () => import("@/views/auth/login/Login.vue");
 const Register = () => import("@/views/auth/register/Register.vue");
 const About = () => import("@/views/About.vue");
-const Profile = () => import("@/views/Profile.vue");
 const Auth = () => import("@/layout/Auth.vue");
 const Layout = () => import("@/layout/Layout.vue");
 const Home = () => import("@/views/home/Home.vue");
@@ -52,10 +51,6 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: "/about",
     component: About,
-  },
-  {
-    path: "/profile",
-    component: Profile,
   },
   { path: "/:pathMatch(.*)*", redirect: "/auth/login" },
 ];

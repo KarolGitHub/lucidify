@@ -1,60 +1,60 @@
 <template>
-  <nav class="top-0 absolute z-50 w-full flex flex-wrap items-center justify-between px-2 py-3 navbar-expand-lg">
-    <div class="container px-4 mx-auto flex flex-wrap items-center justify-between">
-      <div class="w-full relative flex justify-between lg:w-auto lg:static lg:block lg:justify-start">
+  <nav class="absolute top-0 z-50 flex flex-wrap items-center justify-between w-full px-2 py-3 navbar-expand-lg">
+    <div class="container flex flex-wrap items-center justify-between px-4 mx-auto">
+      <div class="relative flex justify-between w-full lg:w-auto lg:static lg:block lg:justify-start">
         <router-link
-          class="text-white text-sm font-bold leading-relaxed inline-block mr-4 py-2 whitespace-nowrap uppercase"
+          class="inline-block py-2 mr-4 text-sm font-bold leading-relaxed text-white uppercase whitespace-nowrap"
           to="/">
-          Vue Dashboard
+          Lucidifier
         </router-link>
         <button
-          class="cursor-pointer text-xl leading-none px-3 py-1 border border-solid border-transparent rounded bg-transparent block lg:hidden outline-none focus:outline-none"
+          class="block px-3 py-1 text-xl leading-none bg-transparent border border-transparent border-solid rounded outline-none cursor-pointer lg:hidden focus:outline-none"
           type="button" @click="setNavbarOpen">
           <i class="text-white fas fa-bars"></i>
         </button>
       </div>
-      <div id="example-navbar-warning" class="lg:flex flex-grow items-center bg-white lg:bg-opacity-0 lg:shadow-none"
+      <div id="example-navbar-warning" class="items-center flex-grow bg-white lg:flex lg:bg-opacity-0 lg:shadow-none"
         :class="[navbarOpen ? 'block rounded shadow-lg' : 'hidden']">
-        <ul class="flex flex-col lg:flex-row list-none lg:ml-auto">
+        <ul class="flex flex-col list-none lg:flex-row lg:ml-auto">
           <li class="flex items-center">
             <PagesDropdown />
           </li>
           <li class="flex items-center">
-            <a class="lg:text-white lg:hover:text-blueGray-200 text-blueGray-700 px-3 py-4 lg:py-2 flex items-center text-xs uppercase font-bold"
+            <a class="flex items-center px-3 py-4 text-xs font-bold uppercase lg:text-white lg:hover:text-blueGray-200 text-blueGray-700 lg:py-2"
               :href="`https://www.facebook.com/sharer/sharer.php?u=${config.redirectUrl}`" target="_blank">
-              <i class="lg:text-blueGray-200 text-blueGray-400 fab fa-facebook text-lg leading-lg" />
-              <span class="lg:hidden inline-block ml-2">Share</span>
+              <i class="text-lg lg:text-blueGray-200 text-blueGray-400 fab fa-facebook leading-lg" />
+              <span class="inline-block ml-2 lg:hidden">Share</span>
             </a>
           </li>
 
           <li class="flex items-center">
-            <a class="lg:text-white lg:hover:text-blueGray-200 text-blueGray-700 px-3 py-4 lg:py-2 flex items-center text-xs uppercase font-bold"
+            <a class="flex items-center px-3 py-4 text-xs font-bold uppercase lg:text-white lg:hover:text-blueGray-200 text-blueGray-700 lg:py-2"
               :href="`https://twitter.com/intent/tweet?url=${config.redirectUrl}&text=Start%20your%20development%20with%20a%20Free%20VueJS%203%20and%20Tailwind%20CSS%20Admin%20Dashboard.%20`"
               target="_blank">
-              <i class="lg:text-blueGray-200 text-blueGray-400 fab fa-twitter text-lg leading-lg" />
-              <span class="lg:hidden inline-block ml-2">Tweet</span>
+              <i class="text-lg lg:text-blueGray-200 text-blueGray-400 fab fa-twitter leading-lg" />
+              <span class="inline-block ml-2 lg:hidden">Tweet</span>
             </a>
           </li>
 
           <li class="flex items-center">
-            <a class="lg:text-white lg:hover:text-blueGray-200 text-blueGray-700 px-3 py-4 lg:py-2 flex items-center text-xs uppercase font-bold"
+            <a class="flex items-center px-3 py-4 text-xs font-bold uppercase lg:text-white lg:hover:text-blueGray-200 text-blueGray-700 lg:py-2"
               :href="config.sourceCodeLink" target="_blank">
-              <i class="lg:text-blueGray-200 text-blueGray-400 fab fa-github text-lg leading-lg" />
-              <span class="lg:hidden inline-block ml-2">Star</span>
+              <i class="text-lg lg:text-blueGray-200 text-blueGray-400 fab fa-github leading-lg" />
+              <span class="inline-block ml-2 lg:hidden">Star</span>
             </a>
           </li>
 
           <li class="flex items-center">
-            <a class="hover:text-blueGray-500 text-blueGray-700 px-3 py-2 flex items-center text-xs uppercase font-bold"
+            <a class="flex items-center px-3 py-2 text-xs font-bold uppercase hover:text-blueGray-500 text-blueGray-700"
               :href="config.linkedinLink" target="_blank">
-              <i class="text-blueGray-400 fab fa-linkedin text-lg leading-lg" />
-              <span class="lg:hidden inline-block ml-2">Linkedin</span>
+              <i class="text-lg text-blueGray-400 fab fa-linkedin leading-lg" />
+              <span class="inline-block ml-2 lg:hidden">Linkedin</span>
             </a>
           </li>
 
           <li v-if="deferredPrompt" class="flex items-center">
             <button
-              class="bg-white text-blueGray-700 active:bg-blueGray-50 text-xs font-bold uppercase px-4 py-2 rounded shadow hover:shadow-md outline-none focus:outline-none lg:mr-1 lg:mb-0 ml-3 mb-3 ease-linear transition-all duration-150"
+              class="px-4 py-2 mb-3 ml-3 text-xs font-bold uppercase transition-all duration-150 ease-linear bg-white rounded shadow outline-none text-blueGray-700 active:bg-blueGray-50 hover:shadow-md focus:outline-none lg:mr-1 lg:mb-0"
               type="button" @click="install">
               <i class="fas fa-arrow-alt-circle-down"></i> Download
             </button>

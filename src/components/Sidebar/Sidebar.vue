@@ -1,50 +1,50 @@
 <template>
   <nav
-    class="md:left-0 dark:bg-black md:block md:fixed md:top-0 md:bottom-0 md:overflow-y-auto md:flex-row md:flex-nowrap md:overflow-hidden shadow-xl bg-white flex flex-wrap items-center justify-between relative md:w-64 z-10 py-4 px-6">
+    class="relative z-10 flex flex-wrap items-center justify-between px-6 py-4 bg-white shadow-xl md:left-0 dark:bg-black md:block md:fixed md:top-0 md:bottom-0 md:overflow-y-auto md:flex-row md:flex-nowrap md:overflow-hidden md:w-64">
     <div
-      class="md:flex-col md:items-stretch md:min-h-full md:flex-nowrap px-0 flex flex-wrap items-center justify-between w-full mx-auto">
+      class="flex flex-wrap items-center justify-between w-full px-0 mx-auto md:flex-col md:items-stretch md:min-h-full md:flex-nowrap">
       <!-- Toggler -->
       <button
-        class="cursor-pointer text-black opacity-50 md:hidden px-3 py-1 text-xl leading-none bg-transparent rounded border border-solid border-transparent"
+        class="px-3 py-1 text-xl leading-none text-black bg-transparent border border-transparent border-solid rounded opacity-50 cursor-pointer md:hidden"
         type="button" @click="toggleCollapseShow('bg-white m-2 py-3 px-6')">
         <i class="fas fa-bars"></i>
       </button>
       <!-- Brand -->
       <router-link
-        class="md:block dark:text-white text-left md:pb-2 text-blueGray-600 mr-0 inline-block whitespace-nowrap text-sm uppercase font-bold p-4 px-0"
+        class="inline-block p-4 px-0 mr-0 text-sm font-bold text-left uppercase md:block dark:text-white md:pb-2 text-blueGray-600 whitespace-nowrap"
         to="/">
-        Vue Dashboard
+        Lucidifier
       </router-link>
       <!-- User -->
-      <ul class="md:hidden items-center flex flex-wrap list-none">
-        <li class="inline-block relative">
+      <ul class="flex flex-wrap items-center list-none md:hidden">
+        <li class="relative inline-block">
           <notification-dropdown />
         </li>
-        <li class="inline-block relative">
+        <li class="relative inline-block">
           <user-dropdown />
         </li>
       </ul>
       <!-- Collapse -->
       <div
-        class="md:flex md:flex-col md:items-stretch md:opacity-100 md:relative md:mt-4 md:shadow-none shadow absolute top-0 left-0 right-0 z-40 overflow-y-auto overflow-x-hidden h-auto items-center flex-1 rounded"
+        class="absolute top-0 left-0 right-0 z-40 items-center flex-1 h-auto overflow-x-hidden overflow-y-auto rounded shadow md:flex md:flex-col md:items-stretch md:opacity-100 md:relative md:mt-4 md:shadow-none"
         :class="collapseShow">
         <hr class="my-4 md:min-w-full" />
-        <ul class="flex-col md:flex-row list-none items-center hidden md:flex mr-2">
+        <ul class="flex-col items-center hidden mr-2 list-none md:flex-row md:flex">
           <select-theme-dropdown></select-theme-dropdown>
         </ul>
         <!-- Collapse header -->
-        <div class="md:min-w-full md:hidden block pb-4 mb-4 border-b border-solid border-blueGray-200">
+        <div class="block pb-4 mb-4 border-b border-solid md:min-w-full md:hidden border-blueGray-200">
           <div class="flex flex-wrap">
             <div class="w-6/12">
               <router-link
-                class="md:block text-left md:pb-2 text-blueGray-600 mr-0 inline-block whitespace-nowrap text-sm uppercase font-bold p-4 px-0"
+                class="inline-block p-4 px-0 mr-0 text-sm font-bold text-left uppercase md:block md:pb-2 text-blueGray-600 whitespace-nowrap"
                 to="/">
-                Vue Dashboard
+                Lucidifier
               </router-link>
             </div>
-            <div class="w-6/12 flex justify-end">
+            <div class="flex justify-end w-6/12">
               <button type="button"
-                class="cursor-pointer text-black opacity-50 md:hidden px-3 py-1 text-xl leading-none bg-transparent rounded border border-solid border-transparent"
+                class="px-3 py-1 text-xl leading-none text-black bg-transparent border border-transparent border-solid rounded opacity-50 cursor-pointer md:hidden"
                 @click="toggleCollapseShow('hidden')">
                 <i class="fas fa-times"></i>
               </button>
@@ -53,23 +53,23 @@
         </div>
         <!-- Form -->
         <form class="mt-6 mb-4 md:hidden">
-          <div class="mb-3 pt-0">
+          <div class="pt-0 mb-3">
             <input type="text" placeholder="Search"
-              class="px-3 py-2 h-12 border border-solid border-blueGray-500 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-base leading-snug shadow-none outline-none focus:outline-none w-full font-normal" />
+              class="w-full h-12 px-3 py-2 text-base font-normal leading-snug bg-white border border-solid rounded shadow-none outline-none border-blueGray-500 placeholder-blueGray-300 text-blueGray-600 focus:outline-none" />
           </div>
         </form>
 
         <hr class="my-4 md:min-w-full" />
 
-        <ul class="md:flex-col md:min-w-full flex flex-col list-none">
+        <ul class="flex flex-col list-none md:flex-col md:min-w-full">
           <li class="inline-flex">
             <router-link v-slot="{ href, navigate, isActive }" to="/dashboard">
-              <a :href="href" class="text-xs uppercase py-3 font-bold block" :class="[
-                                isActive
-                                  ? 'text-emerald-500 hover:text-emerald-600'
-                                  : 'text-blueGray-700 dark:text-white hover:text-blueGray-500',
-                              ]" @click="navigate">
-                <i class="fas fa-tv mr-2 text-sm" :class="[isActive ? 'opacity-75' : 'text-blueGray-300']"></i>
+              <a :href="href" class="block py-3 text-xs font-bold uppercase" :class="[
+          isActive
+            ? 'text-emerald-500 hover:text-emerald-600'
+            : 'text-blueGray-700 dark:text-white hover:text-blueGray-500',
+        ]" @click="navigate">
+                <i class="mr-2 text-sm fas fa-tv" :class="[isActive ? 'opacity-75' : 'text-blueGray-300']"></i>
                 Dashboard
               </a>
             </router-link>
@@ -77,44 +77,34 @@
 
           <li class="inline-flex">
             <router-link v-slot="{ href, navigate, isActive }" to="/settings">
-              <a :href="href" class="text-xs uppercase py-3 font-bold block" :class="[
-                                isActive
-                                  ? 'text-emerald-500 hover:text-emerald-600'
-                                  : 'text-blueGray-700 dark:text-white hover:text-blueGray-500',
-                              ]" @click="navigate">
-                <i class="fas fa-tools mr-2 text-sm" :class="[isActive ? 'opacity-75' : 'text-blueGray-300']"></i>
+              <a :href="href" class="block py-3 text-xs font-bold uppercase" :class="[
+          isActive
+            ? 'text-emerald-500 hover:text-emerald-600'
+            : 'text-blueGray-700 dark:text-white hover:text-blueGray-500',
+        ]" @click="navigate">
+                <i class="mr-2 text-sm fas fa-tools" :class="[isActive ? 'opacity-75' : 'text-blueGray-300']"></i>
                 Settings
               </a>
             </router-link>
           </li>
         </ul>
 
-        <ul class="md:flex-col md:min-w-full flex flex-col list-none md:mb-4">
+        <!-- <ul class="flex flex-col list-none md:flex-col md:min-w-full md:mb-4">
           <li class="inline-flex">
             <router-link
-              class="text-blueGray-700 dark:text-white hover:text-blueGray-500 text-xs uppercase py-3 font-bold block"
+              class="block py-3 text-xs font-bold uppercase text-blueGray-700 dark:text-white hover:text-blueGray-500"
               to="/about">
-              <i class="fas fa-newspaper text-blueGray-300 mr-2 text-sm"></i>
+              <i class="mr-2 text-sm fas fa-newspaper text-blueGray-300"></i>
               About
             </router-link>
           </li>
-
-          <li class="inline-flex">
-            <router-link
-              class="text-blueGray-700 dark:text-white hover:text-blueGray-500 text-xs uppercase py-3 font-bold block"
-              to="/profile">
-              <i class="fas fa-user-circle text-blueGray-300 mr-2 text-sm"></i>
-              Profile
-            </router-link>
-          </li>
-        </ul>
+        </ul> -->
 
         <hr class="my-4 md:min-w-full" />
       </div>
     </div>
   </nav>
 </template>
-); }
 
 <script>
 import NotificationDropdown from '@/components/Dropdowns/NotificationDropdown/NotificationDropdown.vue';
@@ -139,4 +129,3 @@ export default {
   },
 };
 </script>
-

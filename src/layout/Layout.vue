@@ -3,9 +3,9 @@
     <SpinnerLoading></SpinnerLoading>
     <Toast></Toast>
     <Sidebar />
-    <div class="h-full relative md:ml-64 bg-blueGray-100 dark:bg-warmGray-900">
+    <div class="relative h-full md:ml-64 bg-blueGray-100 dark:bg-warmGray-900">
       <Navbar />
-      <main class="px-4 md:px-10 mx-auto w-full -m-24">
+      <main class="w-full px-4 mx-auto md:px-10">
         <router-view />
       </main>
       <Footer />

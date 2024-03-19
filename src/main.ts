@@ -3,7 +3,7 @@ import { firestorePlugin } from "vuefire";
 import VueAxios from "vue-axios";
 import axios from "axios";
 import router from "./router";
-
+import { messaging } from "@/server/firebase/firebase";
 /* Css styles */
 import "./assets/styles/index.css";
 import "./assets/scss/styles.scss";
@@ -14,6 +14,7 @@ import "@/assets/styles/tailwind.css";
 Vue.use(firestorePlugin);
 Vue.use(VueAxios, axios);
 Vue.use(router);
+Vue.config.globalProperties.$messaging = messaging;
 
 import "./plugins";
 
