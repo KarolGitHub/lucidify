@@ -1,12 +1,14 @@
 import vue from "@vitejs/plugin-vue";
 import { defineConfig, splitVendorChunkPlugin } from "vite";
 import { fileURLToPath, URL } from "node:url";
+import { dirname } from "node:path";
 import { visualizer } from "rollup-plugin-visualizer";
 import { VitePWA } from "vite-plugin-pwa";
 import { viteStaticCopy } from "vite-plugin-static-copy";
 import viteCompression from "vite-plugin-compression";
 const options = { algorithm: "brotliCompress" };
-const { dirname } = require("path");
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 /** @type {import('vite').UserConfig} */
 export default defineConfig({
   server: { port: 4000 },

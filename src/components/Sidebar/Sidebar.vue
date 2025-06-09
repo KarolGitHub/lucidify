@@ -252,7 +252,7 @@ export default {
         const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
         const apiBaseUrl = isDevelopment
           ? 'http://localhost:3001'
-          : 'https://your-backend-url.com'; // Replace with your actual backend URL
+          : 'https://lucidify-backend.up.railway.app'; // Replace with your actual Railway URL
 
         const response = await fetch(`${apiBaseUrl}/api/fcm-tokens`, {
           method: 'POST',
