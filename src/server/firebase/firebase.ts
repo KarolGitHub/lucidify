@@ -10,16 +10,16 @@ export const messaging = getMessaging();
 onMessage(messaging, (payload) => {
   console.debug("💪 ~ file: firebase.ts:10 ~ onMessage ~ payload:", payload);
 });
-getToken(messaging, { vapidKey: firebaseConfig.apiKey })
+getToken(messaging, { vapidKey: firebaseConfig.vapidKey })
   .then((currentToken) => {
     if (currentToken) {
       console.debug(
         "💪 ~ file: firebase.ts:15 ~ .then ~ currentToken:",
-        currentToken
+        currentToken,
       );
     } else {
       console.debug(
-        "No registration token available. Request permission to generate one."
+        "No registration token available. Request permission to generate one.",
       );
     }
   })

@@ -9,10 +9,12 @@ const firebaseConfig = {
   storageBucket: "dashboard-6d5c0.appspot.com",
   messagingSenderId: "1023426981171",
   appId: "1:1023426981171:web:40bd9b5850d8b49f3f2246",
+  vapidKey:
+    "BOdP9n3XfOLmJpIBT8iCFhc8xUI96IpBKHvW9lOQekrO9ushni1QDRmv2GGwc4w7KxoSp3TAKY0WM4JdM8jwEA",
 };
 importScripts("https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js");
 importScripts(
-  "https://www.gstatic.com/firebasejs/8.10.0/firebase-messaging.js"
+  "https://www.gstatic.com/firebasejs/8.10.0/firebase-messaging.js",
 );
 firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
@@ -20,7 +22,7 @@ const messaging = firebase.messaging();
 messaging.onBackgroundMessage(messaging, function (payload) {
   console.debug(
     "💪 ~ file: firebase-messaging-sw.js:9 ~ messaging.onBackgroundMessage ~ payload:",
-    payload
+    payload,
   );
   const notificationTitle = payload.notification?.title ?? "Unexpected error";
   const notificationOptions = {
@@ -31,6 +33,6 @@ messaging.onBackgroundMessage(messaging, function (payload) {
 
   return self.registration.showNotification(
     notificationTitle,
-    notificationOptions
+    notificationOptions,
   );
 });
