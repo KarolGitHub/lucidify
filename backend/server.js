@@ -84,6 +84,16 @@ app.get("/api/health", (req, res) => {
   });
 });
 
+// Serve admin panel
+app.get("/admin", (req, res) => {
+  res.sendFile("admin.html", { root: __dirname });
+});
+
+// Serve admin panel at root admin path too
+app.get("/admin.html", (req, res) => {
+  res.sendFile("admin.html", { root: __dirname });
+});
+
 // Store FCM token
 app.post("/api/fcm-tokens", async (req, res) => {
   try {
@@ -324,6 +334,7 @@ app.listen(PORT, () => {
   console.log(
     `📱 Notifications endpoint: http://localhost:${PORT}/api/notifications/send`,
   );
+  console.log(`🛠️ Admin panel: http://localhost:${PORT}/admin`);
 });
 
 module.exports = app;
