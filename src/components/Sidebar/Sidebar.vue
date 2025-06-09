@@ -122,10 +122,14 @@ export default {
       collapseShow: 'hidden',
     };
   },
+  mounted() {
+    const messaging = this.$messaging
+    console.debug("💪 ~ mounted ~ messaging:", messaging)
+  },
   methods: {
     toggleCollapseShow(classes) {
       this.collapseShow = classes;
     },
-  },
+  }
 };
 </script>

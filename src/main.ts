@@ -1,6 +1,7 @@
 import Vue from "./plugins/app";
 import { firestorePlugin } from "vuefire";
 import VueAxios from "vue-axios";
+// import { register } from "register-service-worker";
 import axios from "axios";
 import router from "./router";
 import { messaging } from "@/server/firebase/firebase";
@@ -20,6 +21,7 @@ import "./plugins";
 
 Vue.mount("#app");
 
+// register("/firebase-messaging-sw.js");
 import { useRegisterSW } from "virtual:pwa-register/vue";
 
 const { offlineReady, needRefresh, updateServiceWorker } = useRegisterSW({

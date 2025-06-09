@@ -9,6 +9,7 @@ const options = { algorithm: "brotliCompress" };
 const { dirname } = require("path");
 /** @type {import('vite').UserConfig} */
 export default defineConfig({
+  server: { port: 4000 },
   root: "./",
   define: {
     "process.env": {},

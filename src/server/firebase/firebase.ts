@@ -1,5 +1,5 @@
 import firebase from "firebase/compat/app";
-import firebaseConfig from "@/server/firebase/config";
+import { firebaseConfig } from "@/config";
 import { getAuth } from "firebase/auth";
 import "firebase/compat/firestore";
 import { FirebaseError } from "firebase/app";
@@ -26,7 +26,14 @@ getToken(messaging, { vapidKey: firebaseConfig.apiKey })
   .catch((err: FirebaseError) => {
     console.debug("💪 ~ file: firebase.ts:21 ~ err.message:", err.message);
   });
-
+function requestPermission() {
+  console.log("Requesting permission...");
+  Notification.requestPermission().then((permission) => {
+    if (permission === "granted") {
+      console.log("Notification permission granted.");
+    }
+  });
+}
 export const db = firebaseApp.firestore();
 const auth = getAuth(firebaseApp);
 export default auth;
