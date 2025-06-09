@@ -1,8 +1,7 @@
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const plugin = require("tailwindcss/plugin");
-const defaultTheme = require("tailwindcss/defaultTheme");
+import plugin from "tailwindcss/plugin";
+import defaultTheme from "tailwindcss/defaultTheme";
 
-module.exports = {
+export default {
   content: ["./index.html", "./src/**/*.{vue,js,ts,jsx,tsx,html}"],
   mode: "jit",
   darkMode: "class", // or 'media' or 'class'

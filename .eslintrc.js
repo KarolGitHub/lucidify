@@ -2,7 +2,7 @@
  * @type {import('@types/eslint').Linter.BaseConfig}
  */
 
-module.exports = {
+export default {
   ignorePatterns: ["node_modules", "dist", "**/*.d.ts"],
   root: true,
   env: {
