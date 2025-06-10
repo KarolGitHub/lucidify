@@ -1,0 +1,308 @@
+<div
+  class="relative pt-16 pb-32 flex content-center items-center justify-center min-h-screen-75"
+>
+  <div class="container mx-auto px-4">
+    <div class="flex flex-wrap items-center">
+      <div class="w-full lg:w-6/12 px-4 ml-auto mr-auto text-center">
+        <div class="pr-12">
+          <h1 class="text-5xl font-semibold text-blueGray-700 dark:text-white">
+            Dream Journal
+          </h1>
+          <p
+            class="mt-4 text-lg leading-relaxed text-blueGray-600 dark:text-blueGray-300"
+          >
+            Capture and explore your dreams to unlock the path to lucid dreaming
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container mx-auto px-4">
+  <!-- Dream Journal Controls -->
+  <div class="flex flex-wrap justify-center mb-8">
+    <div class="w-full lg:w-8/12 px-4">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+        <div class="flex flex-wrap items-center justify-between mb-6">
+          <h2 class="text-2xl font-bold text-blueGray-700 dark:text-white">
+            Your Dreams
+          </h2>
+          <button
+            @click="showNewDreamModal = true"
+            class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out transform hover:scale-105"
+          >
+            <i class="fas fa-plus mr-2"></i>
+            New Dream Entry
+          </button>
+        </div>
+
+        <!-- Dream Filters -->
+        <div class="flex flex-wrap gap-4 mb-6">
+          <div class="flex-1">
+            <input
+              v-model="searchQuery"
+              type="text"
+              placeholder="Search dreams..."
+              class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white"
+            />
+          </div>
+          <select
+            v-model="selectedFilter"
+            class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white"
+          >
+            <option value="all">All Dreams</option>
+            <option value="lucid">Lucid Dreams</option>
+            <option value="vivid">Vivid Dreams</option>
+            <option value="recurring">Recurring Dreams</option>
+            <option value="nightmare">Nightmares</option>
+          </select>
+        </div>
+
+        <!-- Dreams List -->
+        <div v-if="filteredDreams.length === 0" class="text-center py-12">
+          <i
+            class="fas fa-moon text-6xl text-gray-300 dark:text-gray-600 mb-4"
+          ></i>
+          <p class="text-gray-500 dark:text-gray-400 text-lg">
+            No dreams recorded yet. Start your journey by adding your first
+            dream!
+          </p>
+        </div>
+
+        <div v-else class="space-y-4">
+          <div
+            v-for="dream in filteredDreams"
+            :key="dream._id"
+            class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 hover:shadow-md transition duration-300 cursor-pointer"
+            @click="viewDream(dream)"
+          >
+            <div class="flex justify-between items-start">
+              <div class="flex-1">
+                <h3
+                  class="text-lg font-semibold text-blueGray-700 dark:text-white mb-2"
+                >
+                  {{ dream.title }}
+                </h3>
+                <p
+                  class="text-gray-600 dark:text-gray-300 text-sm mb-2 line-clamp-2"
+                >
+                  {{ dream.description }}
+                </p>
+                <div class="flex flex-wrap gap-2">
+                  <span
+                    v-for="tag in dream.tags"
+                    :key="tag"
+                    class="px-2 py-1 text-xs bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 rounded-full"
+                  >
+                    {{ tag }}
+                  </span>
+                </div>
+              </div>
+              <div class="text-right">
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                  {{ formatDate(dream.date) }}
+                </p>
+                <div class="flex items-center mt-2">
+                  <span
+                    v-if="dream.isLucid"
+                    class="px-2 py-1 text-xs bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full"
+                  >
+                    <i class="fas fa-star mr-1"></i>Lucid
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- New Dream Modal -->
+<div
+  v-if="showNewDreamModal"
+  class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+  @click.self="showNewDreamModal = false"
+>
+  <div
+    class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+  >
+    <div class="p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-2xl font-bold text-blueGray-700 dark:text-white">
+          New Dream Entry
+        </h3>
+        <button
+          @click="showNewDreamModal = false"
+          class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+        >
+          <i class="fas fa-times text-xl"></i>
+        </button>
+      </div>
+
+      <form @submit.prevent="saveDream">
+        <div class="space-y-6">
+          <!-- Dream Title -->
+          <div>
+            <label
+              class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            >
+              Dream Title
+            </label>
+            <input
+              v-model="newDream.title"
+              type="text"
+              required
+              class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white"
+              placeholder="Give your dream a title..."
+            />
+          </div>
+
+          <!-- Dream Date -->
+          <div>
+            <label
+              class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            >
+              Dream Date
+            </label>
+            <input
+              v-model="newDream.date"
+              type="date"
+              required
+              class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white"
+            />
+          </div>
+
+          <!-- Dream Description -->
+          <div>
+            <label
+              class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            >
+              Dream Description
+            </label>
+            <textarea
+              v-model="newDream.description"
+              rows="6"
+              required
+              class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white resize-none"
+              placeholder="Describe your dream in detail..."
+            ></textarea>
+          </div>
+
+          <!-- Dream Type -->
+          <div>
+            <label
+              class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            >
+              Dream Type
+            </label>
+            <div class="grid grid-cols-2 gap-4">
+              <label class="flex items-center">
+                <input
+                  v-model="newDream.isLucid"
+                  type="checkbox"
+                  class="mr-2"
+                />
+                <span class="text-sm text-gray-700 dark:text-gray-300"
+                  >Lucid Dream</span
+                >
+              </label>
+              <label class="flex items-center">
+                <input
+                  v-model="newDream.isVivid"
+                  type="checkbox"
+                  class="mr-2"
+                />
+                <span class="text-sm text-gray-700 dark:text-gray-300"
+                  >Vivid Dream</span
+                >
+              </label>
+              <label class="flex items-center">
+                <input
+                  v-model="newDream.isRecurring"
+                  type="checkbox"
+                  class="mr-2"
+                />
+                <span class="text-sm text-gray-700 dark:text-gray-300"
+                  >Recurring Dream</span
+                >
+              </label>
+              <label class="flex items-center">
+                <input
+                  v-model="newDream.isNightmare"
+                  type="checkbox"
+                  class="mr-2"
+                />
+                <span class="text-sm text-gray-700 dark:text-gray-300"
+                  >Nightmare</span
+                >
+              </label>
+            </div>
+          </div>
+
+          <!-- Tags -->
+          <div>
+            <label
+              class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            >
+              Tags (comma-separated)
+            </label>
+            <input
+              v-model="newDream.tagsInput"
+              type="text"
+              class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white"
+              placeholder="flying, water, family, etc."
+            />
+          </div>
+
+          <!-- Emotions -->
+          <div>
+            <label
+              class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            >
+              Emotions
+            </label>
+            <div class="grid grid-cols-3 gap-2">
+              <label
+                v-for="emotion in emotions"
+                :key="emotion"
+                class="flex items-center"
+              >
+                <input
+                  v-model="newDream.emotions"
+                  type="checkbox"
+                  :value="emotion"
+                  class="mr-2"
+                />
+                <span class="text-sm text-gray-700 dark:text-gray-300"
+                  >{{ emotion }}</span
+                >
+              </label>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="flex justify-end space-x-4 pt-4">
+            <button
+              type="button"
+              @click="showNewDreamModal = false"
+              class="px-6 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition duration-300"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              :disabled="isSaving"
+              class="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition duration-300 disabled:opacity-50"
+            >
+              <i v-if="isSaving" class="fas fa-spinner fa-spin mr-2"></i>
+              {{ isSaving ? 'Saving...' : 'Save Dream' }}
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

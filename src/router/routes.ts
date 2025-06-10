@@ -2,6 +2,7 @@ import { RouteRecordRaw } from "vue-router";
 
 const Dashboard = () => import("@/views/dashboard/Dashboard.vue");
 const Settings = () => import("@/views/settings/Settings.vue");
+const DreamJournal = () => import("@/views/dream-journal/DreamJournal.vue");
 const Login = () => import("@/views/auth/login/Login.vue");
 const Register = () => import("@/views/auth/register/Register.vue");
 const About = () => import("@/views/About.vue");
@@ -24,6 +25,11 @@ const routes: Array<RouteRecordRaw> = [
         path: "/",
         name: "home",
         component: Home,
+      },
+      {
+        path: "/dream-journal",
+        name: "DreamJournal",
+        component: DreamJournal,
       },
       {
         path: "/settings",

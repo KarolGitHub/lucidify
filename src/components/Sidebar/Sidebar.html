@@ -99,6 +99,30 @@
         </li>
 
         <li class="inline-flex">
+          <router-link
+            v-slot="{ href, navigate, isActive }"
+            to="/dream-journal"
+          >
+            <a
+              :href="href"
+              class="block py-3 text-xs font-bold uppercase"
+              :class="[
+              isActive
+                ? 'text-emerald-500 hover:text-emerald-600'
+                : 'text-blueGray-700 dark:text-white hover:text-blueGray-500',
+            ]"
+              @click="navigate"
+            >
+              <i
+                class="mr-2 text-sm fas fa-moon"
+                :class="[isActive ? 'opacity-75' : 'text-blueGray-300']"
+              ></i>
+              Dream Journal
+            </a>
+          </router-link>
+        </li>
+
+        <li class="inline-flex">
           <router-link v-slot="{ href, navigate, isActive }" to="/settings">
             <a
               :href="href"

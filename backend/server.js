@@ -3,10 +3,30 @@ const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
 const rateLimit = require("express-rate-limit");
+const mongoose = require("mongoose");
 require("dotenv").config();
 
 // Initialize Firebase Admin SDK
 const admin = require("firebase-admin");
+
+// MongoDB Connection
+const connectDB = async () => {
+  try {
+    const mongoURI =
+      process.env.MONGODB_URI || "mongodb://localhost:27017/lucidifier";
+    await mongoose.connect(mongoURI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log("✅ MongoDB connected successfully");
+  } catch (error) {
+    console.error("❌ MongoDB connection error:", error);
+    process.exit(1);
+  }
+};
+
+// Connect to MongoDB
+connectDB();
 
 // Initialize Firebase Admin SDK (optional - only if credentials are provided)
 let firebaseInitialized = false;
@@ -72,6 +92,9 @@ const limiter = rateLimit({
 });
 app.use("/api/", limiter);
 
+// Import routes
+const dreamRoutes = require("./routes/dreams");
+
 // In-memory storage for FCM tokens (replace with database in production)
 const fcmTokens = new Map();
 
@@ -83,6 +106,9 @@ app.get("/api/health", (req, res) => {
     timestamp: new Date().toISOString(),
   });
 });
+
+// Dream Journal Routes
+app.use("/api/dreams", dreamRoutes);
 
 // Serve admin panel
 app.get("/admin", (req, res) => {

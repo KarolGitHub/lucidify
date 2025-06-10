@@ -1,7 +1,7 @@
 {
   "name": "lucidifier-backend",
   "version": "1.0.0",
-  "description": "Backend API for Lucidifier FCM token management",
+  "description": "Backend API for Lucidifier FCM token management and Dream Journal",
   "main": "server.js",
   "engines": {
     "node": ">=18.0.0"
@@ -16,8 +16,10 @@
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "express-rate-limit": "^7.1.5",
+    "express-validator": "^7.2.1",
     "firebase-admin": "^12.0.0",
     "helmet": "^7.1.0",
+    "mongoose": "^8.15.1",
     "morgan": "^1.10.0",
     "node-fetch": "^3.3.2"
   },
@@ -29,7 +31,10 @@
     "fcm",
     "notifications",
     "express",
-    "api"
+    "api",
+    "dream-journal",
+    "mongodb",
+    "lucid-dreaming"
   ],
   "author": "Karol",
   "license": "MIT"

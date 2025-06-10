@@ -10,7 +10,24 @@ import { Toast } from "@/interface/Toast";
 
 export default {
   fetchAccessToken(): void {
-    mutations.setAccessToken(localStorage.getItem("accessToken"));
+    const token = localStorage.getItem("accessToken");
+    const userData = localStorage.getItem("userData");
+
+    if (token && userData) {
+      // If we have a token and user data, restore the full auth state
+      try {
+        const user = JSON.parse(userData);
+        mutations.setAuth(true, user);
+      } catch (error) {
+        console.error("Error parsing user data from localStorage:", error);
+        // Fallback: just set token without user data
+        mutations.setAuth(true);
+        mutations.setAccessToken(token);
+      }
+    } else {
+      mutations.setAuth(false);
+      mutations.setAccessToken(null);
+    }
   },
   async login(loginForm: Login): Promise<void> {
     try {
@@ -18,7 +35,7 @@ export default {
       if (response.user) {
         console.debug(
           "💪 ~ file: actions.ts:15 ~ login ~ response.user",
-          response.user
+          response.user,
         );
         const {
           uid: id,
@@ -29,7 +46,8 @@ export default {
           phoneNumber,
           photoURL,
         } = response.user;
-        mutations.setAuth(true, {
+
+        const userData = {
           id,
           accessToken,
           displayName,
@@ -37,8 +55,12 @@ export default {
           emailVerified,
           phoneNumber,
           photoURL,
-        });
+        };
+
+        mutations.setAuth(true, userData);
         localStorage.setItem("accessToken", accessToken);
+        localStorage.setItem("userData", JSON.stringify(userData));
+
         await router.push({
           name: "Dashboard",
         });
@@ -66,6 +88,7 @@ export default {
       const response = await Auth.logout();
       mutations.setAuth(false);
       localStorage.removeItem("accessToken");
+      localStorage.removeItem("userData");
       await router.push("/auth/login");
       const toast: Toast = {
         body: "Logged out successfully",

@@ -17,9 +17,9 @@ export default defineConfig({
     "process.env": {},
   },
   publicDir: "assets",
-  esbuild: {
+  /* esbuild: {
     drop: ["console"],
-  },
+  }, */
   plugins: [
     viteStaticCopy({
       targets: [
