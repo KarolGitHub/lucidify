@@ -12,23 +12,77 @@
     >
       Dashboard
     </a>
-    <!-- Form -->
-    <form
-      class="md:flex hidden flex-row flex-wrap items-center lg:ml-auto mr-3"
+    <!-- Global Search -->
+    <div
+      class="md:flex hidden flex-row flex-wrap items-center lg:ml-auto mr-3 search-container"
     >
       <div class="relative flex w-full flex-wrap items-stretch">
         <span
-          class="h-full leading-snug font-normal text-center text-blueGray-300 absolute bg-transparent rounded text-base items-center justify-center w-8 pl-3 py-3"
+          class="h-full leading-snug font-normal text-center text-blueGray-300 absolute bg-transparent rounded text-base items-center justify-center w-8 pl-3 py-3 z-10"
         >
           <i class="fas fa-search"></i>
         </span>
         <input
+          ref="searchInputRef"
+          v-model="searchQuery"
+          @input="handleSearchInput"
+          @keydown="handleKeydown"
+          @focus="showSuggestions = true"
+          @blur="handleBlur"
           type="text"
-          placeholder="Search here..."
+          placeholder="Search routes... (⌘K)"
           class="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 relative bg-white rounded text-sm shadow outline-none focus:outline-none focus:ring w-full pl-10"
         />
+
+        <!-- Search Suggestions Dropdown -->
+        <div
+          v-if="showSuggestions && filteredRoutes.length > 0"
+          class="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50 max-h-96 overflow-y-auto"
+        >
+          <div
+            v-for="(route, index) in filteredRoutes"
+            :key="route.path"
+            @click="selectRoute(route)"
+            @mouseenter="selectedIndex = index"
+            class="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors duration-150"
+            :class="{ 'bg-blue-50 dark:bg-blue-900': selectedIndex === index }"
+          >
+            <div class="flex items-center">
+              <i
+                v-if="route.icon"
+                :class="route.icon"
+                class="mr-3 text-blueGray-400 dark:text-blueGray-300 text-sm"
+              ></i>
+              <div class="flex-1">
+                <div class="font-medium text-blueGray-700 dark:text-white">
+                  {{ route.name }}
+                </div>
+                <div
+                  v-if="route.description"
+                  class="text-sm text-blueGray-500 dark:text-blueGray-400"
+                >
+                  {{ route.description }}
+                </div>
+              </div>
+              <div class="text-xs text-blueGray-400 dark:text-blueGray-500">
+                {{ route.category }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- No Results -->
+        <div
+          v-if="showSuggestions && searchQuery && filteredRoutes.length === 0"
+          class="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50 p-4"
+        >
+          <div class="text-center text-blueGray-500 dark:text-blueGray-400">
+            <i class="fas fa-search text-2xl mb-2"></i>
+            <p>No routes found for "{{ searchQuery }}"</p>
+          </div>
+        </div>
       </div>
-    </form>
+    </div>
     <!-- User -->
     <ul class="flex-col md:flex-row list-none items-center hidden md:flex">
       <user-dropdown />
