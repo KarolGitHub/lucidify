@@ -4,6 +4,7 @@ import { Toast } from "@/interface/Toast";
 import dreamService from "@/services/dreams";
 import mutations from "./mutations";
 import state from "./state";
+import { AuthErrorHandler } from "@/utils/authErrorHandler";
 
 export default {
   async loadDreams(): Promise<void> {
@@ -27,13 +28,20 @@ export default {
       mutations.setDreams(dreams);
     } catch (error: any) {
       console.error("Error loading dreams:", error);
-      const toast: Toast = {
-        body: "Failed to load dreams. Please check your connection.",
-        tittle: "Error",
-        type: "error",
-        show: true,
-      };
-      notifications.actions.presentToast(toast);
+
+      // Don't show error toast if it's an auth error (auto logout will handle it)
+      if (
+        !error.message?.includes("No authentication token available") &&
+        !error.message?.includes("Session expired")
+      ) {
+        const toast: Toast = {
+          body: "Failed to load dreams. Please check your connection.",
+          tittle: "Error",
+          type: "error",
+          show: true,
+        };
+        notifications.actions.presentToast(toast);
+      }
       mutations.setDreams([]);
     } finally {
       loadingStore.actions.finish();
@@ -51,13 +59,20 @@ export default {
       mutations.setStats(stats);
     } catch (error: any) {
       console.error("Error loading dream stats:", error);
-      const toast: Toast = {
-        body: "Failed to load dream statistics.",
-        tittle: "Error",
-        type: "error",
-        show: true,
-      };
-      notifications.actions.presentToast(toast);
+
+      // Don't show error toast if it's an auth error (auto logout will handle it)
+      if (
+        !error.message?.includes("No authentication token available") &&
+        !error.message?.includes("Session expired")
+      ) {
+        const toast: Toast = {
+          body: "Failed to load dream statistics.",
+          tittle: "Error",
+          type: "error",
+          show: true,
+        };
+        notifications.actions.presentToast(toast);
+      }
     }
   },
 
@@ -113,13 +128,20 @@ export default {
       notifications.actions.presentToast(toast);
     } catch (error: any) {
       console.error("Error saving dream:", error);
-      const toast: Toast = {
-        body: "Failed to save dream. Please try again.",
-        tittle: "Error",
-        type: "error",
-        show: true,
-      };
-      notifications.actions.presentToast(toast);
+
+      // Don't show error toast if it's an auth error (auto logout will handle it)
+      if (
+        !error.message?.includes("No authentication token available") &&
+        !error.message?.includes("Session expired")
+      ) {
+        const toast: Toast = {
+          body: "Failed to save dream. Please try again.",
+          tittle: "Error",
+          type: "error",
+          show: true,
+        };
+        notifications.actions.presentToast(toast);
+      }
     } finally {
       loadingStore.actions.finish();
     }
@@ -141,13 +163,20 @@ export default {
       notifications.actions.presentToast(toast);
     } catch (error: any) {
       console.error("Error updating dream:", error);
-      const toast: Toast = {
-        body: "Failed to update dream. Please try again.",
-        tittle: "Error",
-        type: "error",
-        show: true,
-      };
-      notifications.actions.presentToast(toast);
+
+      // Don't show error toast if it's an auth error (auto logout will handle it)
+      if (
+        !error.message?.includes("No authentication token available") &&
+        !error.message?.includes("Session expired")
+      ) {
+        const toast: Toast = {
+          body: "Failed to update dream. Please try again.",
+          tittle: "Error",
+          type: "error",
+          show: true,
+        };
+        notifications.actions.presentToast(toast);
+      }
     } finally {
       loadingStore.actions.finish();
     }
@@ -170,13 +199,20 @@ export default {
       notifications.actions.presentToast(toast);
     } catch (error: any) {
       console.error("Error deleting dream:", error);
-      const toast: Toast = {
-        body: "Failed to delete dream. Please try again.",
-        tittle: "Error",
-        type: "error",
-        show: true,
-      };
-      notifications.actions.presentToast(toast);
+
+      // Don't show error toast if it's an auth error (auto logout will handle it)
+      if (
+        !error.message?.includes("No authentication token available") &&
+        !error.message?.includes("Session expired")
+      ) {
+        const toast: Toast = {
+          body: "Failed to delete dream. Please try again.",
+          tittle: "Error",
+          type: "error",
+          show: true,
+        };
+        notifications.actions.presentToast(toast);
+      }
     } finally {
       loadingStore.actions.finish();
     }
@@ -202,13 +238,20 @@ export default {
       mutations.setDreams(dreams);
     } catch (error: any) {
       console.error("Error searching dreams:", error);
-      const toast: Toast = {
-        body: "Failed to search dreams. Please try again.",
-        tittle: "Error",
-        type: "error",
-        show: true,
-      };
-      notifications.actions.presentToast(toast);
+
+      // Don't show error toast if it's an auth error (auto logout will handle it)
+      if (
+        !error.message?.includes("No authentication token available") &&
+        !error.message?.includes("Session expired")
+      ) {
+        const toast: Toast = {
+          body: "Failed to search dreams. Please try again.",
+          tittle: "Error",
+          type: "error",
+          show: true,
+        };
+        notifications.actions.presentToast(toast);
+      }
     } finally {
       loadingStore.actions.finish();
     }

@@ -1,5 +1,6 @@
 import { Dream, DreamStats } from "@/interface/Dream";
 import authService from "./auth";
+import { AuthErrorHandler } from "@/utils/authErrorHandler";
 
 class DreamService {
   private apiBaseUrl: string;
@@ -12,6 +13,10 @@ class DreamService {
   private async getAuthHeaders(): Promise<HeadersInit> {
     const token = await authService.getAuthToken();
     if (!token) {
+      // Auto logout when no token is available
+      await AuthErrorHandler.handleAuthError(
+        "No authentication token available",
+      );
       throw new Error("No authentication token available");
     }
 
@@ -33,7 +38,10 @@ class DreamService {
       );
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        await AuthErrorHandler.handleApiError(
+          response,
+          "Failed to fetch dreams",
+        );
       }
 
       const result = await response.json();
@@ -56,7 +64,10 @@ class DreamService {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        await AuthErrorHandler.handleApiError(
+          response,
+          "Failed to create dream",
+        );
       }
 
       const result = await response.json();
@@ -80,7 +91,10 @@ class DreamService {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        await AuthErrorHandler.handleApiError(
+          response,
+          "Failed to update dream",
+        );
       }
 
       const result = await response.json();
@@ -100,7 +114,10 @@ class DreamService {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        await AuthErrorHandler.handleApiError(
+          response,
+          "Failed to delete dream",
+        );
       }
     } catch (error) {
       console.error("Error deleting dream:", error);
@@ -120,7 +137,10 @@ class DreamService {
       );
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        await AuthErrorHandler.handleApiError(
+          response,
+          "Failed to fetch dream stats",
+        );
       }
 
       const result = await response.json();
@@ -144,7 +164,10 @@ class DreamService {
       );
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        await AuthErrorHandler.handleApiError(
+          response,
+          "Failed to search dreams",
+        );
       }
 
       const result = await response.json();
