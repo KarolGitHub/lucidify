@@ -27,6 +27,11 @@ export interface NewDream {
   emotions: string[];
 }
 
+// EditingDream extends Dream for editing state
+export interface EditingDream extends Dream {
+  tagsInput: string;
+}
+
 export interface DreamStats {
   totalDreams: number;
   lucidDreams: number;

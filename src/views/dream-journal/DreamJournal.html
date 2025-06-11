@@ -60,11 +60,10 @@
           <div
             v-for="dream in filteredDreams"
             :key="dream._id"
-            class="p-4 transition duration-300 rounded-lg cursor-pointer bg-gray-50 dark:bg-gray-700 hover:shadow-md"
-            @click="viewDream(dream)"
+            class="p-4 transition duration-300 rounded-lg bg-gray-50 dark:bg-gray-700 hover:shadow-md"
           >
             <div class="flex items-start justify-between">
-              <div class="flex-1">
+              <div class="flex-1 cursor-pointer" @click="viewDream(dream)">
                 <h3
                   class="mb-2 text-lg font-semibold text-blueGray-700 dark:text-white"
                 >
@@ -89,13 +88,30 @@
                 <p class="text-sm text-gray-500 dark:text-gray-400">
                   {{ formatDate(dream.date) }}
                 </p>
-                <div class="flex items-center mt-2">
+                <div class="flex items-center mt-2 space-x-2">
                   <span
                     v-if="dream.isLucid"
                     class="px-2 py-1 text-xs text-green-800 bg-green-100 rounded-full dark:bg-green-900 dark:text-green-200"
                   >
                     <i class="mr-1 fas fa-star"></i>Lucid
                   </span>
+                  <!-- Action buttons -->
+                  <div class="flex space-x-2">
+                    <button
+                      @click.stop="openEditModal(dream)"
+                      class="p-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                      title="Edit dream"
+                    >
+                      <i class="fas fa-edit"></i>
+                    </button>
+                    <button
+                      @click.stop="handleDeleteDream(dream._id)"
+                      class="p-1 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+                      title="Delete dream"
+                    >
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -296,6 +312,242 @@
           </div>
         </div>
       </form>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Dream Modal -->
+<div
+  v-if="showEditModal && editingDream"
+  class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50"
+  @click.self="closeEditModal"
+>
+  <div
+    class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+  >
+    <div class="p-6">
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="text-2xl font-bold text-blueGray-700 dark:text-white">
+          Edit Dream Entry
+        </h3>
+        <button
+          @click="closeEditModal"
+          class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+        >
+          <i class="text-xl fas fa-times"></i>
+        </button>
+      </div>
+
+      <form @submit.prevent="handleUpdateDream">
+        <div class="space-y-6">
+          <!-- Dream Title -->
+          <div>
+            <label
+              class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              Dream Title
+            </label>
+            <input
+              :value="editingDream.title"
+              @input="handleEditDreamChange('title', $event.target.value)"
+              type="text"
+              required
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white"
+              placeholder="Give your dream a title..."
+            />
+          </div>
+
+          <!-- Dream Date -->
+          <div>
+            <label
+              class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              Dream Date
+            </label>
+            <input
+              :value="editingDream.date"
+              @input="handleEditDreamChange('date', $event.target.value)"
+              type="date"
+              required
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white"
+            />
+          </div>
+
+          <!-- Dream Description -->
+          <div>
+            <label
+              class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              Dream Description
+            </label>
+            <textarea
+              :value="editingDream.description"
+              @input="handleEditDreamChange('description', $event.target.value)"
+              rows="6"
+              required
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg resize-none dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white"
+              placeholder="Describe your dream in detail..."
+            ></textarea>
+          </div>
+
+          <!-- Dream Type -->
+          <div>
+            <label
+              class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              Dream Type
+            </label>
+            <div class="grid grid-cols-2 gap-4">
+              <label class="flex items-center">
+                <input
+                  :checked="editingDream.isLucid"
+                  @change="handleEditDreamChange('isLucid', $event.target.checked)"
+                  type="checkbox"
+                  class="mr-2"
+                />
+                <span class="text-sm text-gray-700 dark:text-gray-300"
+                  >Lucid Dream</span
+                >
+              </label>
+              <label class="flex items-center">
+                <input
+                  :checked="editingDream.isVivid"
+                  @change="handleEditDreamChange('isVivid', $event.target.checked)"
+                  type="checkbox"
+                  class="mr-2"
+                />
+                <span class="text-sm text-gray-700 dark:text-gray-300"
+                  >Vivid Dream</span
+                >
+              </label>
+              <label class="flex items-center">
+                <input
+                  :checked="editingDream.isRecurring"
+                  @change="handleEditDreamChange('isRecurring', $event.target.checked)"
+                  type="checkbox"
+                  class="mr-2"
+                />
+                <span class="text-sm text-gray-700 dark:text-gray-300"
+                  >Recurring Dream</span
+                >
+              </label>
+              <label class="flex items-center">
+                <input
+                  :checked="editingDream.isNightmare"
+                  @change="handleEditDreamChange('isNightmare', $event.target.checked)"
+                  type="checkbox"
+                  class="mr-2"
+                />
+                <span class="text-sm text-gray-700 dark:text-gray-300"
+                  >Nightmare</span
+                >
+              </label>
+            </div>
+          </div>
+
+          <!-- Tags -->
+          <div>
+            <label
+              class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              Tags (comma-separated)
+            </label>
+            <input
+              :value="editingDream.tagsInput"
+              @input="handleEditDreamChange('tagsInput', $event.target.value)"
+              type="text"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white"
+              placeholder="flying, water, family, etc."
+            />
+          </div>
+
+          <!-- Emotions -->
+          <div>
+            <label
+              class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              Emotions
+            </label>
+            <div class="grid grid-cols-3 gap-2">
+              <label
+                v-for="emotion in emotions"
+                :key="emotion"
+                class="flex items-center"
+              >
+                <input
+                  :value="emotion"
+                  :checked="editingDream.emotions.includes(emotion)"
+                  @change="handleEditDreamChange('emotions', $event.target.checked ? [...editingDream.emotions, emotion] : editingDream.emotions.filter(e => e !== emotion))"
+                  type="checkbox"
+                  class="mr-2"
+                />
+                <span class="text-sm text-gray-700 dark:text-gray-300"
+                  >{{ emotion }}</span
+                >
+              </label>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="flex justify-end space-x-4 pt-4">
+            <button
+              type="button"
+              @click="closeEditModal"
+              class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 dark:border-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition duration-300"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              class="px-6 py-2 text-white transition duration-300 bg-purple-600 rounded-lg hover:bg-purple-700 disabled:opacity-50"
+            >
+              Update Dream
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div
+  v-if="showDeleteConfirm"
+  class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50"
+  @click.self="cancelDeleteDream"
+>
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full">
+    <div class="p-6">
+      <div class="flex items-center mb-4">
+        <div class="flex-shrink-0">
+          <i class="text-3xl text-red-500 fas fa-exclamation-triangle"></i>
+        </div>
+        <div class="ml-3">
+          <h3 class="text-lg font-medium text-gray-900 dark:text-white">
+            Delete Dream
+          </h3>
+        </div>
+      </div>
+      <div class="mb-6">
+        <p class="text-sm text-gray-500 dark:text-gray-400">
+          Are you sure you want to delete this dream? This action cannot be
+          undone.
+        </p>
+      </div>
+      <div class="flex justify-end space-x-3">
+        <button
+          @click="cancelDeleteDream"
+          class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-600"
+        >
+          Cancel
+        </button>
+        <button
+          @click="confirmDeleteDream"
+          class="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+        >
+          Delete
+        </button>
+      </div>
     </div>
   </div>
 </div>

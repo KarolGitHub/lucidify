@@ -1,5 +1,11 @@
 import { reactive } from "vue";
-import { Dream, DreamStats, NewDream, DreamFilters } from "@/interface/Dream";
+import {
+  Dream,
+  DreamStats,
+  NewDream,
+  DreamFilters,
+  EditingDream,
+} from "@/interface/Dream";
 
 const state = reactive({
   dreams: [] as Dream[],
@@ -15,11 +21,15 @@ const state = reactive({
     tagsInput: "",
     emotions: [],
   } as NewDream,
+  editingDream: null as EditingDream | null,
   filters: {
     searchQuery: "",
     selectedFilter: "all" as const,
   } as DreamFilters,
   showNewDreamModal: false,
+  showEditModal: false,
+  showDeleteConfirm: false,
+  dreamToDelete: null as string | null,
 });
 
 export default state;

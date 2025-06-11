@@ -1,4 +1,10 @@
-import { Dream, DreamStats, NewDream, DreamFilters } from "@/interface/Dream";
+import {
+  Dream,
+  DreamStats,
+  NewDream,
+  DreamFilters,
+  EditingDream,
+} from "@/interface/Dream";
 import state from "./state";
 
 const mutations = {
@@ -41,6 +47,26 @@ const mutations = {
       tagsInput: "",
       emotions: [],
     };
+  },
+
+  setEditingDream(editingDream: EditingDream | null): void {
+    state.editingDream = editingDream;
+  },
+
+  resetEditingDream(): void {
+    state.editingDream = null;
+  },
+
+  setShowEditModal(show: boolean): void {
+    state.showEditModal = show;
+  },
+
+  setShowDeleteConfirm(show: boolean): void {
+    state.showDeleteConfirm = show;
+  },
+
+  setDreamToDelete(dreamId: string | null): void {
+    state.dreamToDelete = dreamId;
   },
 
   setFilters(filters: Partial<DreamFilters>): void {

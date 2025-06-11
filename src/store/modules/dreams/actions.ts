@@ -1,4 +1,9 @@
-import { Dream, DreamStats, DreamFilters } from "@/interface/Dream";
+import {
+  Dream,
+  DreamStats,
+  DreamFilters,
+  EditingDream,
+} from "@/interface/Dream";
 import { loadingStore, notifications, auth } from "@/store";
 import { Toast } from "@/interface/Toast";
 import dreamService from "@/services/dreams";
@@ -283,5 +288,32 @@ export default {
 
   setShowNewDreamModal(show: boolean): void {
     mutations.setShowNewDreamModal(show);
+  },
+
+  setEditingDream(editingDream: Partial<EditingDream> | null): void {
+    if (editingDream) {
+      mutations.setEditingDream({
+        ...state.editingDream,
+        ...editingDream,
+      } as EditingDream);
+    } else {
+      mutations.resetEditingDream();
+    }
+  },
+
+  resetEditingDream(): void {
+    mutations.resetEditingDream();
+  },
+
+  setShowEditModal(show: boolean): void {
+    mutations.setShowEditModal(show);
+  },
+
+  setShowDeleteConfirm(show: boolean): void {
+    mutations.setShowDeleteConfirm(show);
+  },
+
+  setDreamToDelete(dreamId: string | null): void {
+    mutations.setDreamToDelete(dreamId);
   },
 };
