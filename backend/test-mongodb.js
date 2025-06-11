@@ -9,7 +9,7 @@ const User = require("./models/User");
 async function testConnection() {
   try {
     const mongoURI =
-      process.env.MONGODB_URI || "mongodb://localhost:27017/lucidifier";
+      process.env.MONGODB_URI || "mongodb://localhost:27017/lucidify";
     console.log("🔗 Connecting to MongoDB...");
     console.log("📍 URI:", mongoURI.replace(/\/\/.*@/, "//***:***@")); // Hide credentials
 
@@ -34,7 +34,7 @@ async function createSampleData() {
     // Create a sample user
     const user = new User({
       firebaseUid: "test-user-123",
-      email: "test@lucidifier.com",
+      email: "test@lucidify.com",
       displayName: "Test Dreamer",
       lucidProgress: {
         totalDreams: 0,
@@ -175,7 +175,7 @@ async function testDatabaseOperations() {
 
 // Main test function
 async function runTests() {
-  console.log("🧪 MongoDB Test Suite for Lucidifier\n");
+  console.log("🧪 MongoDB Test Suite for Lucidify\n");
 
   // Test connection
   const connected = await testConnection();

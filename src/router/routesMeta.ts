@@ -32,7 +32,7 @@ export const appRoutes: RouteMeta[] = [
     name: "About",
     path: "/about",
     icon: "fas fa-info-circle",
-    description: "Learn more about Lucidifier",
+    description: "Learn more about Lucidify",
     category: "Info",
   },
   {
@@ -53,7 +53,7 @@ export const appRoutes: RouteMeta[] = [
     name: "Home",
     path: "/",
     icon: "fas fa-home",
-    description: "Welcome to Lucidifier",
+    description: "Welcome to Lucidify",
     category: "Main",
   },
 ];

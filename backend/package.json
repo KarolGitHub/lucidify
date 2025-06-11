@@ -1,7 +1,7 @@
 {
-  "name": "lucidifier-backend",
+  "name": "lucidify-backend",
   "version": "1.0.0",
-  "description": "Backend API for Lucidifier FCM token management and Dream Journal",
+  "description": "Backend API for Lucidify FCM token management and Dream Journal",
   "main": "server.js",
   "engines": {
     "node": ">=18.0.0"
@@ -12,6 +12,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
+    "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
@@ -19,6 +20,7 @@
     "express-validator": "^7.2.1",
     "firebase-admin": "^12.0.0",
     "helmet": "^7.1.0",
+    "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.15.1",
     "morgan": "^1.10.0",
     "node-fetch": "^3.3.2"

@@ -3,7 +3,7 @@ const fetch = require("node-fetch");
 const BASE_URL = "http://localhost:3001";
 
 async function testAPI() {
-  console.log("🧪 Testing Lucidifier Backend API...\n");
+  console.log("🧪 Testing Lucidify Backend API...\n");
 
   try {
     // Test 1: Health Check

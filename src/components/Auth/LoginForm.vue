@@ -1,7 +1,7 @@
 <template>
   <div class="login-form">
     <div class="login-card">
-      <h2>Login to Lucidifier</h2>
+      <h2>Login to Lucidify</h2>
 
       <form @submit.prevent="handleLogin" class="login-form-content">
         <div class="form-group">

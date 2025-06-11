@@ -24,7 +24,7 @@ The Dream Journal is a comprehensive feature for tracking, analyzing, and improv
 2. **Set up MongoDB**:
 
    - Install MongoDB locally or use MongoDB Atlas
-   - Create a database named `lucidifier`
+   - Create a database named `lucidify`
 
 3. **Environment Configuration**:
    Create a `.env` file in the `backend` directory:
@@ -33,7 +33,7 @@ The Dream Journal is a comprehensive feature for tracking, analyzing, and improv
    PORT=3001
    NODE_ENV=development
    CORS_ORIGIN=http://localhost:3000
-   MONGODB_URI=mongodb://localhost:27017/lucidifier
+   MONGODB_URI=mongodb://localhost:27017/lucidify
    JWT_SECRET=your-super-secret-jwt-key
    ```
 

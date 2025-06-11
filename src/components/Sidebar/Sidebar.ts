@@ -188,7 +188,7 @@ export default defineComponent({
       // Test browser notification
       if (Notification.permission === "granted") {
         new Notification("Test Notification", {
-          body: "This is a test notification from Lucidifier!",
+          body: "This is a test notification from Lucidify!",
           icon: "/favicon.ico",
           badge: "/favicon.ico",
           tag: "test-notification",

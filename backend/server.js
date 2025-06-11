@@ -13,7 +13,7 @@ const admin = require("firebase-admin");
 const connectDB = async () => {
   try {
     const mongoURI =
-      process.env.MONGODB_URI || "mongodb://localhost:27017/lucidifier";
+      process.env.MONGODB_URI || "mongodb://localhost:27017/lucidify";
     await mongoose.connect(mongoURI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
@@ -94,6 +94,7 @@ app.use("/api/", limiter);
 
 // Import routes
 const dreamRoutes = require("./routes/dreams");
+const authRoutes = require("./routes/auth");
 
 // In-memory storage for FCM tokens (replace with database in production)
 const fcmTokens = new Map();
@@ -102,10 +103,13 @@ const fcmTokens = new Map();
 app.get("/api/health", (req, res) => {
   res.json({
     status: "OK",
-    message: "Lucidifier Backend API is running",
+    message: "Lucidify Backend API is running",
     timestamp: new Date().toISOString(),
   });
 });
+
+// Authentication Routes
+app.use("/api/auth", authRoutes);
 
 // Dream Journal Routes
 app.use("/api/dreams", dreamRoutes);
@@ -352,7 +356,7 @@ app.use("*", (req, res) => {
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`🚀 Lucidifier Backend API running on port ${PORT}`);
+  console.log(`🚀 Lucidify Backend API running on port ${PORT}`);
   console.log(`📊 Health check: http://localhost:${PORT}/api/health`);
   console.log(
     `🔔 FCM tokens endpoint: http://localhost:${PORT}/api/fcm-tokens`,

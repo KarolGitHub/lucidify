@@ -2,7 +2,7 @@
 
 ## Overview
 
-This guide explains how to properly integrate Firebase Authentication with your Lucidifier app, connecting Firebase Auth users to MongoDB users for the Dream Journal feature.
+This guide explains how to properly integrate Firebase Authentication with your Lucidify app, connecting Firebase Auth users to MongoDB users for the Dream Journal feature.
 
 ## Architecture
 
@@ -23,7 +23,7 @@ Create a `.env` file in the backend directory:
 
 ```env
 # MongoDB
-MONGODB_URI=mongodb://localhost:27017/lucidifier
+MONGODB_URI=mongodb://localhost:27017/lucidify
 
 # Firebase Admin SDK (for auth verification and push notifications)
 FIREBASE_PROJECT_ID=your-project-id

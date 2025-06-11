@@ -1,4 +1,4 @@
-# MongoDB Atlas Setup Guide for Lucidifier
+# MongoDB Atlas Setup Guide for Lucidify
 
 ## 🚀 Quick Setup (5 minutes)
 
@@ -39,7 +39,7 @@
 2. Choose "Connect your application"
 3. Copy the connection string
 4. Replace `<password>` with your database user password
-5. Replace `<dbname>` with `lucidifier`
+5. Replace `<dbname>` with `lucidify`
 
 ### Step 6: Update Environment Variables
 
@@ -47,7 +47,7 @@ Create or update your `backend/.env` file:
 
 ```env
 # MongoDB Configuration
-MONGODB_URI=mongodb+srv://yourusername:yourpassword@cluster0.xxxxx.mongodb.net/lucidifier?retryWrites=true&w=majority
+MONGODB_URI=mongodb+srv://yourusername:yourpassword@cluster0.xxxxx.mongodb.net/lucidify?retryWrites=true&w=majority
 
 # Other configurations
 PORT=3001
@@ -154,4 +154,4 @@ Your database will contain:
 
 ---
 
-**Your MongoDB Atlas is now ready for Lucidifier! 🌙✨**
+**Your MongoDB Atlas is now ready for Lucidify! 🌙✨**

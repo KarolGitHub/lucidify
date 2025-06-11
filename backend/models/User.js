@@ -4,8 +4,9 @@ const userSchema = new mongoose.Schema(
   {
     firebaseUid: {
       type: String,
-      required: [true, "Firebase UID is required"],
+      required: false,
       unique: true,
+      sparse: true,
       index: true,
     },
     email: {
@@ -19,6 +20,22 @@ const userSchema = new mongoose.Schema(
       type: String,
       trim: true,
       maxlength: [100, "Display name cannot exceed 100 characters"],
+    },
+    // Password for JWT authentication (optional if using Firebase)
+    password: {
+      type: String,
+      required: false,
+      minlength: [6, "Password must be at least 6 characters"],
+    },
+    // Email verification status
+    emailVerified: {
+      type: Boolean,
+      default: false,
+    },
+    // Admin privileges
+    isAdmin: {
+      type: Boolean,
+      default: false,
     },
     // Dream journal preferences
     preferences: {

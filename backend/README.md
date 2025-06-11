@@ -1,4 +1,4 @@
-# Lucidifier Backend API
+# Lucidify Backend API
 
 A Node.js backend API for managing Firebase Cloud Messaging (FCM) tokens and sending push notifications.
 

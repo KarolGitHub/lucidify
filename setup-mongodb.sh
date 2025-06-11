@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "🚀 Lucidifier MongoDB Setup Script"
+echo "🚀 Lucidify MongoDB Setup Script"
 echo "=================================="
 
 # Check if Node.js is installed
@@ -35,7 +35,7 @@ if [ ! -f ".env" ]; then
     echo "📝 Creating .env file..."
     cat > .env << EOF
 # MongoDB Configuration
-MONGODB_URI=mongodb://localhost:27017/lucidifier
+MONGODB_URI=mongodb://localhost:27017/lucidify
 
 # Server Configuration
 PORT=3001
@@ -43,7 +43,7 @@ NODE_ENV=development
 CORS_ORIGIN=http://localhost:3000
 
 # JWT Secret (change this in production!)
-JWT_SECRET=lucidifier-dev-secret-key-change-in-production
+JWT_SECRET=lucidify-dev-secret-key-change-in-production
 
 # Firebase Configuration (optional)
 # FIREBASE_PROJECT_ID=your-firebase-project-id

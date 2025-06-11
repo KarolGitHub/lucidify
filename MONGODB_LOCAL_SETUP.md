@@ -1,4 +1,4 @@
-# Local MongoDB Setup Guide for Lucidifier
+# Local MongoDB Setup Guide for Lucidify
 
 ## 🖥️ Local MongoDB Installation
 
@@ -80,7 +80,7 @@
 
    ```bash
    docker run -d \
-     --name mongodb-lucidifier \
+     --name mongodb-lucidify \
      -p 27017:27017 \
      -v mongodb_data:/data/db \
      mongo:7.0
@@ -99,7 +99,7 @@ Create `backend/.env` file:
 
 ```env
 # MongoDB Configuration
-MONGODB_URI=mongodb://localhost:27017/lucidifier
+MONGODB_URI=mongodb://localhost:27017/lucidify
 
 # Other configurations
 PORT=3001
@@ -139,7 +139,7 @@ You should see: `✅ MongoDB connected successfully`
    - Click "Connect"
 
 3. **Browse Collections**:
-   - Navigate to `lucidifier` database
+   - Navigate to `lucidify` database
    - View `dreams` and `users` collections
 
 ### Using MongoDB Shell
@@ -148,8 +148,8 @@ You should see: `✅ MongoDB connected successfully`
 # Connect to MongoDB
 mongosh
 
-# Switch to lucidifier database
-use lucidifier
+# Switch to lucidify database
+use lucidify
 
 # View collections
 show collections
@@ -217,7 +217,7 @@ sudo journalctl -u mongod -f
 mongosh
 
 # Switch to database
-use lucidifier
+use lucidify
 
 # Drop all collections
 db.dreams.drop()
@@ -229,7 +229,7 @@ db.users.drop()
 Your local MongoDB will create:
 
 ```
-lucidifier/
+lucidify/
 ├── dreams/          # Dream journal entries
 ├── users/           # User profiles
 └── system.indexes/  # Database indexes
@@ -267,4 +267,4 @@ lucidifier/
 
 ---
 
-**Your local MongoDB is ready for Lucidifier development! 🖥️✨**
+**Your local MongoDB is ready for Lucidify development! 🖥️✨**
