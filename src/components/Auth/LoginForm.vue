@@ -71,8 +71,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, computed } from 'vue';
 import authService from '@/services/auth';
+import { loadingStore } from '@/store';
 
 export default defineComponent({
   name: 'LoginForm',
@@ -83,17 +84,23 @@ export default defineComponent({
       regEmail: '',
       regPassword: '',
       confirmPassword: '',
-      isLoading: false,
-      isRegistering: false,
       error: '',
       regError: '',
       showRegister: false
     };
   },
+  computed: {
+    isLoading() {
+      return loadingStore.getters.getLoading().loading;
+    },
+    isRegistering() {
+      return loadingStore.getters.getLoading().loading;
+    }
+  },
   methods: {
     async handleLogin() {
       try {
-        this.isLoading = true;
+        loadingStore.actions.start('Logging in...');
         this.error = '';
 
         await authService.login({
@@ -108,7 +115,7 @@ export default defineComponent({
         console.error('Login error:', error);
         this.error = this.getErrorMessage(error);
       } finally {
-        this.isLoading = false;
+        loadingStore.actions.finish();
       }
     },
 
@@ -124,7 +131,7 @@ export default defineComponent({
       }
 
       try {
-        this.isRegistering = true;
+        loadingStore.actions.start('Creating account...');
         this.regError = '';
 
         await authService.register({
@@ -145,7 +152,7 @@ export default defineComponent({
         console.error('Registration error:', error);
         this.regError = this.getErrorMessage(error);
       } finally {
-        this.isRegistering = false;
+        loadingStore.actions.finish();
       }
     },
 

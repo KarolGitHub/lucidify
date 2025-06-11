@@ -29,7 +29,7 @@
             Your Dreams
           </h2>
           <button
-            @click="showNewDreamModal = true"
+            @click="openNewDreamModal"
             class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out transform hover:scale-105"
           >
             <i class="fas fa-plus mr-2"></i>
@@ -41,14 +41,16 @@
         <div class="flex flex-wrap gap-4 mb-6">
           <div class="flex-1">
             <input
-              v-model="searchQuery"
+              :value="filters.searchQuery"
+              @input="handleSearchChange($event.target.value)"
               type="text"
               placeholder="Search dreams..."
               class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white"
             />
           </div>
           <select
-            v-model="selectedFilter"
+            :value="filters.selectedFilter"
+            @change="handleFilterChange($event.target.value)"
             class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white"
           >
             <option value="all">All Dreams</option>
@@ -124,7 +126,7 @@
 <div
   v-if="showNewDreamModal"
   class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
-  @click.self="showNewDreamModal = false"
+  @click.self="closeNewDreamModal"
 >
   <div
     class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
@@ -135,14 +137,14 @@
           New Dream Entry
         </h3>
         <button
-          @click="showNewDreamModal = false"
+          @click="closeNewDreamModal"
           class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
         >
           <i class="fas fa-times text-xl"></i>
         </button>
       </div>
 
-      <form @submit.prevent="saveDream">
+      <form @submit.prevent="handleSaveDream">
         <div class="space-y-6">
           <!-- Dream Title -->
           <div>
@@ -152,7 +154,8 @@
               Dream Title
             </label>
             <input
-              v-model="newDream.title"
+              :value="newDream.title"
+              @input="handleNewDreamChange('title', $event.target.value)"
               type="text"
               required
               class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white"
@@ -168,7 +171,8 @@
               Dream Date
             </label>
             <input
-              v-model="newDream.date"
+              :value="newDream.date"
+              @input="handleNewDreamChange('date', $event.target.value)"
               type="date"
               required
               class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white"
@@ -183,7 +187,8 @@
               Dream Description
             </label>
             <textarea
-              v-model="newDream.description"
+              :value="newDream.description"
+              @input="handleNewDreamChange('description', $event.target.value)"
               rows="6"
               required
               class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white resize-none"
@@ -201,7 +206,8 @@
             <div class="grid grid-cols-2 gap-4">
               <label class="flex items-center">
                 <input
-                  v-model="newDream.isLucid"
+                  :checked="newDream.isLucid"
+                  @change="handleNewDreamChange('isLucid', $event.target.checked)"
                   type="checkbox"
                   class="mr-2"
                 />
@@ -211,7 +217,8 @@
               </label>
               <label class="flex items-center">
                 <input
-                  v-model="newDream.isVivid"
+                  :checked="newDream.isVivid"
+                  @change="handleNewDreamChange('isVivid', $event.target.checked)"
                   type="checkbox"
                   class="mr-2"
                 />
@@ -221,7 +228,8 @@
               </label>
               <label class="flex items-center">
                 <input
-                  v-model="newDream.isRecurring"
+                  :checked="newDream.isRecurring"
+                  @change="handleNewDreamChange('isRecurring', $event.target.checked)"
                   type="checkbox"
                   class="mr-2"
                 />
@@ -231,7 +239,8 @@
               </label>
               <label class="flex items-center">
                 <input
-                  v-model="newDream.isNightmare"
+                  :checked="newDream.isNightmare"
+                  @change="handleNewDreamChange('isNightmare', $event.target.checked)"
                   type="checkbox"
                   class="mr-2"
                 />
@@ -250,7 +259,8 @@
               Tags (comma-separated)
             </label>
             <input
-              v-model="newDream.tagsInput"
+              :value="newDream.tagsInput"
+              @input="handleNewDreamChange('tagsInput', $event.target.value)"
               type="text"
               class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white"
               placeholder="flying, water, family, etc."
@@ -271,9 +281,10 @@
                 class="flex items-center"
               >
                 <input
-                  v-model="newDream.emotions"
-                  type="checkbox"
                   :value="emotion"
+                  :checked="newDream.emotions.includes(emotion)"
+                  @change="handleNewDreamChange('emotions', $event.target.checked ? [...newDream.emotions, emotion] : newDream.emotions.filter(e => e !== emotion))"
+                  type="checkbox"
                   class="mr-2"
                 />
                 <span class="text-sm text-gray-700 dark:text-gray-300"
@@ -287,18 +298,16 @@
           <div class="flex justify-end space-x-4 pt-4">
             <button
               type="button"
-              @click="showNewDreamModal = false"
+              @click="closeNewDreamModal"
               class="px-6 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition duration-300"
             >
               Cancel
             </button>
             <button
               type="submit"
-              :disabled="isSaving"
               class="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition duration-300 disabled:opacity-50"
             >
-              <i v-if="isSaving" class="fas fa-spinner fa-spin mr-2"></i>
-              {{ isSaving ? 'Saving...' : 'Save Dream' }}
+              Save Dream
             </button>
           </div>
         </div>
