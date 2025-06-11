@@ -1,10 +1,12 @@
-<div class="h-full">
+<div class="flex flex-col h-screen md:flex-row">
   <Sidebar />
-  <div class="relative h-full md:ml-64 bg-blueGray-100 dark:bg-warmGray-900">
+  <div
+    class="relative flex flex-col flex-1 min-h-screen bg-blueGray-100 dark:bg-warmGray-900 md:ml-64"
+  >
     <Navbar />
-    <main class="w-full px-4 mx-auto md:px-10">
+    <main class="flex-1 w-full px-4 py-6 mx-auto md:px-10">
       <router-view />
     </main>
-    <footer />
+    <FooterMain />
   </div>
 </div>

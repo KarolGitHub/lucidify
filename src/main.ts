@@ -11,6 +11,7 @@ import "./assets/styles/index.css";
 import "./assets/scss/styles.scss";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import "@/assets/styles/tailwind.css";
+import "@/assets/styles/utilities.css";
 
 /* plugins */
 Vue.use(firestorePlugin);

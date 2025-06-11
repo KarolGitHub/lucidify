@@ -1,5 +1,5 @@
 <template>
-  <div id="app">
+  <div id="app" class="h-screen">
     <router-view />
     <SpinnerLoading />
     <Toast />
@@ -20,4 +20,25 @@ export default defineComponent({
 })
 </script>
 
-<style></style>
+<style>
+/* Ensure proper height handling */
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+#app {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Ensure router-view takes full available height */
+#app>.router-view {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+</style>

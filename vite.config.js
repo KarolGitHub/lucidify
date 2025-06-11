@@ -104,6 +104,7 @@ export default defineConfig({
           ],
           settings: ["./src/views/settings/Settings"],
           about: ["./src/views/About.vue"],
+          dreamJournal: ["./src/views/dream-journal/DreamJournal"],
         },
         plugins: [
           visualizer({
