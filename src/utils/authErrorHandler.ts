@@ -5,19 +5,16 @@ import { AxiosResponse } from "axios";
 
 export class AuthErrorHandler {
   /**
-   * Checks if a JWT token is expired
-   * @param token - The JWT token to check
-   * @returns true if the token is expired
+   * Checks if a Firebase token is expired
+   * Note: Firebase tokens are automatically refreshed by the SDK
+   * This function is mainly for compatibility
+   * @param token - The Firebase token to check
+   * @returns false (Firebase handles token refresh automatically)
    */
   static isTokenExpired(token: string): boolean {
-    try {
-      const payload = JSON.parse(atob(token.split(".")[1]));
-      const currentTime = Date.now() / 1000;
-      return payload.exp < currentTime;
-    } catch (error) {
-      console.error("Error checking token expiration:", error);
-      return true; // Assume expired if we can't parse the token
-    }
+    // Firebase tokens are automatically refreshed by the SDK
+    // We don't need to manually check expiration
+    return false;
   }
 
   /**

@@ -1,8 +1,11 @@
 import axios from "axios";
 import { AuthErrorHandler } from "@/utils/authErrorHandler";
+import authService from "@/services/auth";
 
+// Create axios instance
 const apiClient = axios.create({
-  // baseURL: "http://localhost:5173/",
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:3001/api",
+  timeout: 10000,
   headers: {
     "Content-Type": "application/json",
   },
@@ -11,15 +14,18 @@ const apiClient = axios.create({
 // Request interceptor to add auth token
 apiClient.interceptors.request.use(
   async (config) => {
-    // Add auth token to requests if available
-    try {
-      const token = localStorage.getItem("accessToken");
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-    } catch (error) {
-      console.error("Error adding auth token to request:", error);
+    // Wait for Firebase auth state to be ready before making requests
+    if (!authService.isAuthStateReady()) {
+      console.log("Waiting for Firebase auth state to be ready...");
+      await authService.waitForAuthState();
     }
+
+    // Get auth token
+    const token = await authService.getAuthToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
     return config;
   },
   (error) => {
@@ -40,14 +46,20 @@ apiClient.interceptors.response.use(
     ) {
       console.warn("Authentication error detected in axios interceptor");
 
-      // Auto logout the user
-      await AuthErrorHandler.handleAuthError(
-        "Session expired. Please log in again.",
-      );
+      // Only auto logout if Firebase auth state is ready and user is actually logged out
+      if (authService.isAuthStateReady() && !authService.isAuthenticated()) {
+        await AuthErrorHandler.handleAuthError(
+          "Session expired. Please log in again.",
+        );
+      } else {
+        console.log(
+          "Auth state not ready or user still authenticated, skipping auto logout",
+        );
+      }
     }
 
     return Promise.reject(error);
   },
 );
 
-export { apiClient };
+export default apiClient;

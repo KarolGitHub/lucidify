@@ -26,7 +26,7 @@ class AuthService {
 
   constructor() {
     // Listen for auth state changes
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
       this.currentUser = user;
       this.authStateReady = true;
 
@@ -54,14 +54,6 @@ class AuthService {
 
     try {
       const token = await this.currentUser.getIdToken();
-
-      // Check if token is expired
-      if (AuthErrorHandler.isTokenExpired(token)) {
-        console.warn("Token is expired, triggering auto logout");
-        await AuthErrorHandler.handleAuthError("Token expired", false);
-        return null;
-      }
-
       return token;
     } catch (error) {
       console.error("Error getting auth token:", error);

@@ -2,63 +2,69 @@
 import mutations from "./mutations";
 import router from "@/router";
 import { loadingStore, notifications } from "@/store";
-// import { AuthService } from "../../../services";
-import Auth from "@/server/firebase/auth";
+import authService from "@/services/auth";
 import { Login, Register } from "@/interface/Auth";
 import { Toast } from "@/interface/Toast";
-// const authService = new AuthService();
 
 export default {
-  fetchAccessToken(): void {
-    const token = localStorage.getItem("accessToken");
-    const userData = localStorage.getItem("userData");
+  async fetchAccessToken(): Promise<void> {
+    // Wait for Firebase auth state to be ready
+    if (!authService.isAuthStateReady()) {
+      console.log("Waiting for Firebase auth state to be ready...");
+      await authService.waitForAuthState();
+    }
 
-    if (token && userData) {
-      // If we have a token and user data, restore the full auth state
-      try {
-        const user = JSON.parse(userData);
-        mutations.setAuth(true, user);
-      } catch (error) {
-        console.error("Error parsing user data from localStorage:", error);
-        // Fallback: just set token without user data
-        mutations.setAuth(true);
-        mutations.setAccessToken(token);
+    // Check if user is authenticated via Firebase
+    if (authService.isAuthenticated()) {
+      const user = authService.getCurrentUser();
+      if (user) {
+        const userData = {
+          id: user.uid,
+          accessToken: await user.getIdToken(),
+          displayName: user.displayName,
+          email: user.email,
+          emailVerified: user.emailVerified,
+          phoneNumber: user.phoneNumber,
+          photoURL: user.photoURL,
+        };
+
+        mutations.setAuth(true, userData);
+        localStorage.setItem("accessToken", userData.accessToken);
+        localStorage.setItem("userData", JSON.stringify(userData));
+        console.log("Auth state restored from Firebase");
       }
     } else {
+      // User is not authenticated, clear state
       mutations.setAuth(false);
       mutations.setAccessToken(null);
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("userData");
+      console.log("No authenticated user found");
     }
   },
+
   async login(loginForm: Login): Promise<void> {
     try {
-      const response = await Auth.login(loginForm);
+      const response = await authService.login(loginForm);
       if (response.user) {
         console.debug(
           "💪 ~ file: actions.ts:15 ~ login ~ response.user",
           response.user,
         );
-        const {
-          uid: id,
-          accessToken,
-          displayName,
-          email,
-          emailVerified,
-          phoneNumber,
-          photoURL,
-        } = response.user;
 
+        const token = await response.user.getIdToken();
         const userData = {
-          id,
-          accessToken,
-          displayName,
-          email,
-          emailVerified,
-          phoneNumber,
-          photoURL,
+          id: response.user.uid,
+          accessToken: token,
+          displayName: response.user.displayName,
+          email: response.user.email,
+          emailVerified: response.user.emailVerified,
+          phoneNumber: response.user.phoneNumber,
+          photoURL: response.user.photoURL,
         };
 
         mutations.setAuth(true, userData);
-        localStorage.setItem("accessToken", accessToken);
+        localStorage.setItem("accessToken", token);
         localStorage.setItem("userData", JSON.stringify(userData));
 
         await router.push({
@@ -85,8 +91,9 @@ export default {
 
   async logout(): Promise<void> {
     try {
-      const response = await Auth.logout();
+      await authService.logout();
       mutations.setAuth(false);
+      mutations.setAccessToken(null);
       localStorage.removeItem("accessToken");
       localStorage.removeItem("userData");
       await router.push("/auth/login");
@@ -110,7 +117,7 @@ export default {
 
   async register(registerForm: Register): Promise<void> {
     try {
-      const response = await Auth.register(registerForm);
+      const response = await authService.register(registerForm);
       const toast: Toast = {
         body: "Registration completed successfully",
         tittle: "Success",

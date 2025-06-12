@@ -7,17 +7,18 @@ const router = createRouter({
   routes,
 });
 
-router.beforeEach((to, from, next) => {
-  auth.actions.fetchAccessToken();
+router.beforeEach(async (to, from, next) => {
+  // Wait for auth state to be fetched
+  await auth.actions.fetchAccessToken();
   const accessToken = auth.getters.getAccessToken();
 
   if (!accessToken && !to.fullPath.includes("/auth")) {
     next("/auth/login");
-  }
-  if (accessToken && to.fullPath === "/auth/login") {
+  } else if (accessToken && to.fullPath === "/auth/login") {
     next("/dashboard");
+  } else {
+    next();
   }
-  next();
 });
 
 export default router;
