@@ -2,7 +2,7 @@ const express = require("express");
 const { body, validationResult, query } = require("express-validator");
 const Dream = require("../models/Dream");
 const User = require("../models/User");
-const { authenticateUser } = require("../middleware/auth");
+const { authenticateJWT } = require("../middleware/jwtAuth");
 const router = express.Router();
 
 // Validation rules
@@ -29,7 +29,7 @@ const dreamValidation = [
 ];
 
 // GET /api/dreams - Get all dreams for a user
-router.get("/", authenticateUser, async (req, res) => {
+router.get("/", authenticateJWT, async (req, res) => {
   try {
     const {
       page = 1,
@@ -47,7 +47,7 @@ router.get("/", authenticateUser, async (req, res) => {
       emotions,
     } = req.query;
 
-    const query = { userId: req.user.firebaseUid };
+    const query = { userId: req.user._id.toString() };
 
     // Apply filters
     if (filter === "lucid") query.isLucid = true;
@@ -128,11 +128,11 @@ router.get("/", authenticateUser, async (req, res) => {
 });
 
 // GET /api/dreams/:id - Get a specific dream
-router.get("/:id", authenticateUser, async (req, res) => {
+router.get("/:id", authenticateJWT, async (req, res) => {
   try {
     const dream = await Dream.findOne({
       _id: req.params.id,
-      userId: req.user.firebaseUid,
+      userId: req.user._id.toString(),
     });
 
     if (!dream) {
@@ -147,7 +147,7 @@ router.get("/:id", authenticateUser, async (req, res) => {
 });
 
 // POST /api/dreams - Create a new dream
-router.post("/", authenticateUser, dreamValidation, async (req, res) => {
+router.post("/", authenticateJWT, dreamValidation, async (req, res) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -156,7 +156,7 @@ router.post("/", authenticateUser, dreamValidation, async (req, res) => {
 
     const dreamData = {
       ...req.body,
-      userId: req.user.firebaseUid,
+      userId: req.user._id.toString(),
     };
 
     const dream = new Dream(dreamData);
@@ -177,7 +177,7 @@ router.post("/", authenticateUser, dreamValidation, async (req, res) => {
 });
 
 // PUT /api/dreams/:id - Update a dream
-router.put("/:id", authenticateUser, dreamValidation, async (req, res) => {
+router.put("/:id", authenticateJWT, dreamValidation, async (req, res) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -186,7 +186,7 @@ router.put("/:id", authenticateUser, dreamValidation, async (req, res) => {
 
     const dream = await Dream.findOne({
       _id: req.params.id,
-      userId: req.user.firebaseUid,
+      userId: req.user._id.toString(),
     });
 
     if (!dream) {
@@ -217,11 +217,11 @@ router.put("/:id", authenticateUser, dreamValidation, async (req, res) => {
 });
 
 // DELETE /api/dreams/:id - Delete a dream
-router.delete("/:id", authenticateUser, async (req, res) => {
+router.delete("/:id", authenticateJWT, async (req, res) => {
   try {
     const dream = await Dream.findOneAndDelete({
       _id: req.params.id,
-      userId: req.user.firebaseUid,
+      userId: req.user._id.toString(),
     });
 
     if (!dream) {
@@ -248,19 +248,19 @@ router.delete("/:id", authenticateUser, async (req, res) => {
 });
 
 // GET /api/dreams/stats/user - Get user's dream statistics
-router.get("/stats/user", authenticateUser, async (req, res) => {
+router.get("/stats/user", authenticateJWT, async (req, res) => {
   try {
-    const stats = await Dream.getUserStats(req.user.firebaseUid);
+    const stats = await Dream.getUserStats(req.user._id.toString());
 
     // Get recent activity
-    const recentDreams = await Dream.find({ userId: req.user.firebaseUid })
+    const recentDreams = await Dream.find({ userId: req.user._id.toString() })
       .sort({ date: -1 })
       .limit(5)
       .select("title date isLucid");
 
     // Get most common tags
     const tagStats = await Dream.aggregate([
-      { $match: { userId: req.user.firebaseUid } },
+      { $match: { userId: req.user._id.toString() } },
       { $unwind: "$tags" },
       {
         $group: {
@@ -274,7 +274,7 @@ router.get("/stats/user", authenticateUser, async (req, res) => {
 
     // Get most common emotions
     const emotionStats = await Dream.aggregate([
-      { $match: { userId: req.user.firebaseUid } },
+      { $match: { userId: req.user._id.toString() } },
       { $unwind: "$emotions" },
       {
         $group: {
@@ -306,7 +306,7 @@ router.get("/stats/user", authenticateUser, async (req, res) => {
 });
 
 // GET /api/dreams/search - Advanced search
-router.get("/search/advanced", authenticateUser, async (req, res) => {
+router.get("/search/advanced", authenticateJWT, async (req, res) => {
   try {
     const {
       q,
@@ -319,7 +319,7 @@ router.get("/search/advanced", authenticateUser, async (req, res) => {
       nightmareOnly,
     } = req.query;
 
-    const query = { userId: req.user.firebaseUid };
+    const query = { userId: req.user._id.toString() };
 
     // Text search
     if (q) {
