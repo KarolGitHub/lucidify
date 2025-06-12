@@ -7,7 +7,7 @@ const config = {
   aboutLink: "https://karolgardyjas.netlify.app/about",
   contactLink: "https://karolgardyjas.netlify.app/contact",
   linkedinLink: "https://www.linkedin.com/in/karolgardyjas",
-  sourceCodeLink: "https://github.com/KarolGitHub/vue",
+  sourceCodeLink: "https://github.com/KarolGitHub/lucidify",
 };
 
 export const firebaseConfig = {

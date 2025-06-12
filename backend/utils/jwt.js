@@ -1,3 +1,15 @@
+/**
+ * JWT Utilities
+ *
+ * NOTE: These JWT utilities are currently kept for future use.
+ * The application is currently using Firebase Authentication.
+ *
+ * To switch to JWT authentication:
+ * 1. Ensure JWT_SECRET is set in environment variables
+ * 2. Update routes to use JWT middleware
+ * 3. Update frontend to use JWT endpoints
+ */
+
 const jwt = require("jsonwebtoken");
 
 // JWT Secret from environment variables

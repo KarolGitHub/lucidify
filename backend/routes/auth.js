@@ -1,3 +1,15 @@
+/**
+ * Authentication Routes
+ *
+ * NOTE: These JWT-based auth routes are currently kept for future use.
+ * The application is currently using Firebase Authentication.
+ *
+ * To switch to JWT authentication:
+ * 1. Update frontend to use these endpoints instead of Firebase
+ * 2. Update backend routes to use authenticateJWT middleware
+ * 3. Ensure JWT_SECRET is set in environment variables
+ */
+
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const { generateToken, verifyToken } = require("../utils/jwt");

@@ -1,3 +1,15 @@
+/**
+ * JWT Authentication Middleware
+ *
+ * NOTE: This middleware is currently kept for future use.
+ * The application is currently using Firebase Authentication.
+ *
+ * To switch to JWT authentication:
+ * 1. Update routes to use authenticateJWT instead of authenticateUser
+ * 2. Update user ID references from firebaseUid to _id.toString()
+ * 3. Ensure JWT_SECRET is set in environment variables
+ */
+
 const { verifyToken, isTokenExpired } = require("../utils/jwt");
 const User = require("../models/User");
 
