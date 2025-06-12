@@ -1,0 +1,225 @@
+<div
+  class="relative flex flex-col min-w-0 break-words w-full mb-6 shadow-lg rounded-lg bg-blueGray-100 border-0"
+>
+  <div class="rounded-t bg-white mb-0 px-6 py-6">
+    <div class="text-center flex justify-between">
+      <h6 class="text-blueGray-700 text-xl font-bold">
+        Reality Check Scheduler
+      </h6>
+      <div class="flex items-center space-x-2">
+        <span class="text-sm text-blueGray-600">Status:</span>
+        <span
+          class="px-2 py-1 text-xs font-semibold rounded-full"
+          :class="canReceiveNotifications ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+        >
+          {{ canReceiveNotifications ? 'Active' : 'Inactive' }}
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="flex-auto px-4 lg:px-10 py-10 pt-0">
+    <form @submit.prevent="saveSettings">
+      <!-- Enable/Disable Toggle -->
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h6 class="text-blueGray-400 text-sm font-bold uppercase">
+            Enable Reality Checks
+          </h6>
+          <p class="text-sm text-blueGray-600 mt-1">
+            Receive periodic reminders to check if you're dreaming
+          </p>
+        </div>
+        <label class="relative inline-flex items-center cursor-pointer">
+          <input
+            type="checkbox"
+            class="sr-only peer"
+            v-model="localSettings.enabled"
+            @change="handleEnableChange"
+          />
+          <div
+            class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"
+          ></div>
+        </label>
+      </div>
+
+      <div v-if="localSettings.enabled" class="space-y-6">
+        <!-- Notification Permission -->
+        <div
+          v-if="notificationPermission !== 'granted'"
+          class="bg-yellow-50 border border-yellow-200 rounded-lg p-4"
+        >
+          <div class="flex items-center justify-between">
+            <div>
+              <h6 class="text-yellow-800 font-semibold">
+                Notification Permission Required
+              </h6>
+              <p class="text-yellow-700 text-sm mt-1">
+                Please allow notifications to receive reality check reminders
+              </p>
+            </div>
+            <button
+              type="button"
+              @click="requestPermission"
+              class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+            >
+              Enable Notifications
+            </button>
+          </div>
+        </div>
+
+        <!-- Frequency Settings -->
+        <div>
+          <h6 class="text-blueGray-400 text-sm font-bold uppercase mb-4">
+            Frequency
+          </h6>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-blueGray-700 mb-2"
+                >Check Frequency</label
+              >
+              <select
+                v-model="localSettings.frequency"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="hourly">Every Hour</option>
+                <option value="every_1_5_hours">Every 1.5 Hours</option>
+                <option value="every_2_hours">Every 2 Hours</option>
+                <option value="every_4_hours">Every 4 Hours</option>
+                <option value="every_6_hours">Every 6 Hours</option>
+                <option value="daily">Once Daily</option>
+                <option value="custom">Custom Interval</option>
+              </select>
+            </div>
+
+            <div v-if="localSettings.frequency === 'custom'">
+              <label class="block text-sm font-medium text-blueGray-700 mb-2"
+                >Custom Interval (minutes)</label
+              >
+              <input
+                type="number"
+                v-model.number="localSettings.customInterval"
+                min="15"
+                max="1440"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="240"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Time Range -->
+        <div>
+          <h6 class="text-blueGray-400 text-sm font-bold uppercase mb-4">
+            Active Hours
+          </h6>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-blueGray-700 mb-2"
+                >Start Time</label
+              >
+              <input
+                type="time"
+                v-model="localSettings.startTime"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-blueGray-700 mb-2"
+                >End Time</label
+              >
+              <input
+                type="time"
+                v-model="localSettings.endTime"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Days of Week -->
+        <div>
+          <h6 class="text-blueGray-400 text-sm font-bold uppercase mb-4">
+            Active Days
+          </h6>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <label
+              v-for="day in daysOfWeek"
+              :key="day.value"
+              class="flex items-center space-x-2 cursor-pointer"
+            >
+              <input
+                type="checkbox"
+                :value="day.value"
+                v-model="localSettings.daysOfWeek"
+                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <span class="text-sm text-blueGray-700">{{ day.label }}</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Custom Message -->
+        <div>
+          <h6 class="text-blueGray-400 text-sm font-bold uppercase mb-4">
+            Custom Message
+          </h6>
+          <div>
+            <label class="block text-sm font-medium text-blueGray-700 mb-2"
+              >Reality Check Message</label
+            >
+            <input
+              type="text"
+              v-model="localSettings.message"
+              maxlength="100"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Are you dreaming?"
+            />
+            <p class="text-xs text-blueGray-500 mt-1">
+              {{ localSettings.message.length }}/100 characters
+            </p>
+          </div>
+        </div>
+
+        <!-- Save Button -->
+        <div class="flex justify-end pt-4">
+          <button
+            type="submit"
+            :disabled="loading"
+            class="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2"
+          >
+            <svg
+              v-if="loading"
+              class="animate-spin h-4 w-4"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              ></circle>
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
+            </svg>
+            <span>{{ loading ? 'Saving...' : 'Save Settings' }}</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Error Message -->
+      <div
+        v-if="error"
+        class="mt-4 bg-red-50 border border-red-200 rounded-lg p-4"
+      >
+        <p class="text-red-800 text-sm">{{ error }}</p>
+      </div>
+    </form>
+  </div>
+</div>

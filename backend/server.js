@@ -95,6 +95,7 @@ app.use("/api/", limiter);
 // Import routes
 const dreamRoutes = require("./routes/dreams");
 const authRoutes = require("./routes/auth");
+const userRoutes = require("./routes/users");
 
 // In-memory storage for FCM tokens (replace with database in production)
 const fcmTokens = new Map();
@@ -113,6 +114,9 @@ app.use("/api/auth", authRoutes);
 
 // Dream Journal Routes
 app.use("/api/dreams", dreamRoutes);
+
+// User Routes
+app.use("/api/users", userRoutes);
 
 // Serve admin panel
 app.get("/admin", (req, res) => {

@@ -4,10 +4,8 @@ const userSchema = new mongoose.Schema(
   {
     firebaseUid: {
       type: String,
-      required: false,
+      required: true,
       unique: true,
-      sparse: true,
-      index: true,
     },
     email: {
       type: String,
@@ -56,6 +54,67 @@ const userSchema = new mongoose.Schema(
         weeklyStats: {
           type: Boolean,
           default: true,
+        },
+        realityCheckScheduler: {
+          enabled: {
+            type: Boolean,
+            default: false,
+          },
+          frequency: {
+            type: String,
+            enum: [
+              "hourly",
+              "every_1_5_hours",
+              "every_2_hours",
+              "every_4_hours",
+              "every_6_hours",
+              "daily",
+              "custom",
+            ],
+            default: "every_4_hours",
+          },
+          customInterval: {
+            type: Number, // minutes
+            default: 240, // 4 hours
+          },
+          startTime: {
+            type: String, // HH:MM format
+            default: "09:00",
+          },
+          endTime: {
+            type: String, // HH:MM format
+            default: "22:00",
+          },
+          message: {
+            type: String,
+            default: "Are you dreaming?",
+            maxlength: [100, "Message cannot exceed 100 characters"],
+          },
+          daysOfWeek: {
+            type: [String],
+            enum: [
+              "monday",
+              "tuesday",
+              "wednesday",
+              "thursday",
+              "friday",
+              "saturday",
+              "sunday",
+            ],
+            default: [
+              "monday",
+              "tuesday",
+              "wednesday",
+              "thursday",
+              "friday",
+              "saturday",
+              "sunday",
+            ],
+          },
+          timezone: {
+            type: String,
+            default: "UTC",
+          },
         },
       },
       theme: {
@@ -143,6 +202,14 @@ const userSchema = new mongoose.Schema(
         },
       },
     ],
+    // FCM token for push notifications
+    fcmToken: {
+      type: String,
+      sparse: true, // Allows multiple null values
+    },
+    fcmTokenUpdatedAt: {
+      type: Date,
+    },
   },
   {
     timestamps: true,

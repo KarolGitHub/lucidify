@@ -40,8 +40,6 @@ export default defineComponent({
     };
   },
   async mounted() {
-    console.debug("💪 ~ Sidebar mounted ~ messaging:", messaging);
-
     // Set up message listener for foreground messages
     this.setupMessageListener();
 
@@ -58,8 +56,6 @@ export default defineComponent({
 
     setupMessageListener() {
       onMessage(messaging, (payload) => {
-        console.debug("💪 ~ Sidebar ~ onMessage ~ payload:", payload);
-
         // Add notification to the list
         this.notifications.unshift({
           id: Date.now(),
@@ -92,7 +88,6 @@ export default defineComponent({
 
         if (currentToken) {
           this.fcmToken = currentToken;
-          console.debug("💪 ~ Sidebar ~ FCM Token:", currentToken);
 
           // Send this token to your backend to store it
           await this.sendTokenToServer(currentToken);
@@ -175,7 +170,6 @@ export default defineComponent({
 
         if (response.ok) {
           const result = await response.json();
-          console.log("FCM token sent to server successfully:", result);
         } else {
           console.error("Failed to send FCM token to server:", response.status);
         }
@@ -203,9 +197,6 @@ export default defineComponent({
       // Log current FCM token
       if (this.fcmToken) {
         console.log("Current FCM Token:", this.fcmToken);
-        console.log(
-          "Copy this token to test with Firebase Console or your backend",
-        );
       } else {
         console.log("No FCM token available");
       }
