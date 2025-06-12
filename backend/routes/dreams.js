@@ -53,6 +53,8 @@ const dreamValidation = [
   body("isNightmare").isBoolean().optional(),
   body("tags").isArray().optional(),
   body("emotions").isArray().optional(),
+  body("themes").isArray().optional(),
+  body("symbols").isArray().optional(),
   body("rating")
     .isInt({ min: 1, max: 5 })
     .optional()
@@ -76,6 +78,8 @@ router.get("/", authenticateUser, async (req, res) => {
       endDate,
       tags,
       emotions,
+      themes,
+      symbols,
     } = req.query;
 
     const query = { userId: req.user.firebaseUid };
@@ -111,12 +115,26 @@ router.get("/", authenticateUser, async (req, res) => {
       query.emotions = { $in: emotionArray };
     }
 
+    // Themes filter
+    if (themes) {
+      const themeArray = themes.split(",").map((theme) => theme.trim());
+      query.themes = { $in: themeArray };
+    }
+
+    // Symbols filter
+    if (symbols) {
+      const symbolArray = symbols.split(",").map((symbol) => symbol.trim());
+      query.symbols = { $in: symbolArray };
+    }
+
     // Text search
     if (search) {
       query.$or = [
         { title: { $regex: search, $options: "i" } },
         { description: { $regex: search, $options: "i" } },
         { tags: { $in: [new RegExp(search, "i")] } },
+        { themes: { $in: [new RegExp(search, "i")] } },
+        { symbols: { $in: [new RegExp(search, "i")] } },
       ];
     }
 
@@ -349,6 +367,34 @@ router.get("/stats/user", authenticateUser, async (req, res) => {
       { $limit: 10 },
     ]);
 
+    // Get most common themes
+    const themeStats = await Dream.aggregate([
+      { $match: { userId: req.user.firebaseUid } },
+      { $unwind: "$themes" },
+      {
+        $group: {
+          _id: "$themes",
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { count: -1 } },
+      { $limit: 10 },
+    ]);
+
+    // Get most common symbols
+    const symbolStats = await Dream.aggregate([
+      { $match: { userId: req.user.firebaseUid } },
+      { $unwind: "$symbols" },
+      {
+        $group: {
+          _id: "$symbols",
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { count: -1 } },
+      { $limit: 10 },
+    ]);
+
     res.json({
       success: true,
       data: {
@@ -356,6 +402,8 @@ router.get("/stats/user", authenticateUser, async (req, res) => {
         recentDreams,
         tagStats,
         emotionStats,
+        themeStats,
+        symbolStats,
         lucidPercentage:
           stats.totalDreams > 0
             ? Math.round((stats.lucidDreams / stats.totalDreams) * 100)
@@ -375,6 +423,8 @@ router.get("/search/advanced", authenticateUser, async (req, res) => {
       q,
       tags,
       emotions,
+      themes,
+      symbols,
       dateRange,
       lucidOnly,
       vividOnly,
@@ -390,6 +440,8 @@ router.get("/search/advanced", authenticateUser, async (req, res) => {
         { title: { $regex: q, $options: "i" } },
         { description: { $regex: q, $options: "i" } },
         { tags: { $in: [new RegExp(q, "i")] } },
+        { themes: { $in: [new RegExp(q, "i")] } },
+        { symbols: { $in: [new RegExp(q, "i")] } },
       ];
     }
 
@@ -408,6 +460,17 @@ router.get("/search/advanced", authenticateUser, async (req, res) => {
     if (emotions) {
       const emotionArray = emotions.split(",").map((emotion) => emotion.trim());
       query.emotions = { $in: emotionArray };
+    }
+
+    // Themes and symbols
+    if (themes) {
+      const themeArray = themes.split(",").map((theme) => theme.trim());
+      query.themes = { $in: themeArray };
+    }
+
+    if (symbols) {
+      const symbolArray = symbols.split(",").map((symbol) => symbol.trim());
+      query.symbols = { $in: symbolArray };
     }
 
     // Date range

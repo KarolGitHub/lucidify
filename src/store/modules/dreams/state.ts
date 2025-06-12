@@ -20,6 +20,8 @@ const state = reactive({
     isNightmare: false,
     tagsInput: "",
     emotions: [],
+    themes: [],
+    symbols: [],
   } as NewDream,
   editingDream: null as EditingDream | null,
   filters: {

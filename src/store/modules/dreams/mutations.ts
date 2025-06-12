@@ -46,6 +46,8 @@ const mutations = {
       isNightmare: false,
       tagsInput: "",
       emotions: [],
+      themes: [],
+      symbols: [],
     };
   },
 

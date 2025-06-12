@@ -9,6 +9,8 @@ export interface Dream {
   isNightmare: boolean;
   tags: string[];
   emotions: string[];
+  themes: string[];
+  symbols: string[];
   userId?: string;
   createdAt?: Date;
   updatedAt?: Date;
@@ -25,6 +27,8 @@ export interface NewDream {
   isNightmare: boolean;
   tagsInput: string;
   emotions: string[];
+  themes: string[];
+  symbols: string[];
 }
 
 // EditingDream extends Dream for editing state

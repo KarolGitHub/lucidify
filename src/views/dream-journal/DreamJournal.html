@@ -294,6 +294,60 @@
             </div>
           </div>
 
+          <!-- Themes -->
+          <div>
+            <label
+              class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              Themes
+            </label>
+            <div class="grid grid-cols-3 gap-2 max-h-40 overflow-y-auto">
+              <label
+                v-for="theme in themes"
+                :key="theme"
+                class="flex items-center"
+              >
+                <input
+                  :value="theme"
+                  :checked="newDream.themes.includes(theme)"
+                  @change="handleNewDreamChange('themes', $event.target.checked ? [...newDream.themes, theme] : newDream.themes.filter(t => t !== theme))"
+                  type="checkbox"
+                  class="mr-2"
+                />
+                <span class="text-sm text-gray-700 dark:text-gray-300"
+                  >{{ theme }}</span
+                >
+              </label>
+            </div>
+          </div>
+
+          <!-- Symbols -->
+          <div>
+            <label
+              class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              Symbols
+            </label>
+            <div class="grid grid-cols-3 gap-2 max-h-40 overflow-y-auto">
+              <label
+                v-for="symbol in symbols"
+                :key="symbol"
+                class="flex items-center"
+              >
+                <input
+                  :value="symbol"
+                  :checked="newDream.symbols.includes(symbol)"
+                  @change="handleNewDreamChange('symbols', $event.target.checked ? [...newDream.symbols, symbol] : newDream.symbols.filter(s => s !== symbol))"
+                  type="checkbox"
+                  class="mr-2"
+                />
+                <span class="text-sm text-gray-700 dark:text-gray-300"
+                  >{{ symbol }}</span
+                >
+              </label>
+            </div>
+          </div>
+
           <!-- Actions -->
           <div class="flex justify-end space-x-4 pt-4">
             <button
@@ -483,6 +537,60 @@
                 />
                 <span class="text-sm text-gray-700 dark:text-gray-300"
                   >{{ emotion }}</span
+                >
+              </label>
+            </div>
+          </div>
+
+          <!-- Themes -->
+          <div>
+            <label
+              class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              Themes
+            </label>
+            <div class="grid grid-cols-3 gap-2 max-h-40 overflow-y-auto">
+              <label
+                v-for="theme in themes"
+                :key="theme"
+                class="flex items-center"
+              >
+                <input
+                  :value="theme"
+                  :checked="editingDream.themes.includes(theme)"
+                  @change="handleEditDreamChange('themes', $event.target.checked ? [...editingDream.themes, theme] : editingDream.themes.filter(t => t !== theme))"
+                  type="checkbox"
+                  class="mr-2"
+                />
+                <span class="text-sm text-gray-700 dark:text-gray-300"
+                  >{{ theme }}</span
+                >
+              </label>
+            </div>
+          </div>
+
+          <!-- Symbols -->
+          <div>
+            <label
+              class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              Symbols
+            </label>
+            <div class="grid grid-cols-3 gap-2 max-h-40 overflow-y-auto">
+              <label
+                v-for="symbol in symbols"
+                :key="symbol"
+                class="flex items-center"
+              >
+                <input
+                  :value="symbol"
+                  :checked="editingDream.symbols.includes(symbol)"
+                  @change="handleEditDreamChange('symbols', $event.target.checked ? [...editingDream.symbols, symbol] : editingDream.symbols.filter(s => s !== symbol))"
+                  type="checkbox"
+                  class="mr-2"
+                />
+                <span class="text-sm text-gray-700 dark:text-gray-300"
+                  >{{ symbol }}</span
                 >
               </label>
             </div>
