@@ -5,6 +5,37 @@ const User = require("../models/User");
 const { authenticateUser } = require("../middleware/auth");
 const router = express.Router();
 
+// Helper function to parse dd.mm.rrrr format
+const parseDate = (dateString) => {
+  if (!dateString) return null;
+
+  // If it's already a Date object, return it
+  if (dateString instanceof Date) return dateString;
+
+  // If it's already a valid ISO string, convert it
+  if (typeof dateString === "string" && dateString.includes("-")) {
+    const date = new Date(dateString);
+    if (!isNaN(date.getTime())) return date;
+  }
+
+  // Parse dd.mm.rrrr format
+  if (typeof dateString === "string" && dateString.includes(".")) {
+    const parts = dateString.split(".");
+    if (parts.length === 3) {
+      const [day, month, year] = parts;
+      // Note: month is 0-indexed in JavaScript Date constructor
+      const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+      if (!isNaN(date.getTime())) return date;
+    }
+  }
+
+  // Try standard Date constructor as fallback
+  const date = new Date(dateString);
+  if (!isNaN(date.getTime())) return date;
+
+  return null; // Invalid date
+};
+
 // Validation rules
 const dreamValidation = [
   body("title")
@@ -154,10 +185,25 @@ router.post("/", authenticateUser, dreamValidation, async (req, res) => {
       return res.status(400).json({ errors: errors.array() });
     }
 
+    // Prepare dream data with proper date handling
     const dreamData = {
       ...req.body,
       userId: req.user.firebaseUid,
     };
+
+    // Convert date string to Date object if provided
+    if (dreamData.date) {
+      dreamData.date = parseDate(dreamData.date);
+
+      // Validate the date
+      if (!dreamData.date) {
+        return res.status(400).json({
+          error: "Invalid date format",
+          message:
+            "Please provide a valid date in dd.mm.rrrr format (e.g., 15.01.2024)",
+        });
+      }
+    }
 
     const dream = new Dream(dreamData);
     await dream.save();
@@ -197,7 +243,24 @@ router.put("/:id", authenticateUser, dreamValidation, async (req, res) => {
     const wasLucid = dream.isLucid;
     const isNowLucid = req.body.isLucid;
 
-    Object.assign(dream, req.body);
+    // Prepare update data with proper date handling
+    const updateData = { ...req.body };
+
+    // Convert date string to Date object if provided
+    if (updateData.date) {
+      updateData.date = parseDate(updateData.date);
+
+      // Validate the date
+      if (!updateData.date) {
+        return res.status(400).json({
+          error: "Invalid date format",
+          message:
+            "Please provide a valid date in dd.mm.rrrr format (e.g., 15.01.2024)",
+        });
+      }
+    }
+
+    Object.assign(dream, updateData);
     await dream.save();
 
     // Update user progress if lucid status changed

@@ -190,14 +190,57 @@ dreamSchema.virtual("ageInDays").get(function () {
   return Math.floor((Date.now() - this.date) / (1000 * 60 * 60 * 24));
 });
 
-// Pre-save middleware to clean up tags
+// Pre-save middleware to clean up tags and handle date conversion
 dreamSchema.pre("save", function (next) {
+  // Clean up tags
   if (this.tags) {
     this.tags = this.tags
       .map((tag) => tag.trim().toLowerCase())
       .filter((tag) => tag.length > 0)
       .filter((tag, index, arr) => arr.indexOf(tag) === index); // Remove duplicates
   }
+
+  // Ensure date is a proper Date object
+  if (this.date) {
+    let parsedDate = null;
+
+    // If it's already a Date object, use it
+    if (this.date instanceof Date) {
+      parsedDate = this.date;
+    }
+    // If it's a string, try to parse it
+    else if (typeof this.date === "string") {
+      // Try dd.mm.rrrr format first
+      if (this.date.includes(".")) {
+        const parts = this.date.split(".");
+        if (parts.length === 3) {
+          const [day, month, year] = parts;
+          parsedDate = new Date(
+            parseInt(year),
+            parseInt(month) - 1,
+            parseInt(day),
+          );
+        }
+      }
+
+      // If dd.mm.rrrr parsing failed, try standard Date constructor
+      if (!parsedDate || isNaN(parsedDate.getTime())) {
+        parsedDate = new Date(this.date);
+      }
+    }
+
+    // Validate the parsed date
+    if (!parsedDate || isNaN(parsedDate.getTime())) {
+      return next(
+        new Error(
+          "Invalid date format. Please use dd.mm.rrrr format (e.g., 15.01.2024)",
+        ),
+      );
+    }
+
+    this.date = parsedDate;
+  }
+
   next();
 });
 

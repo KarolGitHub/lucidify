@@ -42,6 +42,15 @@ export default defineComponent({
     );
     const isLoading = computed(() => dreams.getters.getDreams().length === 0);
 
+    // Helper function to convert ISO date to YYYY-MM-DD format for HTML date input
+    const formatDateForInput = (dateString: string): string => {
+      const date = new Date(dateString);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0"); // +1 because months are 0-indexed
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    };
+
     // Methods
     const formatDate = (dateString: string): string => {
       const date = new Date(dateString);
@@ -57,6 +66,7 @@ export default defineComponent({
       // In the future, this could navigate to a dedicated dream detail page
       editingDream.value = {
         ...dream,
+        date: formatDateForInput(dream.date),
         tagsInput: dream.tags.join(", "),
       };
       showEditModal.value = true;
@@ -77,10 +87,15 @@ export default defineComponent({
             .filter((tag: string) => tag.length > 0)
         : editingDream.value.tags;
 
+      // Convert date from YYYY-MM-DD to ISO format for backend
+      const dateForBackend = editingDream.value.date
+        ? new Date(editingDream.value.date).toISOString()
+        : editingDream.value.date;
+
       const dreamData: Partial<Dream> = {
         title: editingDream.value.title,
         description: editingDream.value.description,
-        date: editingDream.value.date,
+        date: dateForBackend,
         isLucid: editingDream.value.isLucid,
         isVivid: editingDream.value.isVivid,
         isRecurring: editingDream.value.isRecurring,
@@ -149,6 +164,7 @@ export default defineComponent({
     const openEditModal = (dream: Dream) => {
       editingDream.value = {
         ...dream,
+        date: formatDateForInput(dream.date),
         tagsInput: dream.tags.join(", "),
       };
       showEditModal.value = true;
@@ -192,6 +208,7 @@ export default defineComponent({
 
       // Methods
       formatDate,
+      formatDateForInput,
       viewDream,
       handleSaveDream,
       handleUpdateDream,
