@@ -1,18 +1,181 @@
 <div
-  class="relative flex flex-col min-w-0 break-words bg-white w-full mb-6 shadow-xl rounded-lg mt-16"
+  class="relative flex flex-col w-full min-w-0 mb-6 break-words bg-white rounded-lg shadow-xl"
 >
   <div class="px-6">
     <div class="flex flex-wrap justify-center">
-      <div class="w-full px-4 flex justify-center">
+      <div class="flex justify-center w-full px-4">
         <div class="relative">
-          <img
-            alt="..."
-            src="@/assets/img/placeholder.png"
-            class="shadow-xl rounded-full h-auto align-middle border-none absolute -m-16 -ml-20 lg:-ml-16 max-w-150-px"
-          />
+          <div
+            class="flex items-center justify-center w-32 h-32 text-4xl font-bold text-white rounded-full shadow-xl bg-gradient-to-br from-blue-400 to-purple-600"
+          >
+            {{ userProfile?.displayName?.charAt(0)?.toUpperCase() ||
+            userProfile?.email?.charAt(0)?.toUpperCase() || 'U' }}
+          </div>
         </div>
       </div>
-      <div class="w-full px-4 text-center mt-20"></div>
+      <div class="w-full px-4 mt-8 text-center">
+        <div v-if="loading" class="py-4 text-center">
+          <div
+            class="inline-block w-6 h-6 border-b-2 rounded-full animate-spin border-blueGray-700"
+          ></div>
+        </div>
+
+        <div v-else-if="userProfile">
+          <h3
+            class="mb-2 text-xl font-semibold leading-normal text-blueGray-700"
+          >
+            {{ userProfile.displayName || 'Dreamer' }}
+          </h3>
+          <div
+            class="mt-0 mb-2 text-sm font-bold leading-normal uppercase text-blueGray-400"
+          >
+            <i class="mr-2 text-lg fas fa-map-marker-alt text-blueGray-400"></i>
+            {{ userProfile.email }}
+          </div>
+
+          <!-- Experience Level Badge -->
+          <div class="mb-4">
+            <span
+              :class="`${experienceLevelColor} text-white text-xs font-medium px-2.5 py-0.5 rounded-full`"
+            >
+              {{ experienceLevelText }}
+            </span>
+          </div>
+
+          <!-- Bio -->
+          <div
+            v-if="userProfile.profile?.bio"
+            class="mb-6 text-sm text-blueGray-600"
+          >
+            {{ userProfile.profile.bio }}
+          </div>
+        </div>
+
+        <div v-else class="py-4 text-center">
+          <p class="text-blueGray-600">Failed to load profile data</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Statistics Section -->
+    <div
+      v-if="userProfile && !loading"
+      class="py-10 mt-10 text-center border-t border-blueGray-200"
+    >
+      <div class="flex flex-wrap justify-center">
+        <div class="w-full px-4 lg:w-9/12">
+          <p class="mb-4 text-lg leading-relaxed text-blueGray-700">
+            <span class="font-bold">Lucid Dream Progress</span>
+          </p>
+
+          <!-- Progress Stats -->
+          <div class="grid grid-cols-1 gap-4 mb-6 md:grid-cols-3">
+            <div class="p-4 rounded-lg bg-blue-50">
+              <div class="text-2xl font-bold text-blue-600">
+                {{ userProfile.lucidProgress.totalDreams }}
+              </div>
+              <div class="text-sm text-blue-600">Total Dreams</div>
+            </div>
+            <div class="p-4 rounded-lg bg-green-50">
+              <div class="text-2xl font-bold text-green-600">
+                {{ userProfile.lucidProgress.lucidDreams }}
+              </div>
+              <div class="text-sm text-green-600">Lucid Dreams</div>
+            </div>
+            <div class="p-4 rounded-lg bg-purple-50">
+              <div class="text-2xl font-bold text-purple-600">
+                {{ lucidDreamPercentage }}%
+              </div>
+              <div class="text-sm text-purple-600">Success Rate</div>
+            </div>
+          </div>
+
+          <!-- Streak Information -->
+          <div class="grid grid-cols-1 gap-4 mb-6 md:grid-cols-2">
+            <div class="p-4 rounded-lg bg-yellow-50">
+              <div class="text-xl font-bold text-yellow-600">
+                {{ userProfile.lucidProgress.currentStreak }}
+              </div>
+              <div class="text-sm text-yellow-600">Current Streak</div>
+            </div>
+            <div class="p-4 rounded-lg bg-orange-50">
+              <div class="text-xl font-bold text-orange-600">
+                {{ userProfile.lucidProgress.longestStreak }}
+              </div>
+              <div class="text-sm text-orange-600">Longest Streak</div>
+            </div>
+          </div>
+
+          <!-- Goals and Interests -->
+          <div
+            v-if="userProfile.profile?.goals?.length || userProfile.profile?.interests?.length"
+            class="mb-6"
+          >
+            <div v-if="userProfile.profile?.goals?.length" class="mb-4">
+              <h4 class="mb-2 text-sm font-semibold text-blueGray-600">
+                Goals
+              </h4>
+              <div class="flex flex-wrap justify-center gap-2">
+                <span
+                  v-for="goal in userProfile.profile.goals"
+                  :key="goal"
+                  class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full"
+                >
+                  {{ goal }}
+                </span>
+              </div>
+            </div>
+
+            <div v-if="userProfile.profile?.interests?.length">
+              <h4 class="mb-2 text-sm font-semibold text-blueGray-600">
+                Interests
+              </h4>
+              <div class="flex flex-wrap justify-center gap-2">
+                <span
+                  v-for="interest in userProfile.profile.interests"
+                  :key="interest"
+                  class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full"
+                >
+                  {{ interest }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Account Information -->
+          <div class="mb-6 text-sm text-blueGray-500">
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div>
+                <span class="font-semibold">Member since:</span> {{ memberSince
+                }}
+              </div>
+              <div>
+                <span class="font-semibold">Last login:</span> {{ lastLogin }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex flex-wrap justify-center gap-4">
+            <button
+              @click="exportUserData"
+              class="px-4 py-2 text-xs font-bold text-white uppercase transition-all duration-150 ease-linear bg-blue-500 rounded shadow outline-none active:bg-blue-600 hover:shadow-md focus:outline-none"
+              type="button"
+            >
+              Export Data
+            </button>
+            <button
+              @click="deleteAccount"
+              class="px-4 py-2 text-xs font-bold text-white uppercase transition-all duration-150 ease-linear bg-red-600 border-2 border-red-600 rounded shadow outline-none active:bg-red-700 hover:shadow-md focus:outline-none hover:border-red-700"
+              type="button"
+              title="Permanently delete your account and all data"
+            >
+              <i class="mr-1 fas fa-trash-alt"></i>
+              Delete Account
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>

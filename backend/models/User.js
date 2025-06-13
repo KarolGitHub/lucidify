@@ -264,8 +264,83 @@ userSchema.statics.findOrCreate = async function (firebaseUser) {
       firebaseUid: firebaseUser.uid,
       email: firebaseUser.email,
       displayName: firebaseUser.displayName || firebaseUser.email.split("@")[0],
+      profile: {
+        bio: "",
+        experienceLevel: "beginner",
+        goals: [],
+        interests: [],
+      },
+      preferences: {
+        defaultDreamVisibility: "private",
+        notificationSettings: {
+          dreamReminders: true,
+          lucidDreamTips: true,
+          weeklyStats: true,
+          realityCheckScheduler: {
+            enabled: false,
+            frequency: "every_4_hours",
+            customInterval: 240,
+            startTime: "09:00",
+            endTime: "22:00",
+            message: "Are you dreaming?",
+            daysOfWeek: [
+              "monday",
+              "tuesday",
+              "wednesday",
+              "thursday",
+              "friday",
+              "saturday",
+              "sunday",
+            ],
+            timezone: "UTC",
+          },
+        },
+        theme: "auto",
+        timezone: "UTC",
+      },
+      lucidProgress: {
+        totalDreams: 0,
+        lucidDreams: 0,
+        currentStreak: 0,
+        longestStreak: 0,
+        techniques: [],
+      },
     });
     await user.save();
+  } else {
+    // Ensure existing users have proper profile structure
+    let needsUpdate = false;
+
+    if (!user.profile) {
+      user.profile = {
+        bio: "",
+        experienceLevel: "beginner",
+        goals: [],
+        interests: [],
+      };
+      needsUpdate = true;
+    } else {
+      if (user.profile.bio === undefined) {
+        user.profile.bio = "";
+        needsUpdate = true;
+      }
+      if (user.profile.experienceLevel === undefined) {
+        user.profile.experienceLevel = "beginner";
+        needsUpdate = true;
+      }
+      if (!Array.isArray(user.profile.goals)) {
+        user.profile.goals = [];
+        needsUpdate = true;
+      }
+      if (!Array.isArray(user.profile.interests)) {
+        user.profile.interests = [];
+        needsUpdate = true;
+      }
+    }
+
+    if (needsUpdate) {
+      await user.save();
+    }
   }
 
   return user;

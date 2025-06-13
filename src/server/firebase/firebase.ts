@@ -30,12 +30,7 @@ function requestPermission() {
       // Get token after permission is granted
       getToken(messaging, { vapidKey: firebaseConfig.vapidKey })
         .then((currentToken) => {
-          if (currentToken) {
-            console.debug(
-              "💪 ~ file: firebase.ts:15 ~ .then ~ currentToken:",
-              currentToken,
-            );
-          } else {
+          if (!currentToken) {
             console.debug(
               "No registration token available. Request permission to generate one.",
             );
