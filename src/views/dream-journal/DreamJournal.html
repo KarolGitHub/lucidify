@@ -61,6 +61,9 @@
             v-for="dream in filteredDreams"
             :key="dream._id"
             class="p-4 transition duration-300 rounded-lg bg-gray-50 dark:bg-gray-700 hover:shadow-md"
+            :class="{
+              'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-900': highlightedDreamId === dream._id
+            }"
           >
             <div class="flex items-start justify-between">
               <div class="flex-1 cursor-pointer" @click="viewDream(dream)">
@@ -491,7 +494,9 @@
           </div>
 
           <!-- AI Dream Analysis -->
-          <div v-if="editingDream.description && editingDream.description.trim().length >= 10">
+          <div
+            v-if="editingDream.description && editingDream.description.trim().length >= 10"
+          >
             <AIDreamAnalysis
               :dream-data="editingDream"
               :available-emotions="emotions"

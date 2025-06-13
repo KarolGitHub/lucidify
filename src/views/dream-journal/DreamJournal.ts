@@ -1,4 +1,5 @@
-import { defineComponent, computed, onMounted, ref } from "vue";
+import { defineComponent, computed, onMounted, ref, watch } from "vue";
+import { useRoute } from "vue-router";
 import { auth, dreams } from "@/store";
 import { Dream } from "@/interface/Dream";
 import VoiceToText from "@/components/VoiceToText";
@@ -16,6 +17,8 @@ export default defineComponent({
     AIDreamAnalysis,
   },
   setup() {
+    const route = useRoute();
+
     // Reactive data
     const emotions = ref([
       "Joy",
@@ -154,6 +157,7 @@ export default defineComponent({
     const showEditModal = ref(false);
     const showDeleteConfirm = ref(false);
     const dreamToDelete = ref<string | null>(null);
+    const highlightedDreamId = ref<string | null>(null);
 
     // Computed properties
     const filteredDreams = computed(() => dreams.getters.getFilteredDreams());
@@ -193,6 +197,30 @@ export default defineComponent({
         tagsInput: dream.tags.join(", "),
       };
       showEditModal.value = true;
+    };
+
+    const handleQueryParameters = () => {
+      const viewDreamId = route.query.view as string;
+      const highlight = route.query.highlight as string;
+
+      if (viewDreamId && filteredDreams.value.length > 0) {
+        const dreamToView = filteredDreams.value.find(
+          (dream) => dream._id === viewDreamId,
+        );
+        if (dreamToView) {
+          // Open the dream in edit modal
+          viewDream(dreamToView);
+
+          // Set highlight for visual indication
+          if (highlight) {
+            highlightedDreamId.value = viewDreamId;
+            // Clear highlight after a few seconds
+            setTimeout(() => {
+              highlightedDreamId.value = null;
+            }, 3000);
+          }
+        }
+      }
     };
 
     const handleSaveDream = async () => {
@@ -310,6 +338,30 @@ export default defineComponent({
       // or tracking analytics for AI feature usage
     };
 
+    // Watch for route changes to handle query parameters
+    watch(() => route.query, handleQueryParameters, { immediate: true });
+
+    // Watch for dreams loading to handle query parameters after data is available
+    watch(
+      () => filteredDreams.value,
+      () => {
+        if (filteredDreams.value.length > 0) {
+          handleQueryParameters();
+        }
+      },
+    );
+
+    // Watch for 'new' query param to open new dream modal
+    watch(
+      () => route.query.new,
+      (newVal) => {
+        if (newVal === "1") {
+          dreams.actions.setShowNewDreamModal(true);
+        }
+      },
+      { immediate: true },
+    );
+
     // Lifecycle
     onMounted(async () => {
       // Check if user is authenticated
@@ -330,6 +382,7 @@ export default defineComponent({
       showEditModal,
       showDeleteConfirm,
       dreamToDelete,
+      highlightedDreamId,
 
       // Computed
       filteredDreams,

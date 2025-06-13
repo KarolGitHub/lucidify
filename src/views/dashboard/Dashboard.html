@@ -1,6 +1,356 @@
-<div class="h-full flex flex-col">
-  <div class="flex flex-wrap mt-4 flex-1">
-    <div class="w-full px-4 mb-12 xl:w-8/12 xl:mb-0"></div>
-    <div class="w-full px-4 xl:w-4/12"></div>
+<div class="flex flex-col h-full">
+  <div class="flex flex-wrap flex-1 mt-4">
+    <!-- Main Content -->
+    <div class="w-full px-4 mb-12 xl:w-8/12 xl:mb-0">
+      <!-- Welcome Section -->
+      <div
+        class="relative flex flex-col w-full min-w-0 mb-6 break-words bg-white rounded-lg shadow-lg dark:bg-gray-800"
+      >
+        <div class="px-6 py-6 mb-0 border-0 rounded-t">
+          <div class="flex flex-wrap items-center">
+            <div class="relative flex-1 flex-grow w-full max-w-full px-4">
+              <h3
+                class="text-base font-semibold text-blueGray-700 dark:text-white"
+              >
+                👁️ {{ greeting }}, {{ userName }}!
+              </h3>
+            </div>
+          </div>
+        </div>
+
+        <!-- Last Dream Section -->
+        <div class="block w-full overflow-x-auto">
+          <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-3">
+                <span class="text-2xl">🌓</span>
+                <div>
+                  <p class="text-sm text-gray-600 dark:text-gray-400">
+                    Last dream:
+                  </p>
+                  <p
+                    v-if="lastDream"
+                    class="font-medium text-blueGray-700 dark:text-white"
+                  >
+                    {{ lastDream.title }}
+                  </p>
+                  <p v-else class="italic text-gray-500 dark:text-gray-400">
+                    No dreams recorded yet
+                  </p>
+                  <p
+                    v-if="lastDream"
+                    class="text-xs text-gray-500 dark:text-gray-400"
+                  >
+                    {{ formatDate(lastDream.date) }}
+                  </p>
+                </div>
+              </div>
+              <div class="flex space-x-2">
+                <button
+                  v-if="lastDream"
+                  @click="viewLastDream"
+                  class="px-3 py-2 text-xs font-bold text-white transition-colors duration-150 bg-blue-500 rounded hover:bg-blue-600"
+                >
+                  View Dream
+                </button>
+                <button
+                  @click="openNewDreamModal"
+                  class="flex items-center px-3 py-2 space-x-1 text-xs font-bold text-white transition-colors duration-150 bg-green-500 rounded hover:bg-green-600"
+                >
+                  <span>🔁</span>
+                  <span>Add New Dream</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Progress Section -->
+      <div
+        class="relative flex flex-col w-full min-w-0 mb-6 break-words bg-white rounded-lg shadow-lg dark:bg-gray-800"
+      >
+        <div class="px-6 py-6 mb-0 border-0 rounded-t">
+          <div class="flex flex-wrap items-center">
+            <div class="relative flex-1 flex-grow w-full max-w-full px-4">
+              <h3
+                class="text-base font-semibold text-blueGray-700 dark:text-white"
+              >
+                📊 Your Progress
+              </h3>
+            </div>
+          </div>
+        </div>
+
+        <div class="block w-full overflow-x-auto">
+          <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+              <!-- Lucid Dreams Card -->
+              <div
+                class="p-4 text-white rounded-lg bg-gradient-to-r from-purple-500 to-purple-600"
+              >
+                <div class="flex items-center justify-between">
+                  <div>
+                    <p class="text-sm opacity-75">Lucid Dreams</p>
+                    <p class="text-2xl font-bold">{{ lucidDreamsCount }}</p>
+                    <p class="text-xs opacity-75">
+                      {{ lucidDreamsThisMonth }} this month
+                    </p>
+                  </div>
+                  <div class="text-3xl">🌙</div>
+                </div>
+              </div>
+
+              <!-- Streak Card -->
+              <div
+                class="p-4 text-white rounded-lg bg-gradient-to-r from-orange-500 to-red-500"
+              >
+                <div class="flex items-center justify-between">
+                  <div>
+                    <p class="text-sm opacity-75">Current Streak</p>
+                    <p class="text-2xl font-bold">{{ currentStreak }}</p>
+                    <p class="text-xs opacity-75">days</p>
+                  </div>
+                  <div class="text-3xl">🔥</div>
+                </div>
+              </div>
+
+              <!-- Total Dreams Card -->
+              <div
+                class="p-4 text-white rounded-lg bg-gradient-to-r from-blue-500 to-blue-600"
+              >
+                <div class="flex items-center justify-between">
+                  <div>
+                    <p class="text-sm opacity-75">Total Dreams</p>
+                    <p class="text-2xl font-bold">
+                      {{ stats?.totalDreams || 0 }}
+                    </p>
+                    <p class="text-xs opacity-75">recorded</p>
+                  </div>
+                  <div class="text-3xl">📝</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Insights Section -->
+      <div
+        class="relative flex flex-col w-full min-w-0 mb-6 break-words bg-white rounded-lg shadow-lg dark:bg-gray-800"
+      >
+        <div class="px-6 py-6 mb-0 border-0 rounded-t">
+          <div class="flex flex-wrap items-center">
+            <div class="relative flex-1 flex-grow w-full max-w-full px-4">
+              <h3
+                class="text-base font-semibold text-blueGray-700 dark:text-white"
+              >
+                🧠 Dream Insights
+              </h3>
+            </div>
+          </div>
+        </div>
+
+        <div class="block w-full overflow-x-auto">
+          <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <!-- Common Emotions -->
+              <div class="p-4 rounded-lg bg-gray-50 dark:bg-gray-700">
+                <h4
+                  class="flex items-center mb-3 font-medium text-blueGray-700 dark:text-white"
+                >
+                  <span class="mr-2">💭</span>
+                  Common Emotions
+                </h4>
+                <div
+                  v-if="commonEmotions.length > 0"
+                  class="flex flex-wrap gap-2"
+                >
+                  <span
+                    v-for="emotion in commonEmotions"
+                    :key="emotion"
+                    class="px-2.5 py-0.5 text-xs font-medium text-blue-800 bg-blue-100 rounded dark:bg-blue-900 dark:text-blue-200"
+                  >
+                    {{ emotion }}
+                  </span>
+                </div>
+                <p
+                  v-else
+                  class="text-sm italic text-gray-500 dark:text-gray-400"
+                >
+                  No emotions recorded yet
+                </p>
+              </div>
+
+              <!-- Common Themes -->
+              <div class="p-4 rounded-lg bg-gray-50 dark:bg-gray-700">
+                <h4
+                  class="flex items-center mb-3 font-medium text-blueGray-700 dark:text-white"
+                >
+                  <span class="mr-2">🎭</span>
+                  Common Themes
+                </h4>
+                <div
+                  v-if="commonThemes.length > 0"
+                  class="flex flex-wrap gap-2"
+                >
+                  <span
+                    v-for="theme in commonThemes"
+                    :key="theme"
+                    class="px-2.5 py-0.5 text-xs font-medium text-green-800 bg-green-100 rounded dark:bg-green-900 dark:text-green-200"
+                  >
+                    {{ theme }}
+                  </span>
+                </div>
+                <p
+                  v-else
+                  class="text-sm italic text-gray-500 dark:text-gray-400"
+                >
+                  No themes recorded yet
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="w-full px-4 xl:w-4/12">
+      <!-- Quick Stats -->
+      <div
+        class="relative flex flex-col w-full min-w-0 mb-6 break-words bg-white rounded-lg shadow-lg dark:bg-gray-800"
+      >
+        <div class="px-6 py-6 mb-0 border-0 rounded-t">
+          <div class="flex flex-wrap items-center">
+            <div class="relative flex-1 flex-grow w-full max-w-full px-4">
+              <h3
+                class="text-base font-semibold text-blueGray-700 dark:text-white"
+              >
+                ⚡ Quick Stats
+              </h3>
+            </div>
+          </div>
+        </div>
+
+        <div class="block w-full overflow-x-auto">
+          <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+            <div class="space-y-4">
+              <!-- Vivid Dreams -->
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                  <span class="text-lg">✨</span>
+                  <span class="text-sm text-gray-600 dark:text-gray-400"
+                    >Vivid Dreams</span
+                  >
+                </div>
+                <span class="font-semibold text-blueGray-700 dark:text-white">
+                  {{ stats?.vividDreams || 0 }}
+                </span>
+              </div>
+
+              <!-- Recurring Dreams -->
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                  <span class="text-lg">🔄</span>
+                  <span class="text-sm text-gray-600 dark:text-gray-400"
+                    >Recurring</span
+                  >
+                </div>
+                <span class="font-semibold text-blueGray-700 dark:text-white">
+                  {{ stats?.recurringDreams || 0 }}
+                </span>
+              </div>
+
+              <!-- Nightmares -->
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                  <span class="text-lg">😰</span>
+                  <span class="text-sm text-gray-600 dark:text-gray-400"
+                    >Nightmares</span
+                  >
+                </div>
+                <span class="font-semibold text-blueGray-700 dark:text-white">
+                  {{ stats?.nightmares || 0 }}
+                </span>
+              </div>
+
+              <!-- Average Rating -->
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                  <span class="text-lg">⭐</span>
+                  <span class="text-sm text-gray-600 dark:text-gray-400"
+                    >Avg Rating</span
+                  >
+                </div>
+                <span class="font-semibold text-blueGray-700 dark:text-white">
+                  {{ stats?.averageRating ? stats.averageRating.toFixed(1) :
+                  'N/A' }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Activity -->
+      <div
+        class="relative flex flex-col w-full min-w-0 mb-6 break-words bg-white rounded-lg shadow-lg dark:bg-gray-800"
+      >
+        <div class="px-6 py-6 mb-0 border-0 rounded-t">
+          <div class="flex flex-wrap items-center">
+            <div class="relative flex-1 flex-grow w-full max-w-full px-4">
+              <h3
+                class="text-base font-semibold text-blueGray-700 dark:text-white"
+              >
+                📅 Recent Activity
+              </h3>
+            </div>
+          </div>
+        </div>
+
+        <div class="block w-full overflow-x-auto">
+          <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+            <div v-if="allDreams?.length > 0" class="space-y-3">
+              <div
+                v-for="dream in allDreams.slice(0, 5)"
+                :key="dream._id"
+                class="flex items-center p-2 space-x-3 transition-colors duration-150 rounded cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
+                @click="viewDream(dream)"
+              >
+                <div class="flex-shrink-0">
+                  <span v-if="dream.isLucid" class="text-yellow-500">🌙</span>
+                  <span v-else-if="dream.isVivid" class="text-purple-500"
+                    >✨</span
+                  >
+                  <span v-else class="text-gray-400">💭</span>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p
+                    class="text-sm font-medium truncate text-blueGray-700 dark:text-white"
+                  >
+                    {{ dream.title }}
+                  </p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">
+                    {{ formatDate(dream.date) }}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div v-else class="py-4 text-center">
+              <p class="text-sm text-gray-500 dark:text-gray-400">
+                No dreams recorded yet
+              </p>
+              <button
+                @click="recordFirstDream"
+                class="px-3 py-2 mt-2 text-xs font-bold text-white transition-colors duration-150 bg-blue-500 rounded hover:bg-blue-600"
+              >
+                Record Your First Dream
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
