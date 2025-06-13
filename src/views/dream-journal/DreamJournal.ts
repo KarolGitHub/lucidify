@@ -1,6 +1,7 @@
 import { defineComponent, computed, onMounted, ref } from "vue";
 import { auth, dreams } from "@/store";
 import { Dream } from "@/interface/Dream";
+import VoiceToText from "@/components/VoiceToText";
 
 // Extended Dream interface for editing
 interface EditingDream extends Dream {
@@ -9,6 +10,9 @@ interface EditingDream extends Dream {
 
 export default defineComponent({
   name: "DreamJournal",
+  components: {
+    VoiceToText,
+  },
   setup() {
     // Reactive data
     const emotions = ref([

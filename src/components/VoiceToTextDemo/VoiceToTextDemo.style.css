@@ -1,0 +1,7 @@
+.voice-demo-container {
+  @apply max-w-4xl mx-auto;
+}
+
+.demo-section {
+  @apply border border-gray-200 dark:border-gray-700 rounded-lg p-4;
+}

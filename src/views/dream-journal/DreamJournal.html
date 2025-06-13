@@ -186,14 +186,30 @@
             >
               Dream Description
             </label>
-            <textarea
-              :value="newDream.description"
-              @input="handleNewDreamChange('description', $event.target.value)"
-              rows="6"
-              required
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg resize-none dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white"
-              placeholder="Describe your dream in detail..."
-            ></textarea>
+            <div class="space-y-2">
+              <textarea
+                :value="newDream.description"
+                @input="handleNewDreamChange('description', $event.target.value)"
+                rows="6"
+                required
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg resize-none dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white"
+                placeholder="Describe your dream in detail..."
+              ></textarea>
+
+              <!-- Voice-to-Text Component -->
+              <div class="flex items-center justify-between">
+                <span class="text-xs text-gray-500 dark:text-gray-400">
+                  Use voice input to describe your dream
+                </span>
+                <VoiceToText
+                  :model-value="newDream.description"
+                  @update:model-value="handleNewDreamChange('description', $event)"
+                  placeholder="Start speaking to describe your dream..."
+                  :continuous="true"
+                  :interim-results="true"
+                />
+              </div>
+            </div>
           </div>
 
           <!-- Dream Type -->
@@ -434,14 +450,30 @@
             >
               Dream Description
             </label>
-            <textarea
-              :value="editingDream.description"
-              @input="handleEditDreamChange('description', $event.target.value)"
-              rows="6"
-              required
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg resize-none dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white"
-              placeholder="Describe your dream in detail..."
-            ></textarea>
+            <div class="space-y-2">
+              <textarea
+                :value="editingDream.description"
+                @input="handleEditDreamChange('description', $event.target.value)"
+                rows="6"
+                required
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg resize-none dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white"
+                placeholder="Describe your dream in detail..."
+              ></textarea>
+
+              <!-- Voice-to-Text Component -->
+              <div class="flex items-center justify-between">
+                <span class="text-xs text-gray-500 dark:text-gray-400">
+                  Use voice input to describe your dream
+                </span>
+                <VoiceToText
+                  :model-value="editingDream.description"
+                  @update:model-value="handleEditDreamChange('description', $event)"
+                  placeholder="Start speaking to describe your dream..."
+                  :continuous="true"
+                  :interim-results="true"
+                />
+              </div>
+            </div>
           </div>
 
           <!-- Dream Type -->
