@@ -17,6 +17,7 @@ export default defineComponent({
     const formData = reactive({
       displayName: "",
       email: "",
+      profilePicture: "",
       bio: "",
       experienceLevel: "beginner" as
         | "beginner"
@@ -34,6 +35,10 @@ export default defineComponent({
         weeklyStats: true,
       },
     });
+
+    // Avatar upload state
+    const avatarUploadProgress = ref(0);
+    const avatarUploadError = ref<string | null>(null);
 
     // Computed properties
     const hasChanges = computed(() => {
@@ -59,6 +64,7 @@ export default defineComponent({
 
       return (
         formData.displayName !== (userProfile.value.displayName || "") ||
+        formData.profilePicture !== (userProfile.value.profilePicture || "") ||
         formData.bio !== (userProfile.value.profile?.bio || "") ||
         formData.experienceLevel !==
           (userProfile.value.profile?.experienceLevel || "beginner") ||
@@ -94,6 +100,7 @@ export default defineComponent({
         // Populate form data
         formData.displayName = profile.displayName || "";
         formData.email = profile.email;
+        formData.profilePicture = profile.profilePicture || "";
         formData.bio = profile.profile?.bio || "";
         formData.experienceLevel =
           profile.profile?.experienceLevel || "beginner";
@@ -122,6 +129,12 @@ export default defineComponent({
         // Profile updates
         if (formData.displayName !== (userProfile.value?.displayName || "")) {
           updates.displayName = formData.displayName;
+        }
+
+        if (
+          formData.profilePicture !== (userProfile.value?.profilePicture || "")
+        ) {
+          updates.profilePicture = formData.profilePicture;
         }
 
         if (formData.bio !== (userProfile.value?.profile?.bio || "")) {
@@ -255,6 +268,7 @@ export default defineComponent({
     const resetForm = () => {
       if (userProfile.value && userSettings.value) {
         formData.displayName = userProfile.value.displayName || "";
+        formData.profilePicture = userProfile.value.profilePicture || "";
         formData.bio = userProfile.value.profile?.bio || "";
         formData.experienceLevel =
           userProfile.value.profile?.experienceLevel || "beginner";
@@ -265,6 +279,57 @@ export default defineComponent({
         formData.defaultDreamVisibility =
           userSettings.value.defaultDreamVisibility;
         formData.notifications = { ...userSettings.value.notifications };
+      }
+    };
+
+    const handleImageError = () => {
+      // Clear the invalid image URL
+      formData.profilePicture = "";
+    };
+
+    // Avatar file upload handler
+    const onAvatarFileChange = async (event: Event) => {
+      const input = event.target as HTMLInputElement;
+      if (!input.files || !input.files[0]) return;
+      const file = input.files[0];
+      avatarUploadProgress.value = 0;
+      avatarUploadError.value = null;
+      try {
+        const formDataObj = new FormData();
+        formDataObj.append("avatar", file);
+        // Use fetch for progress tracking
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", "/api/users/upload-avatar");
+        xhr.withCredentials = true;
+        xhr.upload.onprogress = (e) => {
+          if (e.lengthComputable) {
+            avatarUploadProgress.value = Math.round((e.loaded / e.total) * 100);
+          }
+        };
+        xhr.onload = () => {
+          if (xhr.status === 200) {
+            const res = JSON.parse(xhr.responseText);
+            if (res.success && res.url) {
+              formData.profilePicture = res.url;
+              avatarUploadProgress.value = 100;
+              avatarUploadError.value = null;
+            } else {
+              avatarUploadError.value = res.error || "Upload failed";
+              avatarUploadProgress.value = 0;
+            }
+          } else {
+            avatarUploadError.value = xhr.statusText || "Upload failed";
+            avatarUploadProgress.value = 0;
+          }
+        };
+        xhr.onerror = () => {
+          avatarUploadError.value = "Upload failed";
+          avatarUploadProgress.value = 0;
+        };
+        xhr.send(formDataObj);
+      } catch (err: any) {
+        avatarUploadError.value = err.message || "Upload failed";
+        avatarUploadProgress.value = 0;
       }
     };
 
@@ -281,6 +346,8 @@ export default defineComponent({
       success,
       formData,
       hasChanges,
+      avatarUploadProgress,
+      avatarUploadError,
 
       // Methods
       saveProfile,
@@ -290,6 +357,8 @@ export default defineComponent({
       removeInterest,
       resetForm,
       loadUserData,
+      handleImageError,
+      onAvatarFileChange,
     };
   },
 });

@@ -6,6 +6,17 @@
       <div class="flex justify-center w-full px-4">
         <div class="relative">
           <div
+            v-if="userProfile?.profilePicture"
+            class="w-32 h-32 rounded-full shadow-xl overflow-hidden"
+          >
+            <img
+              :src="userProfile.profilePicture"
+              :alt="userProfile.displayName || 'Profile'"
+              class="w-full h-full object-cover"
+            />
+          </div>
+          <div
+            v-else
             class="flex items-center justify-center w-32 h-32 text-4xl font-bold text-white rounded-full shadow-xl bg-gradient-to-br from-blue-400 to-purple-600"
           >
             {{ userProfile?.displayName?.charAt(0)?.toUpperCase() ||

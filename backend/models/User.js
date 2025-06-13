@@ -19,6 +19,12 @@ const userSchema = new mongoose.Schema(
       trim: true,
       maxlength: [100, "Display name cannot exceed 100 characters"],
     },
+    // Profile picture/avatar
+    profilePicture: {
+      type: String,
+      trim: true,
+      default: null,
+    },
     // Password for JWT authentication (optional if using Firebase)
     password: {
       type: String,

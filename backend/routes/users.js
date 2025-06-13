@@ -3,7 +3,35 @@ const User = require("../models/User");
 const { authenticateUser } = require("../middleware/auth");
 const notificationService = require("../services/notificationService");
 const { body, validationResult } = require("express-validator");
+const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
 const router = express.Router();
+
+// Multer setup for avatar uploads
+const avatarStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const uploadPath = path.join(__dirname, "../uploads/avatars");
+    fs.mkdirSync(uploadPath, { recursive: true });
+    cb(null, uploadPath);
+  },
+  filename: function (req, file, cb) {
+    const ext = path.extname(file.originalname);
+    const uniqueName = `${req.user.firebaseUid}_${Date.now()}${ext}`;
+    cb(null, uniqueName);
+  },
+});
+const avatarUpload = multer({
+  storage: avatarStorage,
+  fileFilter: (req, file, cb) => {
+    // Accept only image files
+    if (!file.mimetype.startsWith("image/")) {
+      return cb(new Error("Only image files are allowed!"));
+    }
+    cb(null, true);
+  },
+  limits: { fileSize: 2 * 1024 * 1024 }, // 2MB limit
+});
 
 // GET /api/users/profile - Get current user profile
 router.get("/profile", authenticateUser, async (req, res) => {
@@ -64,6 +92,10 @@ router.put(
       .optional()
       .isArray()
       .withMessage("Interests must be an array"),
+    body("profilePicture")
+      .optional()
+      .isURL()
+      .withMessage("Profile picture must be a valid URL"),
   ],
   async (req, res) => {
     try {
@@ -85,6 +117,11 @@ router.put(
       // Handle display name
       if (req.body.displayName !== undefined) {
         updateData.displayName = req.body.displayName;
+      }
+
+      // Handle profile picture
+      if (req.body.profilePicture !== undefined) {
+        updateData.profilePicture = req.body.profilePicture;
       }
 
       // Handle profile updates
@@ -496,5 +533,20 @@ router.delete("/fcm-token", authenticateUser, async (req, res) => {
     res.status(500).json({ message: "Error removing FCM token" });
   }
 });
+
+// POST /api/users/upload-avatar - Upload user avatar
+router.post(
+  "/upload-avatar",
+  authenticateUser,
+  avatarUpload.single("avatar"),
+  (req, res) => {
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+    // Return the public URL for the uploaded avatar
+    const avatarUrl = `/uploads/avatars/${req.file.filename}`;
+    res.json({ success: true, url: avatarUrl });
+  },
+);
 
 module.exports = router;

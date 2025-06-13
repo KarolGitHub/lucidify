@@ -111,10 +111,18 @@
             >
               <span class="sr-only">Open user menu</span>
               <img
-                class="h-8 w-8 rounded-full"
-                src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                alt=""
+                v-if="userProfile?.profilePicture"
+                class="h-8 w-8 rounded-full object-cover"
+                :src="userProfile.profilePicture"
+                :alt="userProfile.displayName || 'Profile'"
               />
+              <div
+                v-else
+                class="h-8 w-8 rounded-full bg-gradient-to-br from-blue-400 to-purple-600 flex items-center justify-center text-white text-sm font-bold"
+              >
+                {{ userProfile?.displayName?.charAt(0)?.toUpperCase() ||
+                userProfile?.email?.charAt(0)?.toUpperCase() || 'U' }}
+              </div>
             </button>
           </div>
 

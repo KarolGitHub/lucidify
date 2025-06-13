@@ -4,6 +4,7 @@ export interface UserProfile {
   firebaseUid: string;
   email: string;
   displayName?: string;
+  profilePicture?: string;
   emailVerified: boolean;
   isAdmin: boolean;
   preferences: {
