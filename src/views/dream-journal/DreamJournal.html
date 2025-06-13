@@ -212,6 +212,20 @@
             </div>
           </div>
 
+          <!-- AI Dream Analysis -->
+          <div
+            v-if="newDream.description && newDream.description.trim().length >= 10"
+          >
+            <AIDreamAnalysis
+              :dream-data="newDream"
+              :available-emotions="emotions"
+              :available-themes="themes"
+              :available-symbols="symbols"
+              @update:dream-data="handleNewDreamChange"
+              @suggestions-applied="handleAISuggestionsApplied"
+            />
+          </div>
+
           <!-- Dream Type -->
           <div>
             <label
@@ -474,6 +488,18 @@
                 />
               </div>
             </div>
+          </div>
+
+          <!-- AI Dream Analysis -->
+          <div v-if="editingDream.description && editingDream.description.trim().length >= 10">
+            <AIDreamAnalysis
+              :dream-data="editingDream"
+              :available-emotions="emotions"
+              :available-themes="themes"
+              :available-symbols="symbols"
+              @update:dream-data="handleEditDreamChange"
+              @suggestions-applied="handleAISuggestionsApplied"
+            />
           </div>
 
           <!-- Dream Type -->

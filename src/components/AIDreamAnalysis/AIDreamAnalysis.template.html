@@ -1,0 +1,479 @@
+<div class="ai-dream-analysis">
+  <!-- AI Status Banner -->
+  <div v-if="!aiStatus.available" class="ai-status-banner">
+    <div
+      class="flex items-center space-x-2 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg"
+    >
+      <i
+        class="fas fa-exclamation-triangle text-yellow-600 dark:text-yellow-400"
+      ></i>
+      <span class="text-sm text-yellow-800 dark:text-yellow-200">
+        AI features are not available. Please contact administrator to enable AI
+        analysis.
+      </span>
+    </div>
+  </div>
+
+  <!-- AI Analysis Controls -->
+  <div v-if="aiStatus.available" class="ai-controls mb-4">
+    <div class="flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center space-x-2">
+        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+          AI Analysis:
+        </span>
+        <div class="flex items-center space-x-1">
+          <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+          <span class="text-xs text-green-600 dark:text-green-400"
+            >Available</span
+          >
+        </div>
+      </div>
+
+      <div class="flex space-x-2">
+        <button
+          @click="analyzeDream"
+          :disabled="!canAnalyze || isAnalyzing"
+          class="ai-btn primary"
+          :class="{ 'loading': isAnalyzing }"
+        >
+          <i v-if="isAnalyzing" class="fas fa-spinner fa-spin mr-2"></i>
+          <i v-else class="fas fa-magic mr-2"></i>
+          {{ isAnalyzing ? 'Analyzing...' : 'Analyze Dream' }}
+        </button>
+
+        <button
+          @click="interpretDream"
+          :disabled="!canAnalyze || isInterpreting"
+          class="ai-btn secondary"
+          :class="{ 'loading': isInterpreting }"
+        >
+          <i v-if="isInterpreting" class="fas fa-spinner fa-spin mr-2"></i>
+          <i v-else class="fas fa-brain mr-2"></i>
+          {{ isInterpreting ? 'Interpreting...' : 'Interpret' }}
+        </button>
+
+        <button
+          @click="completeAnalysis"
+          :disabled="!canAnalyze || isCompleteAnalyzing"
+          class="ai-btn tertiary"
+          :class="{ 'loading': isCompleteAnalyzing }"
+        >
+          <i v-if="isCompleteAnalyzing" class="fas fa-spinner fa-spin mr-2"></i>
+          <i v-else class="fas fa-star mr-2"></i>
+          {{ isCompleteAnalyzing ? 'Analyzing...' : 'Complete Analysis' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Analysis Results -->
+  <div v-if="hasResults" class="analysis-results">
+    <!-- Tabs -->
+    <div class="tabs-container mb-4">
+      <div class="flex space-x-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+        <button
+          v-for="tab in availableTabs"
+          :key="tab.id"
+          @click="activeTab = tab.id"
+          :class="[
+            'tab-btn',
+            activeTab === tab.id ? 'active' : 'inactive'
+          ]"
+        >
+          <i :class="tab.icon" class="mr-2"></i>
+          {{ tab.label }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="tab-content">
+      <!-- Analysis Tab -->
+      <div v-if="activeTab === 'analysis' && analysis" class="analysis-tab">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Suggested Tags -->
+          <div class="suggestion-card">
+            <h3 class="card-title">
+              <i class="fas fa-tags mr-2"></i>
+              Suggested Tags
+            </h3>
+            <div class="suggestion-content">
+              <div
+                v-if="analysis.suggestedTags.length > 0"
+                class="flex flex-wrap gap-2"
+              >
+                <span
+                  v-for="tag in analysis.suggestedTags"
+                  :key="tag"
+                  class="suggestion-tag"
+                  @click="applyTag(tag)"
+                >
+                  {{ tag }}
+                  <i class="fas fa-plus ml-1 text-xs"></i>
+                </span>
+              </div>
+              <p v-else class="text-gray-500 dark:text-gray-400 text-sm">
+                No tags suggested
+              </p>
+            </div>
+          </div>
+
+          <!-- Suggested Emotions -->
+          <div class="suggestion-card">
+            <h3 class="card-title">
+              <i class="fas fa-heart mr-2"></i>
+              Suggested Emotions
+            </h3>
+            <div class="suggestion-content">
+              <div
+                v-if="analysis.suggestedEmotions.length > 0"
+                class="flex flex-wrap gap-2"
+              >
+                <span
+                  v-for="emotion in analysis.suggestedEmotions"
+                  :key="emotion"
+                  class="suggestion-emotion"
+                  @click="applyEmotion(emotion)"
+                >
+                  {{ emotion }}
+                  <i class="fas fa-plus ml-1 text-xs"></i>
+                </span>
+              </div>
+              <p v-else class="text-gray-500 dark:text-gray-400 text-sm">
+                No emotions suggested
+              </p>
+            </div>
+          </div>
+
+          <!-- Suggested Themes -->
+          <div class="suggestion-card">
+            <h3 class="card-title">
+              <i class="fas fa-palette mr-2"></i>
+              Suggested Themes
+            </h3>
+            <div class="suggestion-content">
+              <div
+                v-if="analysis.suggestedThemes.length > 0"
+                class="flex flex-wrap gap-2"
+              >
+                <span
+                  v-for="theme in analysis.suggestedThemes"
+                  :key="theme"
+                  class="suggestion-theme"
+                  @click="applyTheme(theme)"
+                >
+                  {{ theme }}
+                  <i class="fas fa-plus ml-1 text-xs"></i>
+                </span>
+              </div>
+              <p v-else class="text-gray-500 dark:text-gray-400 text-sm">
+                No themes suggested
+              </p>
+            </div>
+          </div>
+
+          <!-- Suggested Symbols -->
+          <div class="suggestion-card">
+            <h3 class="card-title">
+              <i class="fas fa-magic mr-2"></i>
+              Suggested Symbols
+            </h3>
+            <div class="suggestion-content">
+              <div
+                v-if="analysis.suggestedSymbols.length > 0"
+                class="flex flex-wrap gap-2"
+              >
+                <span
+                  v-for="symbol in analysis.suggestedSymbols"
+                  :key="symbol"
+                  class="suggestion-symbol"
+                  @click="applySymbol(symbol)"
+                >
+                  {{ symbol }}
+                  <i class="fas fa-plus ml-1 text-xs"></i>
+                </span>
+              </div>
+              <p v-else class="text-gray-500 dark:text-gray-400 text-sm">
+                No symbols suggested
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Confidence and Reasoning -->
+        <div class="confidence-section mt-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <span
+                class="text-sm font-medium text-gray-700 dark:text-gray-300"
+              >
+                Confidence:
+              </span>
+              <div class="flex items-center space-x-2">
+                <div class="w-24 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                  <div
+                    class="bg-green-500 h-2 rounded-full transition-all duration-300"
+                    :style="{ width: `${analysis.confidence * 100}%` }"
+                  ></div>
+                </div>
+                <span class="text-sm text-gray-600 dark:text-gray-400">
+                  {{ Math.round(analysis.confidence * 100) }}%
+                </span>
+              </div>
+            </div>
+
+            <button
+              @click="applyAllSuggestions"
+              :disabled="!canApplySuggestions"
+              class="apply-all-btn"
+            >
+              <i class="fas fa-check mr-2"></i>
+              Apply All Suggestions
+            </button>
+          </div>
+
+          <div v-if="analysis.reasoning" class="reasoning-section mt-3">
+            <h4
+              class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            >
+              AI Reasoning:
+            </h4>
+            <p
+              class="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 p-3 rounded-lg"
+            >
+              {{ analysis.reasoning }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Interpretation Tab -->
+      <div
+        v-if="activeTab === 'interpretation' && interpretation"
+        class="interpretation-tab"
+      >
+        <div class="interpretation-content">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Main Interpretation -->
+            <div class="interpretation-section">
+              <h3 class="section-title">
+                <i class="fas fa-brain mr-2"></i>
+                Dream Interpretation
+              </h3>
+
+              <div class="interpretation-card">
+                <h4 class="interpretation-subtitle">General Meaning</h4>
+                <p class="interpretation-text">
+                  {{ interpretation.interpretation.generalMeaning }}
+                </p>
+              </div>
+
+              <div class="interpretation-card">
+                <h4 class="interpretation-subtitle">Symbolic Elements</h4>
+                <p class="interpretation-text">
+                  {{ interpretation.interpretation.symbolicElements }}
+                </p>
+              </div>
+
+              <div class="interpretation-card">
+                <h4 class="interpretation-subtitle">Emotional Insights</h4>
+                <p class="interpretation-text">
+                  {{ interpretation.interpretation.emotionalInsights }}
+                </p>
+              </div>
+
+              <div class="interpretation-card">
+                <h4 class="interpretation-subtitle">Personal Growth</h4>
+                <p class="interpretation-text">
+                  {{ interpretation.interpretation.personalGrowth }}
+                </p>
+              </div>
+
+              <div class="interpretation-card">
+                <h4 class="interpretation-subtitle">Practical Advice</h4>
+                <p class="interpretation-text">
+                  {{ interpretation.interpretation.practicalAdvice }}
+                </p>
+              </div>
+            </div>
+
+            <!-- Key Symbols -->
+            <div class="symbols-section">
+              <h3 class="section-title">
+                <i class="fas fa-magic mr-2"></i>
+                Key Symbols
+              </h3>
+
+              <div
+                v-for="symbol in interpretation.keySymbols"
+                :key="symbol.symbol"
+                class="symbol-card"
+              >
+                <h4 class="symbol-name">{{ symbol.symbol }}</h4>
+                <div class="symbol-content">
+                  <p class="symbol-meaning">
+                    <strong>Meaning:</strong> {{ symbol.meaning }}
+                  </p>
+                  <p class="symbol-relevance">
+                    <strong>Personal Relevance:</strong> {{
+                    symbol.personalRelevance }}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Disclaimer -->
+          <div class="disclaimer-section mt-6">
+            <div
+              class="flex items-start space-x-2 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg"
+            >
+              <i
+                class="fas fa-info-circle text-blue-600 dark:text-blue-400 mt-1"
+              ></i>
+              <div>
+                <p class="text-sm text-blue-800 dark:text-blue-200">
+                  {{ interpretation.disclaimer }}
+                </p>
+                <p class="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                  Confidence: {{ Math.round(interpretation.confidence * 100) }}%
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Insights Tab -->
+      <div v-if="activeTab === 'insights' && insights" class="insights-tab">
+        <div class="insights-content">
+          <!-- Pattern Analysis -->
+          <div class="insights-section">
+            <h3 class="section-title">
+              <i class="fas fa-chart-line mr-2"></i>
+              Pattern Analysis
+            </h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="pattern-card">
+                <h4 class="pattern-subtitle">Recurring Themes</h4>
+                <div
+                  v-if="insights.patternAnalysis.recurringThemes.length > 0"
+                  class="flex flex-wrap gap-2"
+                >
+                  <span
+                    v-for="theme in insights.patternAnalysis.recurringThemes"
+                    :key="theme"
+                    class="pattern-tag"
+                  >
+                    {{ theme }}
+                  </span>
+                </div>
+                <p v-else class="text-gray-500 dark:text-gray-400 text-sm">
+                  No recurring themes identified
+                </p>
+              </div>
+
+              <div class="pattern-card">
+                <h4 class="pattern-subtitle">Emotional Trends</h4>
+                <p class="pattern-text">
+                  {{ insights.patternAnalysis.emotionalTrends }}
+                </p>
+              </div>
+
+              <div class="pattern-card">
+                <h4 class="pattern-subtitle">Symbolic Connections</h4>
+                <p class="pattern-text">
+                  {{ insights.patternAnalysis.symbolicConnections }}
+                </p>
+              </div>
+
+              <div class="pattern-card">
+                <h4 class="pattern-subtitle">Growth Areas</h4>
+                <p class="pattern-text">
+                  {{ insights.patternAnalysis.growthAreas }}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Personalized Insights -->
+          <div class="insights-section">
+            <h3 class="section-title">
+              <i class="fas fa-lightbulb mr-2"></i>
+              Personalized Insights
+            </h3>
+
+            <div
+              v-for="insight in insights.personalizedInsights"
+              :key="insight.insight"
+              class="insight-card"
+            >
+              <div class="insight-header">
+                <h4 class="insight-title">{{ insight.insight }}</h4>
+                <div v-if="insight.suggestion" class="insight-actionable">
+                  <i class="fas fa-check-circle text-green-500"></i>
+                  <span class="text-sm text-green-600 dark:text-green-400"
+                    >Actionable</span
+                  >
+                </div>
+              </div>
+
+              <div class="insight-content">
+                <p class="insight-evidence">
+                  <strong>Evidence:</strong> {{ insight.evidence }}
+                </p>
+                <p v-if="insight.suggestion" class="insight-suggestion">
+                  <strong>Suggestion:</strong> {{ insight.suggestion }}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dream Progression -->
+          <div class="insights-section">
+            <h3 class="section-title">
+              <i class="fas fa-route mr-2"></i>
+              Dream Progression
+            </h3>
+            <p class="progression-text">{{ insights.dreamProgression }}</p>
+          </div>
+
+          <!-- Recommendations -->
+          <div class="insights-section">
+            <h3 class="section-title">
+              <i class="fas fa-star mr-2"></i>
+              Recommendations
+            </h3>
+            <div class="recommendations-list">
+              <div
+                v-for="(recommendation, index) in insights.recommendations"
+                :key="index"
+                class="recommendation-item"
+              >
+                <span class="recommendation-number">{{ index + 1 }}</span>
+                <span class="recommendation-text">{{ recommendation }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error Messages -->
+  <div v-if="error" class="error-message">
+    <div
+      class="flex items-center space-x-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg"
+    >
+      <i class="fas fa-exclamation-circle text-red-600 dark:text-red-400"></i>
+      <span class="text-sm text-red-800 dark:text-red-200">{{ error }}</span>
+      <button
+        @click="error = ''"
+        class="ml-auto text-red-400 hover:text-red-600"
+      >
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+  </div>
+</div>

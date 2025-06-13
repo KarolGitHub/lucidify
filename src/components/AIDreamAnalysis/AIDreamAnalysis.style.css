@@ -1,0 +1,348 @@
+/* AI Dream Analysis Component Styles */
+
+.ai-dream-analysis {
+  @apply space-y-4;
+}
+
+/* AI Status Banner */
+.ai-status-banner {
+  @apply mb-4;
+}
+
+/* AI Controls */
+.ai-controls {
+  @apply bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4;
+}
+
+.ai-btn {
+  @apply px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 flex items-center;
+}
+
+.ai-btn.primary {
+  @apply bg-blue-600 hover:bg-blue-700 text-white shadow-sm hover:shadow-md;
+}
+
+.ai-btn.secondary {
+  @apply bg-purple-600 hover:bg-purple-700 text-white shadow-sm hover:shadow-md;
+}
+
+.ai-btn.tertiary {
+  @apply bg-green-600 hover:bg-green-700 text-white shadow-sm hover:shadow-md;
+}
+
+.ai-btn:disabled {
+  @apply opacity-50 cursor-not-allowed;
+}
+
+.ai-btn.loading {
+  @apply opacity-75 cursor-wait;
+}
+
+/* Apply All Button */
+.apply-all-btn {
+  @apply px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg transition-colors duration-200 flex items-center;
+}
+
+.apply-all-btn:disabled {
+  @apply opacity-50 cursor-not-allowed;
+}
+
+/* Tabs */
+.tabs-container {
+  @apply bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700;
+}
+
+.tab-btn {
+  @apply px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 flex items-center;
+}
+
+.tab-btn.active {
+  @apply bg-blue-600 text-white shadow-sm;
+}
+
+.tab-btn.inactive {
+  @apply text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200;
+}
+
+/* Tab Content */
+.tab-content {
+  @apply bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6;
+}
+
+/* Analysis Tab */
+.analysis-tab {
+  @apply space-y-4;
+}
+
+.suggestion-card {
+  @apply bg-gray-50 dark:bg-gray-900 rounded-lg p-4 border border-gray-200 dark:border-gray-700;
+}
+
+.card-title {
+  @apply text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3 flex items-center;
+}
+
+.suggestion-content {
+  @apply min-h-[60px];
+}
+
+.suggestion-tag,
+.suggestion-emotion,
+.suggestion-theme,
+.suggestion-symbol {
+  @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium cursor-pointer transition-all duration-200;
+}
+
+.suggestion-tag {
+  @apply bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 hover:bg-blue-200 dark:hover:bg-blue-800;
+}
+
+.suggestion-emotion {
+  @apply bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200 hover:bg-red-200 dark:hover:bg-red-800;
+}
+
+.suggestion-theme {
+  @apply bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200 hover:bg-purple-200 dark:hover:bg-purple-800;
+}
+
+.suggestion-symbol {
+  @apply bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 hover:bg-green-200 dark:hover:bg-green-800;
+}
+
+/* Confidence Section */
+.confidence-section {
+  @apply bg-gray-50 dark:bg-gray-900 rounded-lg p-4 border border-gray-200 dark:border-gray-700;
+}
+
+.reasoning-section {
+  @apply mt-4;
+}
+
+/* Interpretation Tab */
+.interpretation-tab {
+  @apply space-y-6;
+}
+
+.interpretation-content {
+  @apply space-y-6;
+}
+
+.section-title {
+  @apply text-xl font-bold text-gray-800 dark:text-gray-200 mb-4 flex items-center;
+}
+
+.interpretation-section {
+  @apply space-y-4;
+}
+
+.interpretation-card {
+  @apply bg-gray-50 dark:bg-gray-900 rounded-lg p-4 border border-gray-200 dark:border-gray-700;
+}
+
+.interpretation-subtitle {
+  @apply text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2;
+}
+
+.interpretation-text {
+  @apply text-gray-600 dark:text-gray-400 leading-relaxed;
+}
+
+.symbols-section {
+  @apply space-y-4;
+}
+
+.symbol-card {
+  @apply bg-gray-50 dark:bg-gray-900 rounded-lg p-4 border border-gray-200 dark:border-gray-700;
+}
+
+.symbol-name {
+  @apply text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2;
+}
+
+.symbol-content {
+  @apply space-y-2;
+}
+
+.symbol-meaning,
+.symbol-relevance {
+  @apply text-sm text-gray-600 dark:text-gray-400;
+}
+
+.disclaimer-section {
+  @apply mt-6;
+}
+
+/* Insights Tab */
+.insights-tab {
+  @apply space-y-6;
+}
+
+.insights-content {
+  @apply space-y-6;
+}
+
+.insights-section {
+  @apply space-y-4;
+}
+
+.pattern-card {
+  @apply bg-gray-50 dark:bg-gray-900 rounded-lg p-4 border border-gray-200 dark:border-gray-700;
+}
+
+.pattern-subtitle {
+  @apply text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2;
+}
+
+.pattern-text {
+  @apply text-gray-600 dark:text-gray-400 leading-relaxed;
+}
+
+.pattern-tag {
+  @apply inline-block px-3 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded-full text-sm font-medium;
+}
+
+.insight-card {
+  @apply bg-gray-50 dark:bg-gray-900 rounded-lg p-4 border border-gray-200 dark:border-gray-700;
+}
+
+.insight-header {
+  @apply flex items-center justify-between mb-3;
+}
+
+.insight-title {
+  @apply text-lg font-semibold text-gray-800 dark:text-gray-200;
+}
+
+.insight-actionable {
+  @apply flex items-center space-x-1 text-sm;
+}
+
+.insight-content {
+  @apply space-y-2;
+}
+
+.insight-evidence,
+.insight-suggestion {
+  @apply text-sm text-gray-600 dark:text-gray-400;
+}
+
+.progression-text {
+  @apply text-gray-600 dark:text-gray-400 leading-relaxed bg-gray-50 dark:bg-gray-900 p-4 rounded-lg border border-gray-200 dark:border-gray-700;
+}
+
+.recommendations-list {
+  @apply space-y-3;
+}
+
+.recommendation-item {
+  @apply flex items-start space-x-3 p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700;
+}
+
+.recommendation-number {
+  @apply flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold;
+}
+
+.recommendation-text {
+  @apply text-gray-600 dark:text-gray-400 leading-relaxed;
+}
+
+/* Error Messages */
+.error-message {
+  @apply mt-4;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .ai-controls {
+    @apply p-3;
+  }
+
+  .ai-btn {
+    @apply px-3 py-2 text-xs;
+  }
+
+  .tab-content {
+    @apply p-4;
+  }
+
+  .suggestion-card,
+  .interpretation-card,
+  .symbol-card,
+  .pattern-card,
+  .insight-card {
+    @apply p-3;
+  }
+
+  .card-title,
+  .section-title,
+  .interpretation-subtitle,
+  .pattern-subtitle,
+  .insight-title {
+    @apply text-base;
+  }
+}
+
+/* Loading States */
+.loading-spinner {
+  @apply animate-spin;
+}
+
+/* Animations */
+.fade-enter-active,
+.fade-leave-active {
+  @apply transition-opacity duration-300;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  @apply opacity-0;
+}
+
+.slide-enter-active,
+.slide-leave-active {
+  @apply transition-all duration-300;
+}
+
+.slide-enter-from {
+  @apply transform translate-x-full opacity-0;
+}
+
+.slide-leave-to {
+  @apply transform -translate-x-full opacity-0;
+}
+
+/* Focus States */
+.ai-btn:focus,
+.tab-btn:focus,
+.suggestion-tag:focus,
+.suggestion-emotion:focus,
+.suggestion-theme:focus,
+.suggestion-symbol:focus {
+  @apply outline-none ring-2 ring-blue-500 ring-offset-2;
+}
+
+/* Hover Effects */
+.suggestion-tag:hover,
+.suggestion-emotion:hover,
+.suggestion-theme:hover,
+.suggestion-symbol:hover {
+  @apply transform scale-105;
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .ai-btn,
+  .suggestion-tag,
+  .suggestion-emotion,
+  .suggestion-theme,
+  .suggestion-symbol {
+    @apply transition-none;
+  }
+
+  .fade-enter-active,
+  .fade-leave-active,
+  .slide-enter-active,
+  .slide-leave-active {
+    @apply transition-none;
+  }
+}

@@ -96,6 +96,7 @@ app.use("/api/", limiter);
 const dreamRoutes = require("./routes/dreams");
 const authRoutes = require("./routes/auth");
 const userRoutes = require("./routes/users");
+const aiRoutes = require("./routes/ai");
 
 // In-memory storage for FCM tokens (replace with database in production)
 const fcmTokens = new Map();
@@ -117,6 +118,9 @@ app.use("/api/dreams", dreamRoutes);
 
 // User Routes
 app.use("/api/users", userRoutes);
+
+// AI Routes
+app.use("/api/ai", aiRoutes);
 
 // Serve admin panel
 app.get("/admin", (req, res) => {

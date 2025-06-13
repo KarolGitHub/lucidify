@@ -2,6 +2,7 @@ import { defineComponent, computed, onMounted, ref } from "vue";
 import { auth, dreams } from "@/store";
 import { Dream } from "@/interface/Dream";
 import VoiceToText from "@/components/VoiceToText";
+import AIDreamAnalysis from "@/components/AIDreamAnalysis";
 
 // Extended Dream interface for editing
 interface EditingDream extends Dream {
@@ -12,6 +13,7 @@ export default defineComponent({
   name: "DreamJournal",
   components: {
     VoiceToText,
+    AIDreamAnalysis,
   },
   setup() {
     // Reactive data
@@ -302,6 +304,12 @@ export default defineComponent({
       dreams.actions.resetNewDream();
     };
 
+    const handleAISuggestionsApplied = (suggestion: any) => {
+      console.log("AI suggestion applied:", suggestion);
+      // You can add additional logic here, such as showing a notification
+      // or tracking analytics for AI feature usage
+    };
+
     // Lifecycle
     onMounted(async () => {
       // Check if user is authenticated
@@ -349,6 +357,7 @@ export default defineComponent({
       openEditModal,
       closeEditModal,
       resetNewDreamForm,
+      handleAISuggestionsApplied,
     };
   },
 });
