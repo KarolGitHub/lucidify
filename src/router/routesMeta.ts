@@ -4,6 +4,7 @@ export interface RouteMeta {
   icon?: string;
   description?: string;
   category?: string;
+  requiresAuth?: boolean;
 }
 
 export const appRoutes: RouteMeta[] = [
@@ -13,6 +14,7 @@ export const appRoutes: RouteMeta[] = [
     icon: "fas fa-tv",
     description: "View your dream statistics and overview",
     category: "Main",
+    requiresAuth: true,
   },
   {
     name: "Dream Journal",
@@ -20,6 +22,7 @@ export const appRoutes: RouteMeta[] = [
     icon: "fas fa-moon",
     description: "Record and manage your dreams",
     category: "Main",
+    requiresAuth: true,
   },
   {
     name: "Settings",
@@ -27,27 +30,7 @@ export const appRoutes: RouteMeta[] = [
     icon: "fas fa-tools",
     description: "Manage your account and preferences",
     category: "Account",
-  },
-  {
-    name: "About",
-    path: "/about",
-    icon: "fas fa-info-circle",
-    description: "Learn more about Lucidify",
-    category: "Info",
-  },
-  {
-    name: "Login",
-    path: "/auth/login",
-    icon: "fas fa-sign-in-alt",
-    description: "Sign in to your account",
-    category: "Auth",
-  },
-  {
-    name: "Register",
-    path: "/auth/register",
-    icon: "fas fa-user-plus",
-    description: "Create a new account",
-    category: "Auth",
+    requiresAuth: true,
   },
   {
     name: "Home",
@@ -55,6 +38,31 @@ export const appRoutes: RouteMeta[] = [
     icon: "fas fa-home",
     description: "Welcome to Lucidify",
     category: "Main",
+    requiresAuth: false,
+  },
+  {
+    name: "Login",
+    path: "/auth/login",
+    icon: "fas fa-sign-in-alt",
+    description: "Sign in to your account",
+    category: "Auth",
+    requiresAuth: false,
+  },
+  {
+    name: "Register",
+    path: "/auth/register",
+    icon: "fas fa-user-plus",
+    description: "Create a new account",
+    category: "Auth",
+    requiresAuth: false,
+  },
+  {
+    name: "About",
+    path: "/about",
+    icon: "fas fa-info-circle",
+    description: "Learn more about Lucidify",
+    category: "Info",
+    requiresAuth: false,
   },
 ];
 
@@ -76,4 +84,19 @@ export const searchRoutes = (query: string): RouteMeta[] => {
 // Helper function to get route by path
 export const getRouteByPath = (path: string): RouteMeta | undefined => {
   return appRoutes.find((route) => route.path === path);
+};
+
+// Helper function to get routes by category
+export const getRoutesByCategory = (category: string): RouteMeta[] => {
+  return appRoutes.filter((route) => route.category === category);
+};
+
+// Helper function to get authenticated routes only
+export const getAuthenticatedRoutes = (): RouteMeta[] => {
+  return appRoutes.filter((route) => route.requiresAuth);
+};
+
+// Helper function to get public routes only
+export const getPublicRoutes = (): RouteMeta[] => {
+  return appRoutes.filter((route) => !route.requiresAuth);
 };

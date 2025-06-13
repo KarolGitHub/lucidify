@@ -31,20 +31,105 @@
           @blur="handleBlur"
           type="text"
           placeholder="Search routes... (⌘K)"
-          class="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 relative bg-white rounded text-sm shadow outline-none focus:outline-none focus:ring w-full pl-10"
+          class="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 relative bg-white rounded text-sm shadow outline-none focus:outline-none focus:ring w-full pl-10 pr-10"
         />
+
+        <!-- Clear Button -->
+        <button
+          v-if="searchQuery"
+          @click="clearSearch"
+          type="button"
+          class="absolute right-2 top-1/2 transform -translate-y-1/2 text-blueGray-400 hover:text-blueGray-600 transition-colors duration-150 z-20"
+        >
+          <i class="fas fa-times text-sm"></i>
+        </button>
 
         <!-- Search Suggestions Dropdown -->
         <div
           v-if="showSuggestions && filteredRoutes.length > 0"
           class="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50 max-h-96 overflow-y-auto"
         >
+          <!-- Search Results Header -->
+          <div
+            class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600"
+          >
+            <div class="text-xs font-medium text-gray-500 dark:text-gray-400">
+              {{ filteredRoutes.length }} route{{ filteredRoutes.length !== 1 ?
+              's' : '' }} found
+            </div>
+          </div>
+
           <div
             v-for="(route, index) in filteredRoutes"
             :key="route.path"
             @click="selectRoute(route)"
             @mouseenter="selectedIndex = index"
-            class="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors duration-150"
+            class="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors duration-150 border-b border-gray-100 dark:border-gray-600 last:border-b-0"
+            :class="{ 'bg-blue-50 dark:bg-blue-900': selectedIndex === index }"
+          >
+            <div class="flex items-center">
+              <i
+                v-if="route.icon"
+                :class="route.icon"
+                class="mr-3 text-blueGray-400 dark:text-blueGray-300 text-sm"
+              ></i>
+              <div class="flex-1">
+                <div class="font-medium text-blueGray-700 dark:text-white">
+                  {{ route.name }}
+                </div>
+                <div
+                  v-if="route.description"
+                  class="text-sm text-blueGray-500 dark:text-blueGray-400"
+                >
+                  {{ route.description }}
+                </div>
+              </div>
+              <div class="flex flex-col items-end">
+                <div class="text-xs text-blueGray-400 dark:text-blueGray-500">
+                  {{ route.category }}
+                </div>
+                <div
+                  class="text-xs text-blueGray-300 dark:text-blueGray-600 mt-1"
+                >
+                  {{ route.path }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- No Results -->
+        <div
+          v-if="showSuggestions && searchQuery && filteredRoutes.length === 0"
+          class="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50 p-4"
+        >
+          <div class="text-center text-blueGray-500 dark:text-blueGray-400">
+            <i class="fas fa-search text-2xl mb-2"></i>
+            <p>No routes found for "{{ searchQuery }}"</p>
+            <p class="text-sm mt-1">Try searching for different keywords</p>
+          </div>
+        </div>
+
+        <!-- Quick Access (when no search query) -->
+        <div
+          v-if="showSuggestions && !searchQuery && filteredRoutes.length > 0"
+          class="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50 max-h-96 overflow-y-auto"
+        >
+          <!-- Quick Access Header -->
+          <div
+            class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600"
+          >
+            <div class="text-xs font-medium text-gray-500 dark:text-gray-400">
+              Quick Access
+            </div>
+          </div>
+
+          <div
+            v-for="(route, index) in filteredRoutes"
+            :key="route.path"
+            @click="selectRoute(route)"
+            @mouseenter="selectedIndex = index"
+            class="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors duration-150 border-b border-gray-100 dark:border-gray-600 last:border-b-0"
             :class="{ 'bg-blue-50 dark:bg-blue-900': selectedIndex === index }"
           >
             <div class="flex items-center">
@@ -68,17 +153,6 @@
                 {{ route.category }}
               </div>
             </div>
-          </div>
-        </div>
-
-        <!-- No Results -->
-        <div
-          v-if="showSuggestions && searchQuery && filteredRoutes.length === 0"
-          class="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50 p-4"
-        >
-          <div class="text-center text-blueGray-500 dark:text-blueGray-400">
-            <i class="fas fa-search text-2xl mb-2"></i>
-            <p>No routes found for "{{ searchQuery }}"</p>
           </div>
         </div>
       </div>
