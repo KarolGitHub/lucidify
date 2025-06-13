@@ -1,5 +1,6 @@
 import { defineComponent, ref, reactive, onMounted, computed } from "vue";
 import userService, { UserProfile, UserSettings } from "@/services/userService";
+import AvatarUpload from "@/components/AvatarUpload/AvatarUpload.vue";
 
 export default defineComponent({
   name: "CardSettings",
@@ -287,50 +288,17 @@ export default defineComponent({
       formData.profilePicture = "";
     };
 
-    // Avatar file upload handler
-    const onAvatarFileChange = async (event: Event) => {
-      const input = event.target as HTMLInputElement;
-      if (!input.files || !input.files[0]) return;
-      const file = input.files[0];
-      avatarUploadProgress.value = 0;
-      avatarUploadError.value = null;
-      try {
-        const formDataObj = new FormData();
-        formDataObj.append("avatar", file);
-        // Use fetch for progress tracking
-        const xhr = new XMLHttpRequest();
-        xhr.open("POST", "/api/users/upload-avatar");
-        xhr.withCredentials = true;
-        xhr.upload.onprogress = (e) => {
-          if (e.lengthComputable) {
-            avatarUploadProgress.value = Math.round((e.loaded / e.total) * 100);
-          }
-        };
-        xhr.onload = () => {
-          if (xhr.status === 200) {
-            const res = JSON.parse(xhr.responseText);
-            if (res.success && res.url) {
-              formData.profilePicture = res.url;
-              avatarUploadProgress.value = 100;
-              avatarUploadError.value = null;
-            } else {
-              avatarUploadError.value = res.error || "Upload failed";
-              avatarUploadProgress.value = 0;
-            }
-          } else {
-            avatarUploadError.value = xhr.statusText || "Upload failed";
-            avatarUploadProgress.value = 0;
-          }
-        };
-        xhr.onerror = () => {
-          avatarUploadError.value = "Upload failed";
-          avatarUploadProgress.value = 0;
-        };
-        xhr.send(formDataObj);
-      } catch (err: any) {
-        avatarUploadError.value = err.message || "Upload failed";
-        avatarUploadProgress.value = 0;
-      }
+    // Avatar upload event handlers
+    const onAvatarUploaded = (avatarUrl: string) => {
+      formData.profilePicture = avatarUrl;
+      success.value = "Avatar uploaded successfully!";
+      setTimeout(() => {
+        success.value = null;
+      }, 3000);
+    };
+
+    const onAvatarRemoved = () => {
+      formData.profilePicture = "";
     };
 
     // Load data on mount
@@ -346,8 +314,6 @@ export default defineComponent({
       success,
       formData,
       hasChanges,
-      avatarUploadProgress,
-      avatarUploadError,
 
       // Methods
       saveProfile,
@@ -358,7 +324,8 @@ export default defineComponent({
       resetForm,
       loadUserData,
       handleImageError,
-      onAvatarFileChange,
+      onAvatarUploaded,
+      onAvatarRemoved,
     };
   },
 });

@@ -126,42 +126,13 @@
                 </div>
               </div>
 
-              <!-- Avatar Input -->
+              <!-- Avatar Upload Component -->
               <div class="flex-1">
-                <input
-                  id="profilePicture"
-                  v-model="formData.profilePicture"
-                  type="url"
-                  class="w-full px-3 py-3 text-sm transition-all duration-150 ease-linear bg-white border-0 rounded shadow placeholder-blueGray-300 text-blueGray-600 focus:outline-none focus:ring"
-                  placeholder="Enter image URL (e.g., https://example.com/avatar.jpg)"
+                <AvatarUpload
+                  :current-avatar="formData.profilePicture"
+                  @avatar-uploaded="onAvatarUploaded"
+                  @avatar-removed="onAvatarRemoved"
                 />
-                <div class="flex items-center gap-2 mt-2">
-                  <label
-                    for="avatarFileInput"
-                    class="px-3 py-1 text-xs text-white transition-colors bg-blue-500 rounded cursor-pointer hover:bg-blue-600"
-                  >
-                    Upload Image
-                  </label>
-                  <input
-                    id="avatarFileInput"
-                    type="file"
-                    accept="image/*"
-                    class="hidden"
-                    @change="onAvatarFileChange"
-                  />
-                  <span
-                    v-if="avatarUploadProgress > 0 && avatarUploadProgress < 100"
-                    class="text-xs text-blue-600"
-                    >Uploading... {{ avatarUploadProgress }}%</span
-                  >
-                  <span v-if="avatarUploadError" class="text-xs text-red-600"
-                    >{{ avatarUploadError }}</span
-                  >
-                </div>
-                <small class="text-blueGray-500">
-                  Enter a URL to your profile picture or upload an image. For
-                  best results, use a square image.
-                </small>
               </div>
             </div>
           </div>
