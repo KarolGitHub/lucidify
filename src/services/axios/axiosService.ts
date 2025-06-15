@@ -1,6 +1,6 @@
 // @ts-nocheck
 import loading from "../../store/modules/loading";
-import { apiClient } from "./config";
+import apiClient from "./config";
 import { AxiosError, AxiosResponse } from "axios";
 import surePromise from "../../utils/surePromise";
 import { Toast } from "../../interface/Toast";

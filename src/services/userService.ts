@@ -75,7 +75,7 @@ class UserService {
    */
   async getProfile(): Promise<UserProfile> {
     try {
-      const response = await apiClient.get("/users/profile");
+      const response = await apiClient.get("users/profile");
       return response.data.data;
     } catch (error: any) {
       console.error("Failed to get user profile:", error);
@@ -90,7 +90,7 @@ class UserService {
    */
   async updateProfile(updates: UpdateUserProfileRequest): Promise<UserProfile> {
     try {
-      const response = await apiClient.put("/users/profile", updates);
+      const response = await apiClient.put("users/profile", updates);
       return response.data.data;
     } catch (error: any) {
       console.error("Failed to update user profile:", error);
@@ -105,7 +105,7 @@ class UserService {
    */
   async updateSettings(settings: Partial<UserSettings>): Promise<UserSettings> {
     try {
-      const response = await apiClient.put("/users/settings", settings);
+      const response = await apiClient.put("users/settings", settings);
       return response.data.data;
     } catch (error: any) {
       console.error("Failed to update user settings:", error);
@@ -120,7 +120,7 @@ class UserService {
    */
   async getSettings(): Promise<UserSettings> {
     try {
-      const response = await apiClient.get("/users/settings");
+      const response = await apiClient.get("users/settings");
       return response.data.data;
     } catch (error: any) {
       console.error("Failed to get user settings:", error);
@@ -135,7 +135,7 @@ class UserService {
    */
   async updateDisplayName(displayName: string): Promise<UserProfile> {
     try {
-      const response = await apiClient.put("/users/profile", { displayName });
+      const response = await apiClient.put("users/profile", { displayName });
       return response.data.data;
     } catch (error: any) {
       console.error("Failed to update display name:", error);
@@ -150,7 +150,7 @@ class UserService {
    */
   async updateBio(bio: string): Promise<UserProfile> {
     try {
-      const response = await apiClient.put("/users/profile", {
+      const response = await apiClient.put("users/profile", {
         profile: { bio },
       });
       return response.data.data;
@@ -167,7 +167,7 @@ class UserService {
     level: "beginner" | "intermediate" | "advanced" | "expert",
   ): Promise<UserProfile> {
     try {
-      const response = await apiClient.put("/users/profile", {
+      const response = await apiClient.put("users/profile", {
         profile: { experienceLevel: level },
       });
       return response.data.data;
@@ -184,7 +184,7 @@ class UserService {
    */
   async updateGoals(goals: string[]): Promise<UserProfile> {
     try {
-      const response = await apiClient.put("/users/profile", {
+      const response = await apiClient.put("users/profile", {
         profile: { goals },
       });
       return response.data.data;
@@ -199,7 +199,7 @@ class UserService {
    */
   async updateInterests(interests: string[]): Promise<UserProfile> {
     try {
-      const response = await apiClient.put("/users/profile", {
+      const response = await apiClient.put("users/profile", {
         profile: { interests },
       });
       return response.data.data;
@@ -216,7 +216,7 @@ class UserService {
    */
   async updateTheme(theme: "light" | "dark" | "auto"): Promise<UserSettings> {
     try {
-      const response = await apiClient.put("/users/settings", { theme });
+      const response = await apiClient.put("users/settings", { theme });
       return response.data.data;
     } catch (error: any) {
       console.error("Failed to update theme:", error);
@@ -229,7 +229,7 @@ class UserService {
    */
   async updateTimezone(timezone: string): Promise<UserSettings> {
     try {
-      const response = await apiClient.put("/users/settings", { timezone });
+      const response = await apiClient.put("users/settings", { timezone });
       return response.data.data;
     } catch (error: any) {
       console.error("Failed to update timezone:", error);
@@ -246,7 +246,7 @@ class UserService {
     notifications: Partial<UserSettings["notifications"]>,
   ): Promise<UserSettings> {
     try {
-      const response = await apiClient.put("/users/settings", {
+      const response = await apiClient.put("users/settings", {
         notifications,
       });
       return response.data.data;
@@ -265,7 +265,7 @@ class UserService {
     visibility: "private" | "public" | "friends",
   ): Promise<UserSettings> {
     try {
-      const response = await apiClient.put("/users/settings", {
+      const response = await apiClient.put("users/settings", {
         defaultDreamVisibility: visibility,
       });
       return response.data.data;
@@ -283,7 +283,7 @@ class UserService {
   async deleteAccount(): Promise<void> {
     try {
       // First delete from backend
-      await apiClient.delete("/users/account");
+      await apiClient.delete("users/account");
 
       // Then delete Firebase user account
       const { getAuth, deleteUser } = await import("firebase/auth");
@@ -316,7 +316,7 @@ class UserService {
    */
   async exportData(): Promise<any> {
     try {
-      const response = await apiClient.get("/users/export");
+      const response = await apiClient.get("users/export");
       return response.data.data;
     } catch (error: any) {
       console.error("Failed to export user data:", error);

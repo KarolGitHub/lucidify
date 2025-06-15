@@ -14,7 +14,7 @@ class AIService {
    */
   async getStatus(): Promise<AIStatus> {
     try {
-      const response = await apiClient.get("/ai/status");
+      const response = await apiClient.get("ai/status");
       return response.data.data;
     } catch (error) {
       console.error("Failed to get AI status:", error);
@@ -27,7 +27,7 @@ class AIService {
    */
   async analyzeDream(description: string, title?: string): Promise<AIAnalysis> {
     try {
-      const response = await apiClient.post("/ai/analyze", {
+      const response = await apiClient.post("ai/analyze", {
         description,
         title,
       });
@@ -56,7 +56,7 @@ class AIService {
     context?: { isLucid?: boolean; isNightmare?: boolean },
   ): Promise<AIIntepretation> {
     try {
-      const response = await apiClient.post("/ai/interpret", {
+      const response = await apiClient.post("ai/interpret", {
         description,
         title,
         context,
@@ -85,7 +85,7 @@ class AIService {
     description: string;
   }): Promise<AIInsights> {
     try {
-      const response = await apiClient.post("/ai/insights", { currentDream });
+      const response = await apiClient.post("ai/insights", { currentDream });
       return response.data.data;
     } catch (error: any) {
       console.error("AI Insights Error:", error);
@@ -111,7 +111,7 @@ class AIService {
     context?: { isLucid?: boolean; isNightmare?: boolean },
   ): Promise<CompleteAIAnalysis> {
     try {
-      const response = await apiClient.post("/ai/complete-analysis", {
+      const response = await apiClient.post("ai/complete-analysis", {
         description,
         title,
         context,
@@ -137,7 +137,7 @@ class AIService {
    */
   async batchAnalyze(dreamIds: string[]): Promise<BatchAnalysisResponse> {
     try {
-      const response = await apiClient.post("/ai/batch-analyze", { dreamIds });
+      const response = await apiClient.post("ai/batch-analyze", { dreamIds });
       return response.data.data;
     } catch (error: any) {
       console.error("Batch AI Analysis Error:", error);

@@ -1,4 +1,4 @@
-import { apiClient } from "./config";
+import apiClient from "./config";
 import { AxiosError } from "axios";
 
 apiClient.interceptors.request.use(
@@ -12,7 +12,7 @@ apiClient.interceptors.request.use(
   },
   (error) => {
     return Promise.reject(error);
-  }
+  },
 );
 
 apiClient.interceptors.response.use(
@@ -30,5 +30,5 @@ apiClient.interceptors.response.use(
       }
     }
     return Promise.reject(error);
-  }
+  },
 );

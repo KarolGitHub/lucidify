@@ -9,7 +9,7 @@ import apiClient from "./axios/config";
 export const realityCheckSchedulerService = {
   // Get reality check scheduler settings
   async getSettings(): Promise<RealityCheckSchedulerResponse> {
-    const response = await apiClient.get("/users/reality-check-scheduler");
+    const response = await apiClient.get("users/reality-check-scheduler");
     return response.data;
   },
 
@@ -18,7 +18,7 @@ export const realityCheckSchedulerService = {
     settings: Partial<RealityCheckScheduler>,
   ): Promise<RealityCheckSchedulerResponse> {
     const response = await apiClient.put(
-      "/users/reality-check-scheduler",
+      "users/reality-check-scheduler",
       settings,
     );
     return response.data;
@@ -26,13 +26,13 @@ export const realityCheckSchedulerService = {
 
   // Store FCM token
   async storeFCMToken(token: string): Promise<FCMTokenResponse> {
-    const response = await apiClient.post("/users/fcm-token", { token });
+    const response = await apiClient.post("users/fcm-token", { token });
     return response.data;
   },
 
   // Remove FCM token
   async removeFCMToken(): Promise<FCMTokenResponse> {
-    const response = await apiClient.delete("/users/fcm-token");
+    const response = await apiClient.delete("users/fcm-token");
     return response.data;
   },
 };

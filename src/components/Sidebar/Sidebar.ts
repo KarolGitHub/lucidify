@@ -5,6 +5,7 @@ import SelectThemeDropdown from "@/components/Dropdowns/SelectThemeDropdown/Sele
 import { messaging } from "@/server/firebase/firebase";
 import { onMessage, getToken } from "firebase/messaging";
 import { firebaseConfig } from "@/config";
+import apiClient from "@/services/axios/config";
 
 interface Notification {
   id: number;
@@ -150,26 +151,11 @@ export default defineComponent({
           },
         };
 
-        // Determine API URL based on environment
-        const isDevelopment =
-          window.location.hostname === "localhost" ||
-          window.location.hostname === "127.0.0.1";
-        const apiBaseUrl = isDevelopment
-          ? "http://localhost:3001"
-          : "https://lucidify-backend.up.railway.app"; // Replace with your actual Railway URL
+        const response = await apiClient.post("fcm-tokens", tokenData);
 
-        const response = await fetch(`${apiBaseUrl}/api/fcm-tokens`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            // Add authentication header if needed
-            // 'Authorization': `Bearer ${(this as any).$store.state.auth.token}`
-          },
-          body: JSON.stringify(tokenData),
-        });
-
-        if (response.ok) {
-          const result = await response.json();
+        if (response.status === 200) {
+          const result = response.data;
+          console.log("FCM token sent successfully:", result);
         } else {
           console.error("Failed to send FCM token to server:", response.status);
         }
