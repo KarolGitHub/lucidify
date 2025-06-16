@@ -7,6 +7,10 @@ export default defineComponent({
   setup() {
     const store = realityCheckScheduler;
 
+    // Local reactive state for FCM token and notification permission
+    const fcmToken = ref<string | null>(null);
+    const notificationPermission = ref<NotificationPermission>("default");
+
     // Local settings for form handling
     const localSettings = ref<RealityCheckScheduler>({
       enabled: false,
@@ -41,11 +45,11 @@ export default defineComponent({
     // Computed properties
     const loading = computed(() => store.getters.getLoading());
     const error = computed(() => store.getters.getError());
-    const notificationPermission = computed(() =>
-      store.getters.getNotificationPermission(),
-    );
-    const canReceiveNotifications = computed(() =>
-      store.getters.canReceiveNotifications(),
+    const canReceiveNotifications = computed(
+      () =>
+        localSettings.value.enabled &&
+        notificationPermission.value === "granted" &&
+        fcmToken.value !== null,
     );
 
     // Methods
@@ -65,6 +69,8 @@ export default defineComponent({
     const requestPermission = async () => {
       const granted = await store.actions.requestNotificationPermission();
       if (granted) {
+        // Update local notification permission
+        notificationPermission.value = "granted";
         // Initialize Firebase messaging and get FCM token
         await initializeFirebaseMessaging();
       }
@@ -81,35 +87,24 @@ export default defineComponent({
 
     const initializeFirebaseMessaging = async () => {
       try {
-        // Check if Firebase messaging is available
-        if ("serviceWorker" in navigator && "firebase" in window) {
-          const { initializeApp } = await import("firebase/app");
-          const { getMessaging, getToken, onMessage } = await import(
-            "firebase/messaging"
-          );
-          const { firebaseConfig } = await import("@/config");
+        // Use the already-initialized Firebase messaging from firebase.ts
+        const { messaging } = await import("@/server/firebase/firebase");
+        const { getToken } = await import("firebase/messaging");
+        const { firebaseConfig } = await import("@/config");
 
-          // Initialize Firebase
-          const app = initializeApp(firebaseConfig);
-          const messaging = getMessaging(app);
+        // Get FCM token using the existing messaging instance
+        const token = await getToken(messaging, {
+          vapidKey: firebaseConfig.vapidKey,
+        });
 
-          // Get FCM token
-          const token = await getToken(messaging, {
-            vapidKey: firebaseConfig.vapidKey,
-          });
-
-          if (token) {
-            await store.actions.storeFCMToken(token);
-          }
-
-          // Handle foreground messages
-          onMessage(messaging, (payload) => {
-            console.log("Message received in foreground:", payload);
-            // You can show a custom notification here
-          });
+        if (token) {
+          await store.actions.storeFCMToken(token);
+          // Update local FCM token
+          fcmToken.value = token;
+          console.log("FCM token stored successfully");
         }
       } catch (error) {
-        console.error("Error initializing Firebase messaging:", error);
+        console.error("Error getting FCM token:", error);
       }
     };
 
@@ -119,10 +114,16 @@ export default defineComponent({
 
       // Check notification permission on mount
       if ("Notification" in window) {
+        notificationPermission.value = Notification.permission;
         store.mutations.setNotificationPermission(
           store.state,
           Notification.permission,
         );
+
+        // If user has already granted permission, initialize Firebase messaging
+        if (Notification.permission === "granted") {
+          await initializeFirebaseMessaging();
+        }
       }
     });
 

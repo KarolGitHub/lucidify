@@ -6,6 +6,7 @@ import { messaging } from "@/server/firebase/firebase";
 import { onMessage, getToken } from "firebase/messaging";
 import { firebaseConfig } from "@/config";
 import apiClient from "@/services/axios/config";
+import { realityCheckScheduler } from "@/store";
 
 interface Notification {
   id: number;
@@ -128,8 +129,9 @@ export default defineComponent({
 
     async requestNotificationPermission() {
       try {
-        const permission = await Notification.requestPermission();
-        if (permission === "granted") {
+        const store = realityCheckScheduler;
+        const granted = await store.actions.requestNotificationPermission();
+        if (granted) {
           console.log("Notification permission granted.");
           // Retry getting token after permission is granted
           await this.getFCMToken();
