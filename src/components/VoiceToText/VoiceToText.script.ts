@@ -46,7 +46,7 @@ export default defineComponent({
     const interimResults = ref(props.interimResults);
     const selectedLanguage = ref(props.language);
 
-    let recognition: SpeechRecognition | null = null;
+    let recognition: any = null;
     let recordingTimer: NodeJS.Timeout | null = null;
 
     // Check if Web Speech API is supported
@@ -64,93 +64,99 @@ export default defineComponent({
       if (!isSupported.value) return;
 
       const SpeechRecognition =
-        window.SpeechRecognition || (window as any).webkitSpeechRecognition;
+        (window as any).SpeechRecognition ||
+        (window as any).webkitSpeechRecognition;
       recognition = new SpeechRecognition();
 
-      recognition.continuous = continuousMode.value;
-      recognition.interimResults = interimResults.value;
-      recognition.lang = selectedLanguage.value;
+      if (recognition) {
+        recognition.continuous = continuousMode.value;
+        recognition.interimResults = interimResults.value;
+        recognition.lang = selectedLanguage.value;
 
-      recognition.onstart = () => {
-        isRecording.value = true;
-        isProcessing.value = false;
-        error.value = "";
-        successMessage.value = "";
-        recordingTime.value = 0;
-        emit("recording-start");
+        recognition.onstart = () => {
+          isRecording.value = true;
+          isProcessing.value = false;
+          error.value = "";
+          successMessage.value = "";
+          recordingTime.value = 0;
+          emit("recording-start");
 
-        // Start recording timer
-        recordingTimer = setInterval(() => {
-          recordingTime.value++;
-        }, 1000);
-      };
+          // Start recording timer
+          recordingTimer = setInterval(() => {
+            recordingTime.value++;
+          }, 1000);
+        };
 
-      recognition.onresult = (event) => {
-        let finalTranscript = "";
-        let interimTranscript = "";
+        recognition.onresult = (event: any) => {
+          let finalTranscript = "";
+          let interimTranscript = "";
 
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          const transcript = event.results[i][0].transcript;
-          if (event.results[i].isFinal) {
-            finalTranscript += transcript;
-          } else {
-            interimTranscript += transcript;
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+            const transcript = event.results[i][0].transcript;
+            if (event.results[i].isFinal) {
+              finalTranscript += transcript;
+            } else {
+              interimTranscript += transcript;
+            }
           }
-        }
 
-        transcript.value = finalTranscript || interimTranscript;
+          transcript.value = finalTranscript || interimTranscript;
 
-        if (finalTranscript) {
-          // Emit the final transcript
-          const newValue =
-            props.modelValue + (props.modelValue ? " " : "") + finalTranscript;
-          emit("update:modelValue", newValue);
-          emit("transcript-change", finalTranscript);
+          if (finalTranscript) {
+            // Emit the final transcript
+            const newValue =
+              props.modelValue +
+              (props.modelValue ? " " : "") +
+              finalTranscript;
+            emit("update:modelValue", newValue);
+            emit("transcript-change", finalTranscript);
 
-          // Show success message
-          successMessage.value = "Voice input added successfully!";
-          setTimeout(() => {
-            successMessage.value = "";
-          }, 3000);
-        }
-      };
+            // Show success message
+            successMessage.value = "Voice input added successfully!";
+            setTimeout(() => {
+              successMessage.value = "";
+            }, 3000);
+          }
+        };
 
-      recognition.onerror = (event) => {
-        isRecording.value = false;
-        isProcessing.value = false;
-        stopRecordingTimer();
+        recognition.onerror = (event: any) => {
+          isRecording.value = false;
+          isProcessing.value = false;
+          stopRecordingTimer();
 
-        switch (event.error) {
-          case "not-allowed":
-            error.value =
-              "Microphone access denied. Please allow microphone access and try again.";
-            break;
-          case "no-speech":
-            error.value = "No speech detected. Please try again.";
-            break;
-          case "audio-capture":
-            error.value = "Audio capture error. Please check your microphone.";
-            break;
-          case "network":
-            error.value =
-              "Network error. Please check your internet connection.";
-            break;
-          case "service-not-allowed":
-            error.value =
-              "Speech recognition service not allowed. Please check your browser settings.";
-            break;
-          default:
-            error.value = `Error: ${event.error}`;
-        }
-      };
+          switch (event.error) {
+            case "not-allowed":
+              error.value =
+                "Microphone access denied. Please allow microphone access and try again.";
+              break;
+            case "no-speech":
+              error.value = "No speech detected. Please try again.";
+              break;
+            case "audio-capture":
+              error.value =
+                "Audio capture error. Please check your microphone.";
+              break;
+            case "network":
+              error.value =
+                "Network error. Please check your internet connection.";
+              break;
+            case "service-not-allowed":
+              error.value =
+                "Speech recognition service not allowed. Please check your browser settings.";
+              break;
+            default:
+              error.value = `Error: ${event.error}`;
+          }
+        };
 
-      recognition.onend = () => {
-        isRecording.value = false;
-        isProcessing.value = false;
-        transcript.value = "";
-        stopRecordingTimer();
-        emit("recording-stop");
-      };
+        recognition.onend = () => {
+          isRecording.value = false;
+          isProcessing.value = false;
+          transcript.value = "";
+          stopRecordingTimer();
+          emit("recording-stop");
+        };
+      }
     };
 
     // Stop recording timer

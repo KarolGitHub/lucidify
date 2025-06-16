@@ -1,0 +1,209 @@
+<div class="avatar-upload">
+  <!-- Drag & Drop Zone -->
+  <div
+    ref="dropZone"
+    class="drop-zone"
+    :class="{ 'drag-over': isDragOver, 'has-image': selectedFile }"
+    @dragover.prevent="handleDragOver"
+    @dragleave.prevent="handleDragLeave"
+    @drop.prevent="handleDrop"
+    @click="triggerFileInput"
+  >
+    <div v-if="!selectedFile" class="drop-zone-content">
+      <div class="drop-zone-icon">
+        <svg
+          class="w-8 h-8 text-gray-400"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+          />
+        </svg>
+      </div>
+      <p class="drop-zone-text">
+        Drag & drop an image here, or click to select
+      </p>
+      <p class="drop-zone-hint">Supports JPG, PNG, GIF up to 2MB</p>
+    </div>
+
+    <div v-else class="selected-file-preview">
+      <img :src="previewUrl" alt="Preview" class="preview-image" />
+      <div class="preview-overlay">
+        <button @click.stop="removeFile" class="remove-btn">
+          <svg
+            class="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- File Input (Hidden) -->
+  <input
+    ref="fileInput"
+    type="file"
+    accept="image/*"
+    class="hidden"
+    @change="handleFileSelect"
+  />
+
+  <!-- Cropping Modal -->
+  <div v-if="showCropper" class="cropper-modal">
+    <div class="cropper-overlay" @click="closeCropper"></div>
+    <div class="cropper-container">
+      <div class="cropper-header">
+        <h3 class="cropper-title">Crop Your Avatar</h3>
+        <button @click="closeCropper" class="cropper-close">
+          <svg
+            class="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
+      </div>
+
+      <div class="cropper-content">
+        <Cropper
+          ref="cropper"
+          :src="cropperImage"
+          :stencil-props="{
+          aspectRatio: 1,
+          grid: true,
+        }"
+          class="cropper-component"
+        />
+      </div>
+
+      <div class="cropper-actions">
+        <button @click="checkCropperState" class="action-btn">
+          <svg
+            class="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+          Debug State
+        </button>
+        <button @click="rotateLeft" class="action-btn">
+          <svg
+            class="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M10 19l-7-7m0 0l7-7m-7 7h18"
+            />
+          </svg>
+          Rotate Left
+        </button>
+        <button @click="rotateRight" class="action-btn">
+          <svg
+            class="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M14 5l7 7m0 0l-7 7m7-7H3"
+            />
+          </svg>
+          Rotate Right
+        </button>
+        <button @click="zoomIn" class="action-btn">
+          <svg
+            class="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"
+            />
+          </svg>
+          Zoom In
+        </button>
+        <button @click="zoomOut" class="action-btn">
+          <svg
+            class="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7"
+            />
+          </svg>
+          Zoom Out
+        </button>
+      </div>
+
+      <div class="cropper-footer">
+        <button @click="closeCropper" class="btn-secondary">Cancel</button>
+        <button
+          @click="cropImage"
+          class="btn-primary"
+          :disabled="cropping || !cropperReady"
+        >
+          {{ cropping ? 'Cropping...' : !cropperReady ? 'Loading...' : 'Crop & Save' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Upload Progress -->
+  <div
+    v-if="uploadProgress > 0 && uploadProgress < 100"
+    class="upload-progress"
+  >
+    <div class="progress-bar">
+      <div class="progress-fill" :style="{ width: uploadProgress + '%' }"></div>
+    </div>
+    <span class="progress-text">Uploading... {{ uploadProgress }}%</span>
+  </div>
+
+  <!-- Error Messages -->
+  <div v-if="error" class="error-message">{{ error }}</div>
+</div>

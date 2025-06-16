@@ -1,0 +1,144 @@
+.avatar-upload {
+  @apply w-full;
+}
+
+.drop-zone {
+  @apply border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer transition-all duration-200;
+  @apply hover:border-blue-400 hover:bg-blue-50;
+}
+
+.drop-zone.drag-over {
+  @apply border-blue-500 bg-blue-100;
+}
+
+.drop-zone.has-image {
+  @apply border-solid border-gray-300 p-2;
+}
+
+.drop-zone-content {
+  @apply flex flex-col items-center justify-center space-y-2;
+}
+
+.drop-zone-icon {
+  @apply text-gray-400;
+}
+
+.drop-zone-text {
+  @apply text-sm font-medium text-gray-700;
+}
+
+.drop-zone-hint {
+  @apply text-xs text-gray-500;
+}
+
+.selected-file-preview {
+  @apply relative;
+}
+
+.preview-image {
+  @apply w-16 h-16 rounded-full object-cover;
+}
+
+.preview-overlay {
+  @apply absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity;
+  @apply bg-black bg-opacity-50 rounded-full;
+}
+
+.remove-btn {
+  @apply p-1 text-white bg-red-500 rounded-full hover:bg-red-600 transition-colors;
+}
+
+.cropper-modal {
+  @apply fixed inset-0 z-50 flex items-center justify-center;
+}
+
+.cropper-overlay {
+  @apply absolute inset-0 bg-black bg-opacity-50;
+}
+
+.cropper-container {
+  @apply relative bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden;
+}
+
+.cropper-header {
+  @apply flex items-center justify-between p-4 border-b border-gray-200;
+}
+
+.cropper-title {
+  @apply text-lg font-semibold text-gray-900;
+}
+
+.cropper-close {
+  @apply p-1 text-gray-400 hover:text-gray-600 transition-colors;
+}
+
+.cropper-content {
+  @apply p-4;
+  height: 400px;
+  min-height: 400px;
+}
+
+.cropper-component {
+  width: 100%;
+  height: 400px;
+  min-height: 400px;
+}
+
+.cropper-actions {
+  @apply flex items-center justify-center space-x-2 p-4 border-t border-gray-200;
+}
+
+.action-btn {
+  @apply flex items-center space-x-1 px-3 py-2 text-sm text-gray-700 bg-gray-100 rounded hover:bg-gray-200 transition-colors;
+}
+
+.cropper-footer {
+  @apply flex items-center justify-end space-x-2 p-4 border-t border-gray-200;
+}
+
+.btn-secondary {
+  @apply px-4 py-2 text-sm text-gray-700 bg-gray-100 rounded hover:bg-gray-200 transition-colors;
+}
+
+.btn-primary {
+  @apply px-4 py-2 text-sm text-white bg-blue-500 rounded hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.upload-progress {
+  @apply mt-2;
+}
+
+.progress-bar {
+  @apply w-full bg-gray-200 rounded-full h-2;
+}
+
+.progress-fill {
+  @apply bg-blue-500 h-2 rounded-full transition-all duration-300;
+}
+
+.progress-text {
+  @apply text-xs text-gray-600 mt-1 block;
+}
+
+.error-message {
+  @apply mt-2 text-sm text-red-600;
+}
+
+/* Vue Advanced Cropper custom styles */
+:deep(.vue-advanced-cropper) {
+  @apply rounded-lg overflow-hidden;
+  width: 100%;
+  height: 100%;
+}
+
+:deep(.vue-advanced-cropper__image) {
+  @apply rounded-lg;
+}
+
+:deep(.vue-advanced-cropper__stencil) {
+  @apply rounded-full;
+}
+
+:deep(.vue-advanced-cropper__stencil-grid) {
+  @apply opacity-20;
+}

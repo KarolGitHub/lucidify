@@ -65,14 +65,7 @@ export default defineComponent({
         currentInterests.some(
           (interest, index) => interest !== formData.interests[index],
         );
-      console.debug(
-        "💪 ~ hasChanges ~ formData.profilePicture:",
-        formData.profilePicture,
-      );
-      console.debug(
-        "💪 ~ hasChanges ~ userProfile.value.profilePicture:",
-        userProfile.value.profilePicture,
-      );
+
       return (
         formData.displayName !== (userProfile.value.displayName || "") ||
         formData.profilePicture !== (userProfile.value.profilePicture || "") ||

@@ -1,7 +1,16 @@
-<template src="./Home.html"> </template>
+<template>
+  <!-- component -->
+  <div></div>
+</template>
 
-<script lang="ts" src="./Home.ts"></script>
+<script lang="ts">
+import { defineComponent } from "vue";
 
-<style lang="scss">
+export default defineComponent({
+  setup() {
+    return {};
+  },
+});
+</script>
 
-</style>
+<style lang="scss"></style>
