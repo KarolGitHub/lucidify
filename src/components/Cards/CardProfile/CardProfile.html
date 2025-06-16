@@ -1,5 +1,5 @@
 <div
-  class="relative flex flex-col w-full min-w-0 mb-6 break-words bg-white rounded-lg shadow-xl"
+  class="relative flex flex-col w-full min-w-0 mb-6 break-words bg-white rounded-lg shadow-xl dark:bg-gray-800"
 >
   <div class="px-6">
     <div class="flex flex-wrap justify-center">
@@ -33,14 +33,16 @@
 
         <div v-else-if="userProfile">
           <h3
-            class="mb-2 text-xl font-semibold leading-normal text-blueGray-700"
+            class="mb-2 text-xl font-semibold leading-normal text-blueGray-700 dark:text-white"
           >
             {{ userProfile.displayName || 'Dreamer' }}
           </h3>
           <div
-            class="mt-0 mb-2 text-sm font-bold leading-normal uppercase text-blueGray-400"
+            class="mt-0 mb-2 text-sm font-bold leading-normal uppercase text-blueGray-400 dark:text-gray-300"
           >
-            <i class="mr-2 text-lg fas fa-map-marker-alt text-blueGray-400"></i>
+            <i
+              class="mr-2 text-lg fas fa-map-marker-alt text-blueGray-400 dark:text-gray-300"
+            ></i>
             {{ userProfile.email }}
           </div>
 
@@ -56,14 +58,16 @@
           <!-- Bio -->
           <div
             v-if="userProfile.profile?.bio"
-            class="mb-6 text-sm text-blueGray-600"
+            class="mb-6 text-sm text-blueGray-600 dark:text-gray-300"
           >
             {{ userProfile.profile.bio }}
           </div>
         </div>
 
         <div v-else class="py-4 text-center">
-          <p class="text-blueGray-600">Failed to load profile data</p>
+          <p class="text-blueGray-600 dark:text-gray-300">
+            Failed to load profile data
+          </p>
         </div>
       </div>
     </div>
@@ -71,11 +75,13 @@
     <!-- Statistics Section -->
     <div
       v-if="userProfile && !loading"
-      class="py-10 mt-10 text-center border-t border-blueGray-200"
+      class="py-10 mt-10 text-center border-t border-blueGray-200 dark:border-gray-600"
     >
       <div class="flex flex-wrap justify-center">
         <div class="w-full px-4 lg:w-9/12">
-          <p class="mb-4 text-lg leading-relaxed text-blueGray-700">
+          <p
+            class="mb-4 text-lg leading-relaxed text-blueGray-700 dark:text-white"
+          >
             <span class="font-bold">Lucid Dream Progress</span>
           </p>
 
@@ -123,14 +129,16 @@
             class="mb-6"
           >
             <div v-if="userProfile.profile?.goals?.length" class="mb-4">
-              <h4 class="mb-2 text-sm font-semibold text-blueGray-600">
+              <h4
+                class="mb-2 text-sm font-semibold text-blueGray-600 dark:text-gray-300"
+              >
                 Goals
               </h4>
               <div class="flex flex-wrap justify-center gap-2">
                 <span
                   v-for="goal in userProfile.profile.goals"
                   :key="goal"
-                  class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full"
+                  class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium px-2.5 py-0.5 rounded-full"
                 >
                   {{ goal }}
                 </span>
@@ -138,14 +146,16 @@
             </div>
 
             <div v-if="userProfile.profile?.interests?.length">
-              <h4 class="mb-2 text-sm font-semibold text-blueGray-600">
+              <h4
+                class="mb-2 text-sm font-semibold text-blueGray-600 dark:text-gray-300"
+              >
                 Interests
               </h4>
               <div class="flex flex-wrap justify-center gap-2">
                 <span
                   v-for="interest in userProfile.profile.interests"
                   :key="interest"
-                  class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full"
+                  class="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-medium px-2.5 py-0.5 rounded-full"
                 >
                   {{ interest }}
                 </span>
@@ -154,7 +164,7 @@
           </div>
 
           <!-- Account Information -->
-          <div class="mb-6 text-sm text-blueGray-500">
+          <div class="mb-6 text-sm text-blueGray-500 dark:text-gray-400">
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
                 <span class="font-semibold">Member since:</span> {{ memberSince
