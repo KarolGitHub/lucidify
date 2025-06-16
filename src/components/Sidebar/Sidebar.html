@@ -30,10 +30,10 @@
     </ul>
     <!-- Collapse -->
     <div
-      class="absolute top-full left-0 right-0 z-40 items-center flex-1 h-auto overflow-x-hidden overflow-y-auto rounded shadow md:flex md:flex-col md:items-stretch md:opacity-100 md:relative md:mt-4 md:shadow-none md:top-auto"
+      class="absolute top-full left-0 right-0 z-40 items-center flex-1 h-auto overflow-x-hidden overflow-y-auto rounded shadow md:flex md:flex-col md:items-stretch md:opacity-100 md:relative md:mt-4 md:shadow-none md:top-auto bg-white dark:bg-gray-800 md:bg-black md:dark:bg-black"
       :class="collapseShow"
     >
-      <hr class="my-4 md:min-w-full" />
+      <hr class="my-4 md:min-w-full border-blueGray-200 dark:border-gray-600" />
       <ul
         class="flex-col items-center hidden mr-2 list-none md:flex-row md:flex"
       >
@@ -41,7 +41,7 @@
       </ul>
       <!-- Collapse header -->
       <div
-        class="block pb-4 mb-4 border-b border-solid md:min-w-full md:hidden border-blueGray-200"
+        class="block pb-4 mb-4 border-b border-solid md:min-w-full md:hidden border-blueGray-200 dark:border-gray-600"
       >
         <div class="flex flex-wrap">
           <div class="w-6/12">
@@ -69,12 +69,12 @@
           <input
             type="text"
             placeholder="Search"
-            class="w-full h-12 px-3 py-2 text-base font-normal leading-snug bg-white border border-solid rounded shadow-none outline-none border-blueGray-500 placeholder-blueGray-300 text-blueGray-600 focus:outline-none"
+            class="w-full h-12 px-3 py-2 text-base font-normal leading-snug bg-white dark:bg-gray-700 border border-solid rounded shadow-none outline-none border-blueGray-500 dark:border-gray-600 placeholder-blueGray-300 dark:placeholder-gray-400 text-blueGray-600 dark:text-gray-200 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400"
           />
         </div>
       </form>
 
-      <hr class="my-4 md:min-w-full" />
+      <hr class="my-4 md:min-w-full border-blueGray-200 dark:border-gray-600" />
 
       <ul class="flex flex-col list-none md:flex-col md:min-w-full">
         <li class="inline-flex">
@@ -155,19 +155,19 @@
         </li>
       </ul> -->
 
-      <hr class="my-4 md:min-w-full" />
+      <hr class="my-4 md:min-w-full border-blueGray-200 dark:border-gray-600" />
 
       <!-- Test Notification Button (remove in production) -->
       <div class="px-4 py-2">
         <button
           @click="testNotification"
-          class="w-full px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          class="w-full px-4 py-2 text-sm font-medium text-white bg-blue-600 dark:bg-blue-700 rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
         >
           Test Notification
         </button>
       </div>
 
-      <hr class="my-4 md:min-w-full" />
+      <hr class="my-4 md:min-w-full border-blueGray-200 dark:border-gray-600" />
     </div>
   </div>
 </nav>
