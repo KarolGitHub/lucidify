@@ -51,8 +51,15 @@ export default defineComponent({
     this.requestNotificationPermission();
   },
   methods: {
-    toggleCollapseShow(classes: string) {
-      this.collapseShow = classes;
+    toggleCollapseShow(classes?: string) {
+      // If no classes provided, toggle between open and closed
+      if (!classes) {
+        this.collapseShow =
+          this.collapseShow === "hidden" ? "bg-white m-2 py-3 px-6" : "hidden";
+      } else {
+        // If classes provided, set to that state
+        this.collapseShow = classes;
+      }
     },
 
     setupMessageListener() {
