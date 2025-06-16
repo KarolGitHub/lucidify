@@ -161,6 +161,7 @@ export default defineComponent({
       // Computed
       greeting,
       userName,
+      stats,
       lastDream,
       lucidDreamsCount,
       lucidDreamsThisMonth,

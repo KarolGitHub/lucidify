@@ -377,6 +377,21 @@ app.listen(PORT, () => {
     `📱 Notifications endpoint: http://localhost:${PORT}/api/notifications/send`,
   );
   console.log(`🛠️ Admin panel: http://localhost:${PORT}/admin`);
+
+  // Initialize reality check schedules after server starts
+  if (firebaseInitialized) {
+    setTimeout(async () => {
+      try {
+        const notificationService = require("./services/notificationService");
+
+        console.log("🔄 Initializing reality check schedules...");
+        await notificationService.initializeAllSchedules();
+        console.log("✅ Reality check schedules initialized successfully");
+      } catch (error) {
+        console.error("❌ Error initializing reality check schedules:", error);
+      }
+    }, 3000); // Wait 3 seconds for database connection to be fully established
+  }
 });
 
 module.exports = app;

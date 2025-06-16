@@ -49,6 +49,10 @@ class NotificationService {
         return false;
       }
 
+      console.log(
+        `Attempting to send notification to user: ${userId} with token: ${user.fcmToken.substring(0, 20)}...`,
+      );
+
       const message = {
         token: user.fcmToken,
         notification: {
@@ -79,21 +83,49 @@ class NotificationService {
       };
 
       const response = await admin.messaging().send(message);
-      console.log(`Notification sent to user ${userId}:`, response);
+      console.log(
+        `✅ Notification sent successfully to user ${userId}:`,
+        response,
+      );
       return true;
     } catch (error) {
-      console.error("Error sending notification:", error);
+      console.error(
+        `❌ Error sending notification to user ${userId}:`,
+        error.message,
+      );
+      console.error("Error details:", {
+        code: error.code,
+        message: error.message,
+        errorInfo: error.errorInfo,
+      });
 
-      // If token is invalid, remove it
+      // If token is invalid, remove it and log the action
       if (
         error.code === "messaging/invalid-registration-token" ||
         error.code === "messaging/registration-token-not-registered"
       ) {
+        console.log(`🔄 Removing invalid FCM token for user: ${userId}`);
         await this.removeFCMToken(userId);
+
+        // Also stop reality check scheduling for this user since they have no valid token
+        this.stopRealityChecks(userId);
+        console.log(
+          `⏹️ Stopped reality check scheduling for user: ${userId} due to invalid token`,
+        );
       }
 
       return false;
     }
+  }
+
+  // Validate FCM token format
+  validateFCMToken(token) {
+    if (!token || typeof token !== "string") {
+      return false;
+    }
+
+    // FCM tokens are typically 140+ characters long and contain alphanumeric characters, hyphens, and underscores
+    return /^[A-Za-z0-9_-]{140,}$/.test(token);
   }
 
   // Schedule reality check notifications for a user
@@ -107,6 +139,15 @@ class NotificationService {
         !user ||
         !user.preferences.notificationSettings.realityCheckScheduler.enabled
       ) {
+        console.log(`⏹️ Reality check scheduler disabled for user: ${userId}`);
+        return;
+      }
+
+      // Validate FCM token before scheduling
+      if (!user.fcmToken || !this.validateFCMToken(user.fcmToken)) {
+        console.log(
+          `⚠️ Skipping reality check scheduling for user ${userId}: Invalid or missing FCM token`,
+        );
         return;
       }
 
@@ -162,7 +203,7 @@ class NotificationService {
       this.scheduledJobs.set(userId, job);
 
       console.log(
-        `Reality check notifications scheduled for user ${userId} with cron: ${cronExpression}`,
+        `✅ Reality check notifications scheduled for user ${userId} with cron: ${cronExpression}`,
       );
     } catch (error) {
       console.error("Error scheduling reality checks:", error);
@@ -224,20 +265,51 @@ class NotificationService {
   // Initialize reality check schedules for all enabled users
   async initializeAllSchedules() {
     try {
+      console.log("🔍 Finding users with enabled reality check scheduler...");
+
       const users = await User.find({
         "preferences.notificationSettings.realityCheckScheduler.enabled": true,
         fcmToken: { $exists: true, $ne: null },
       });
 
+      console.log(
+        `📊 Found ${users.length} users with enabled reality check scheduler`,
+      );
+
+      let scheduledCount = 0;
+      let skippedCount = 0;
+
       for (const user of users) {
-        await this.scheduleRealityChecks(user.firebaseUid);
+        try {
+          // Validate FCM token using the new validation method
+          if (!this.validateFCMToken(user.fcmToken)) {
+            console.log(
+              `⚠️ Skipping user ${user.firebaseUid}: Invalid FCM token format`,
+            );
+            skippedCount++;
+            continue;
+          }
+
+          await this.scheduleRealityChecks(user.firebaseUid);
+          scheduledCount++;
+          console.log(
+            `✅ Scheduled reality checks for user: ${user.firebaseUid}`,
+          );
+        } catch (error) {
+          console.error(
+            `❌ Error scheduling reality checks for user ${user.firebaseUid}:`,
+            error.message,
+          );
+          skippedCount++;
+        }
       }
 
-      console.log(
-        `Initialized reality check schedules for ${users.length} users`,
-      );
+      console.log(`🎯 Reality check initialization complete:`);
+      console.log(`   ✅ Successfully scheduled: ${scheduledCount} users`);
+      console.log(`   ⚠️ Skipped: ${skippedCount} users`);
+      console.log(`   📊 Total processed: ${users.length} users`);
     } catch (error) {
-      console.error("Error initializing reality check schedules:", error);
+      console.error("❌ Error initializing reality check schedules:", error);
     }
   }
 

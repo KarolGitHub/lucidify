@@ -24,15 +24,66 @@ messaging.onBackgroundMessage(messaging, function (payload) {
     "💪 ~ file: firebase-messaging-sw.js:9 ~ messaging.onBackgroundMessage ~ payload:",
     payload,
   );
-  const notificationTitle = payload.notification?.title ?? "Unexpected error";
+
+  const notificationTitle = payload.notification?.title ?? "Reality Check";
   const notificationOptions = {
-    body: payload.notification?.body,
+    body: payload.notification?.body || "Are you dreaming?",
     icon: "./favicon-32x32.png",
-    // type: 'json'
+    badge: "./favicon-32x32.png",
+    tag: "reality-check", // Group notifications
+    requireInteraction: true, // Keep notification until user interacts
+    actions: [
+      {
+        action: "check",
+        title: "Perform Reality Check",
+        icon: "./favicon-32x32.png",
+      },
+      {
+        action: "record",
+        title: "Record Dream",
+        icon: "./favicon-32x32.png",
+      },
+      {
+        action: "dismiss",
+        title: "Dismiss",
+        icon: "./favicon-32x32.png",
+      },
+    ],
+    data: payload.data || {},
+    vibrate: [200, 100, 200], // Vibration pattern
+    silent: false,
+    sound: "default",
   };
 
   return self.registration.showNotification(
     notificationTitle,
     notificationOptions,
   );
+});
+
+// Handle notification clicks
+self.addEventListener("notificationclick", function (event) {
+  console.log("Notification clicked:", event);
+
+  event.notification.close();
+
+  // Handle different actions
+  if (event.action === "check") {
+    // Open reality check page
+    event.waitUntil(clients.openWindow("/reality-check"));
+  } else if (event.action === "record") {
+    // Open dream journal with new dream modal
+    event.waitUntil(clients.openWindow("/dream-journal?new=1"));
+  } else if (event.action === "dismiss") {
+    // Just close the notification (already done above)
+    console.log("Notification dismissed");
+  } else {
+    // Default action - open reality check page
+    event.waitUntil(clients.openWindow("/reality-check"));
+  }
+});
+
+// Handle notification close
+self.addEventListener("notificationclose", function (event) {
+  console.log("Notification closed:", event);
 });
