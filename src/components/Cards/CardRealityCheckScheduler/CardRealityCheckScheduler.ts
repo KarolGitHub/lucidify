@@ -63,7 +63,41 @@ export default defineComponent({
     };
 
     const saveSettings = async () => {
-      await store.actions.updateSettings(localSettings.value);
+      try {
+        await store.actions.updateSettings(localSettings.value);
+
+        // If settings are enabled and we don't have a valid FCM token, try to refresh it
+        if (
+          localSettings.value.enabled &&
+          !fcmToken.value &&
+          notificationPermission.value === "granted"
+        ) {
+          console.log(
+            "Settings enabled but no FCM token found, attempting to refresh...",
+          );
+          await refreshFCMToken();
+        }
+      } catch (error: any) {
+        // If the error is related to invalid FCM token, try to refresh it
+        if (
+          error.response?.data?.message?.includes("token") ||
+          error.response?.data?.message?.includes("notification")
+        ) {
+          console.log(
+            "Token-related error detected, attempting to refresh FCM token...",
+          );
+          await refreshFCMToken();
+          // Try saving settings again after token refresh
+          try {
+            await store.actions.updateSettings(localSettings.value);
+          } catch (retryError) {
+            console.error(
+              "Error saving settings after token refresh:",
+              retryError,
+            );
+          }
+        }
+      }
     };
 
     const requestPermission = async () => {
@@ -102,10 +136,38 @@ export default defineComponent({
           // Update local FCM token
           fcmToken.value = token;
           console.log("FCM token stored successfully");
+        } else {
+          // Clear local FCM token if no token is available
+          fcmToken.value = null;
+          console.log("No FCM token available");
         }
       } catch (error) {
         console.error("Error getting FCM token:", error);
+        // Clear local FCM token on error
+        fcmToken.value = null;
+
+        // If it's a token-related error, try to remove the invalid token
+        if (error && typeof error === "object" && "code" in error) {
+          const errorCode = (error as any).code;
+          if (
+            errorCode === "messaging/registration-token-not-registered" ||
+            errorCode === "messaging/invalid-registration-token"
+          ) {
+            try {
+              await store.actions.removeFCMToken();
+              console.log("Invalid FCM token removed from backend");
+            } catch (removeError) {
+              console.error("Error removing invalid FCM token:", removeError);
+            }
+          }
+        }
       }
+    };
+
+    // Method to refresh FCM token
+    const refreshFCMToken = async () => {
+      console.log("Refreshing FCM token...");
+      await initializeFirebaseMessaging();
     };
 
     // Lifecycle
@@ -147,6 +209,7 @@ export default defineComponent({
       saveSettings,
       requestPermission,
       handleEnableChange,
+      refreshFCMToken,
     };
   },
 });
