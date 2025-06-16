@@ -44,13 +44,20 @@
         </div>
 
         <div class="cropper-content">
-          <VueCropper ref="cropper" :src="cropperImage" :aspect-ratio="1" :view-mode="2" :auto-crop-area="0.8"
-            :background="true" :movable="true" :zoomable="true" :scalable="true" :rotatable="true" :center="true"
-            :highlight="false" :crop-box-movable="true" :crop-box-resizable="true" :toggle-drag-mode-on-dblclick="false"
-            class="cropper-component" />
+          <Cropper ref="cropper" :src="cropperImage" :stencil-props="{
+            aspectRatio: 1,
+            grid: true,
+          }" class="cropper-component" />
         </div>
 
         <div class="cropper-actions">
+          <button @click="checkCropperState" class="action-btn">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Debug State
+          </button>
           <button @click="rotateLeft" class="action-btn">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -81,8 +88,8 @@
 
         <div class="cropper-footer">
           <button @click="closeCropper" class="btn-secondary">Cancel</button>
-          <button @click="cropImage" class="btn-primary" :disabled="cropping">
-            {{ cropping ? 'Cropping...' : 'Crop & Save' }}
+          <button @click="cropImage" class="btn-primary" :disabled="cropping || !cropperReady">
+            {{ cropping ? 'Cropping...' : !cropperReady ? 'Loading...' : 'Crop & Save' }}
           </button>
         </div>
       </div>
@@ -104,14 +111,16 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onUnmounted } from 'vue';
-import VueCropper from 'vue-cropper';
-import 'vue-cropper/dist/index.css';
+import { defineComponent, ref, onUnmounted, nextTick } from 'vue';
+import { Cropper } from 'vue-advanced-cropper';
+import 'vue-advanced-cropper/dist/style.css';
+import apiClient from '../../services/axios/config';
+import { AxiosProgressEvent } from 'axios';
 
 export default defineComponent({
   name: 'AvatarUpload',
   components: {
-    VueCropper
+    Cropper
   },
   props: {
     currentAvatar: {
@@ -133,6 +142,8 @@ export default defineComponent({
     const uploadProgress = ref(0);
     const error = ref('');
     const cropping = ref(false);
+    const cropperReady = ref(false);
+    const zoomLevel = ref(1); // Track zoom level
 
     // File validation
     const validateFile = (file: File): string | null => {
@@ -166,8 +177,24 @@ export default defineComponent({
       previewUrl.value = URL.createObjectURL(file);
     };
 
+    // Validate image loads properly
+    const validateImageLoad = (url: string): Promise<boolean> => {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          console.log('Image loaded successfully:', img.width, 'x', img.height);
+          resolve(true);
+        };
+        img.onerror = () => {
+          console.log('Image failed to load');
+          resolve(false);
+        };
+        img.src = url;
+      });
+    };
+
     // Handle file selection
-    const handleFileSelect = (event: Event) => {
+    const handleFileSelect = async (event: Event) => {
       const input = event.target as HTMLInputElement;
       if (!input.files || !input.files[0]) return;
 
@@ -182,7 +209,14 @@ export default defineComponent({
       error.value = '';
       selectedFile.value = file;
       createPreviewUrl(file);
-      openCropper();
+
+      // Validate that the image loads properly before opening cropper
+      const imageLoaded = await validateImageLoad(previewUrl.value);
+      if (imageLoaded) {
+        openCropper();
+      } else {
+        error.value = 'Failed to load image. Please try another file.';
+      }
     };
 
     // Drag & Drop handlers
@@ -196,7 +230,7 @@ export default defineComponent({
       isDragOver.value = false;
     };
 
-    const handleDrop = (event: DragEvent) => {
+    const handleDrop = async (event: DragEvent) => {
       event.preventDefault();
       isDragOver.value = false;
 
@@ -214,7 +248,14 @@ export default defineComponent({
       error.value = '';
       selectedFile.value = file;
       createPreviewUrl(file);
-      openCropper();
+
+      // Validate that the image loads properly before opening cropper
+      const imageLoaded = await validateImageLoad(previewUrl.value);
+      if (imageLoaded) {
+        openCropper();
+      } else {
+        error.value = 'Failed to load image. Please try another file.';
+      }
     };
 
     // Trigger file input
@@ -235,58 +276,170 @@ export default defineComponent({
 
     // Cropper methods
     const openCropper = () => {
+      console.log('Opening cropper, selectedFile:', selectedFile.value);
       if (selectedFile.value) {
+        cropperReady.value = false;
+        zoomLevel.value = 1; // Reset zoom level
         cropperImage.value = previewUrl.value;
         showCropper.value = true;
+        console.log('Cropper opened with image:', cropperImage.value);
+
+        // Wait for the cropper to be mounted and then check if it's ready
+        nextTick(() => {
+          setTimeout(() => {
+            checkCropperState();
+            // If the cropper has a valid result, mark it as ready
+            if (cropper.value) {
+              try {
+                const result = cropper.value.getResult();
+                if (result && result.canvas && result.canvas.width > 0 && result.canvas.height > 0) {
+                  console.log('Cropper appears to be ready based on canvas size');
+                  cropperReady.value = true;
+                }
+              } catch (err) {
+                console.log('Error checking cropper readiness:', err);
+              }
+            }
+          }, 1000); // Give it a bit more time to initialize
+        });
       }
     };
 
     const closeCropper = () => {
       showCropper.value = false;
       cropperImage.value = '';
+      cropperReady.value = false;
+    };
+
+    const onCropperReady = () => {
+      console.log('Cropper is ready!');
+      cropperReady.value = true;
+    };
+
+    // Add a method to check cropper state
+    const checkCropperState = () => {
+      console.log('Checking cropper state...');
+      console.log('Cropper ref:', cropper.value);
+      console.log('Cropper ready:', cropperReady.value);
+      console.log('Show cropper:', showCropper.value);
+      console.log('Cropper image:', cropperImage.value);
+
+      if (cropper.value) {
+        try {
+          const result = cropper.value.getResult();
+          console.log('Cropper result:', result);
+          if (result && result.canvas) {
+            console.log('Canvas dimensions:', result.canvas.width, 'x', result.canvas.height);
+          }
+        } catch (err) {
+          console.log('Error getting cropper result:', err);
+        }
+      }
     };
 
     const rotateLeft = () => {
-      cropper.value?.rotate(-90);
+      console.log('Rotate left clicked, cropper:', cropper.value);
+      if (cropper.value) {
+        cropper.value.rotate(-90);
+      }
     };
 
     const rotateRight = () => {
-      cropper.value?.rotate(90);
+      console.log('Rotate right clicked, cropper:', cropper.value);
+      if (cropper.value) {
+        cropper.value.rotate(90);
+      }
     };
 
     const zoomIn = () => {
-      cropper.value?.zoom(0.1);
+      console.log('Zoom in clicked, cropper:', cropper.value);
+      if (cropper.value) {
+        cropper.value.zoom(1.1); // Scale to 110%
+        zoomLevel.value *= 1.1;
+        // Check if zoom was successful
+        setTimeout(() => {
+          checkCropperState();
+        }, 100);
+      }
     };
 
     const zoomOut = () => {
-      cropper.value?.zoom(-0.1);
+      console.log('Zoom out clicked, cropper:', cropper.value);
+      if (cropper.value && zoomLevel.value > 0.3) { // Prevent zooming out too much
+        // Zoom out by using a scale factor less than 1
+        cropper.value.zoom(0.9); // Scale to 90%
+        zoomLevel.value *= 0.9;
+
+        // Check if zoom made the cropper invalid
+        setTimeout(() => {
+          const result = cropper.value?.getResult();
+          if (result && result.canvas && (result.canvas.width === 0 || result.canvas.height === 0)) {
+            console.log('Zoom out made cropper invalid, resetting...');
+            // Reset the cropper by refreshing it
+            cropper.value.refresh();
+            cropperReady.value = false;
+            zoomLevel.value = 1; // Reset zoom level
+            // Wait a bit and then check again
+            setTimeout(() => {
+              checkCropperState();
+              const newResult = cropper.value?.getResult();
+              if (newResult && newResult.canvas && newResult.canvas.width > 0 && newResult.canvas.height > 0) {
+                cropperReady.value = true;
+              }
+            }, 200);
+          }
+        }, 100);
+      } else {
+        console.log('Cannot zoom out further - at minimum zoom level');
+      }
     };
 
     // Crop and upload
     const cropImage = async () => {
-      if (!cropper.value) return;
+      console.log('Crop image clicked, cropper:', cropper.value, 'ready:', cropperReady.value);
+      if (!cropper.value || !cropperReady.value) {
+        error.value = 'Cropper is not ready yet. Please wait a moment and try again.';
+        return;
+      }
 
       cropping.value = true;
       error.value = '';
 
       try {
-        const canvas = cropper.value.getCroppedCanvas({
-          width: 400,
-          height: 400,
-          imageSmoothingEnabled: true,
-          imageSmoothingQuality: 'high'
-        });
+        console.log('Getting result from cropper...');
+        const result = cropper.value.getResult();
+        console.log('Cropper result:', result);
 
+        if (!result || !result.canvas) {
+          console.log('No result or canvas from cropper');
+          error.value = 'Failed to get cropped image';
+          cropping.value = false;
+          return;
+        }
+
+        console.log('Canvas:', result.canvas);
+        console.log('Canvas width/height:', result.canvas.width, result.canvas.height);
+
+        if (result.canvas.width === 0 || result.canvas.height === 0) {
+          console.log('Canvas is empty (0x0)');
+          error.value = 'Cropper is not properly initialized. Please try again.';
+          cropping.value = false;
+          return;
+        }
+
+        console.log('Converting canvas to blob...');
         // Convert canvas to blob
-        canvas.toBlob(async (blob: Blob | null) => {
+        result.canvas.toBlob(async (blob: Blob | null) => {
+          console.log('Blob created:', blob);
           if (!blob) {
-            error.value = 'Failed to crop image';
+            error.value = 'Failed to crop image (canvas toBlob returned null)';
             cropping.value = false;
             return;
           }
 
           // Create file from blob
           const croppedFile = new File([blob], 'avatar.jpg', { type: 'image/jpeg' });
+          console.log('File created:', croppedFile);
 
           // Upload the cropped image
           await uploadFile(croppedFile);
@@ -295,6 +448,7 @@ export default defineComponent({
           closeCropper();
         }, 'image/jpeg', 0.9);
       } catch (err: any) {
+        console.log("💪 ~ cropImage ~ err:", err);
         error.value = err.message || 'Failed to crop image';
         cropping.value = false;
       }
@@ -309,43 +463,29 @@ export default defineComponent({
         const formData = new FormData();
         formData.append('avatar', file);
 
-        const xhr = new XMLHttpRequest();
-        xhr.open('POST', '/api/users/upload-avatar');
-        xhr.withCredentials = true;
-
-        xhr.upload.onprogress = (e) => {
-          if (e.lengthComputable) {
-            uploadProgress.value = Math.round((e.loaded / e.total) * 100);
-          }
-        };
-
-        xhr.onload = () => {
-          if (xhr.status === 200) {
-            const response = JSON.parse(xhr.responseText);
-            if (response.success && response.url) {
-              emit('avatar-uploaded', response.url);
-              uploadProgress.value = 100;
-              setTimeout(() => {
-                uploadProgress.value = 0;
-              }, 1000);
-            } else {
-              error.value = response.error || 'Upload failed';
-              uploadProgress.value = 0;
+        const response = await apiClient.post('users/upload-avatar', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+          onUploadProgress: (progressEvent: AxiosProgressEvent) => {
+            if (progressEvent.total) {
+              uploadProgress.value = Math.round((progressEvent.loaded / progressEvent.total) * 100);
             }
-          } else {
-            error.value = xhr.statusText || 'Upload failed';
+          },
+        });
+
+        if (response.data.success && response.data.url) {
+          emit('avatar-uploaded', response.data.url);
+          uploadProgress.value = 100;
+          setTimeout(() => {
             uploadProgress.value = 0;
-          }
-        };
-
-        xhr.onerror = () => {
-          error.value = 'Upload failed';
+          }, 1000);
+        } else {
+          error.value = response.data.error || 'Upload failed';
           uploadProgress.value = 0;
-        };
-
-        xhr.send(formData);
+        }
       } catch (err: any) {
-        error.value = err.message || 'Upload failed';
+        error.value = err.response?.data?.error || err.message || 'Upload failed';
         uploadProgress.value = 0;
       }
     };
@@ -369,6 +509,8 @@ export default defineComponent({
       uploadProgress,
       error,
       cropping,
+      cropperReady,
+      zoomLevel,
       handleFileSelect,
       handleDragOver,
       handleDragLeave,
@@ -377,6 +519,8 @@ export default defineComponent({
       removeFile,
       openCropper,
       closeCropper,
+      onCropperReady,
+      checkCropperState,
       rotateLeft,
       rotateRight,
       zoomIn,
@@ -464,10 +608,14 @@ export default defineComponent({
 
 .cropper-content {
   @apply p-4;
+  height: 400px;
+  min-height: 400px;
 }
 
 .cropper-component {
-  @apply max-h-96;
+  width: 100%;
+  height: 400px;
+  min-height: 400px;
 }
 
 .cropper-actions {
@@ -508,5 +656,24 @@ export default defineComponent({
 
 .error-message {
   @apply mt-2 text-sm text-red-600;
+}
+
+/* Vue Advanced Cropper custom styles */
+:deep(.vue-advanced-cropper) {
+  @apply rounded-lg overflow-hidden;
+  width: 100%;
+  height: 100%;
+}
+
+:deep(.vue-advanced-cropper__image) {
+  @apply rounded-lg;
+}
+
+:deep(.vue-advanced-cropper__stencil) {
+  @apply rounded-full;
+}
+
+:deep(.vue-advanced-cropper__stencil-grid) {
+  @apply opacity-20;
 }
 </style>

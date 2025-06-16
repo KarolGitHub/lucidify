@@ -4,6 +4,7 @@ const helmet = require("helmet");
 const morgan = require("morgan");
 const rateLimit = require("express-rate-limit");
 const mongoose = require("mongoose");
+const path = require("path");
 require("dotenv").config();
 
 // Initialize Firebase Admin SDK
@@ -91,6 +92,9 @@ const limiter = rateLimit({
   },
 });
 app.use("/api/", limiter);
+
+// Serve uploaded avatars
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Import routes
 const dreamRoutes = require("./routes/dreams");

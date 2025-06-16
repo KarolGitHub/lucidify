@@ -24,6 +24,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       trim: true,
       default: null,
+      select: true, // Explicitly include in queries
     },
     // Password for JWT authentication (optional if using Firebase)
     password: {
@@ -219,8 +220,26 @@ const userSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-    toJSON: { virtuals: true },
-    toObject: { virtuals: true },
+    toJSON: {
+      virtuals: true,
+      transform: function (doc, ret) {
+        // Ensure profilePicture is always included in JSON output
+        if (ret.profilePicture === undefined) {
+          ret.profilePicture = null;
+        }
+        return ret;
+      },
+    },
+    toObject: {
+      virtuals: true,
+      transform: function (doc, ret) {
+        // Ensure profilePicture is always included in object output
+        if (ret.profilePicture === undefined) {
+          ret.profilePicture = null;
+        }
+        return ret;
+      },
+    },
   },
 );
 

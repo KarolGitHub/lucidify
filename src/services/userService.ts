@@ -54,6 +54,7 @@ export interface UserProfile {
 
 export interface UpdateUserProfileRequest {
   displayName?: string;
+  profilePicture?: string;
   preferences?: Partial<UserProfile["preferences"]>;
   profile?: Partial<UserProfile["profile"]>;
 }
@@ -322,6 +323,23 @@ class UserService {
       console.error("Failed to export user data:", error);
       throw new Error(
         error.response?.data?.error || "Failed to export user data",
+      );
+    }
+  }
+
+  /**
+   * Update profile picture
+   */
+  async updateProfilePicture(profilePicture: string): Promise<UserProfile> {
+    try {
+      const response = await apiClient.put("users/profile", {
+        profilePicture,
+      });
+      return response.data.data;
+    } catch (error: any) {
+      console.error("Failed to update profile picture:", error);
+      throw new Error(
+        error.response?.data?.error || "Failed to update profile picture",
       );
     }
   }

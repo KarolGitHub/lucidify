@@ -36,17 +36,44 @@ const avatarUpload = multer({
 // GET /api/users/profile - Get current user profile
 router.get("/profile", authenticateUser, async (req, res) => {
   try {
-    const user = await User.findOne({ firebaseUid: req.user.firebaseUid });
+    const user = await User.findOne({
+      firebaseUid: req.user.firebaseUid,
+    });
 
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
+
+    // Debug: Direct MongoDB query to bypass Mongoose
+    const db = User.db;
+    const collection = db.collection("users");
+    const rawDoc = await collection.findOne({
+      firebaseUid: req.user.firebaseUid,
+    });
+    console.log("Direct MongoDB document:", JSON.stringify(rawDoc, null, 2));
+
+    // Debug: Check what's actually in the database
+    console.log(
+      "Raw user object from database:",
+      JSON.stringify(user.toObject(), null, 2),
+    );
+    console.log("profilePicture field specifically:", user.profilePicture);
+
+    // Debug: Try different query methods
+    const userLean = await User.findOne({
+      firebaseUid: req.user.firebaseUid,
+    }).lean();
+    console.log("Lean query profilePicture:", userLean.profilePicture);
+
+    const userById = await User.findById(user._id);
+    console.log("FindById profilePicture:", userById.profilePicture);
 
     console.log(
       "Returning user profile:",
       JSON.stringify(
         {
           displayName: user.displayName,
+          profilePicture: user.profilePicture,
           profile: user.profile,
           preferences: user.preferences,
         },
@@ -94,8 +121,24 @@ router.put(
       .withMessage("Interests must be an array"),
     body("profilePicture")
       .optional()
-      .isURL()
-      .withMessage("Profile picture must be a valid URL"),
+      .custom((value) => {
+        // Allow empty string, null, or undefined
+        if (!value || value === "") {
+          return true;
+        }
+        // Allow relative paths starting with /
+        if (value.startsWith("/")) {
+          return true;
+        }
+        // Allow full URLs
+        try {
+          new URL(value);
+          return true;
+        } catch {
+          return false;
+        }
+      })
+      .withMessage("Profile picture must be a valid URL or relative path"),
   ],
   async (req, res) => {
     try {
@@ -190,6 +233,7 @@ router.put(
         JSON.stringify(
           {
             displayName: user.displayName,
+            profilePicture: user.profilePicture,
             profile: user.profile,
             preferences: user.preferences,
           },
@@ -539,13 +583,84 @@ router.post(
   "/upload-avatar",
   authenticateUser,
   avatarUpload.single("avatar"),
-  (req, res) => {
+  async (req, res) => {
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded" });
     }
-    // Return the public URL for the uploaded avatar
-    const avatarUrl = `/uploads/avatars/${req.file.filename}`;
-    res.json({ success: true, url: avatarUrl });
+
+    try {
+      // Get current user to check if they have an existing avatar
+      const currentUser = await User.findOne({
+        firebaseUid: req.user.firebaseUid,
+      });
+
+      // Return the public URL for the uploaded avatar
+      const avatarUrl = `/uploads/avatars/${req.file.filename}`;
+
+      // Update the user's profile with the new avatar URL
+      const updatedUser = await User.findOneAndUpdate(
+        { firebaseUid: req.user.firebaseUid },
+        { profilePicture: avatarUrl },
+        { new: true },
+      );
+
+      if (!updatedUser) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      // Debug: Check what was actually saved
+      console.log(
+        "Avatar upload - updatedUser.profilePicture:",
+        updatedUser.profilePicture,
+      );
+      console.log("Avatar upload - avatarUrl that was saved:", avatarUrl);
+
+      // Debug: Direct database query to verify what's stored
+      const directUser = await User.findOne({
+        firebaseUid: req.user.firebaseUid,
+      }).lean();
+      console.log(
+        "Avatar upload - Direct DB query profilePicture:",
+        directUser.profilePicture,
+      );
+
+      // Delete the old avatar file if it exists and is different from the new one
+      if (
+        currentUser &&
+        currentUser.profilePicture &&
+        currentUser.profilePicture !== avatarUrl
+      ) {
+        const oldAvatarPath = path.join(
+          __dirname,
+          "..",
+          currentUser.profilePicture,
+        );
+        try {
+          if (fs.existsSync(oldAvatarPath)) {
+            fs.unlinkSync(oldAvatarPath);
+            console.log(`Deleted old avatar: ${oldAvatarPath}`);
+          }
+        } catch (deleteError) {
+          console.error("Error deleting old avatar file:", deleteError);
+          // Don't fail the upload if we can't delete the old file
+        }
+      }
+
+      console.log(
+        `Avatar uploaded and saved for user ${req.user.firebaseUid}: ${avatarUrl}`,
+      );
+
+      res.json({
+        success: true,
+        url: avatarUrl,
+        message: "Avatar uploaded and profile updated successfully",
+      });
+    } catch (error) {
+      console.error("Error updating user profile with avatar:", error);
+      res
+        .status(500)
+        .json({ error: "Failed to update user profile with avatar" });
+    }
   },
 );
 

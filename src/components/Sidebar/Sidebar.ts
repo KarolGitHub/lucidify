@@ -153,7 +153,7 @@ export default defineComponent({
 
         const response = await apiClient.post("fcm-tokens", tokenData);
 
-        if (response.status === 200) {
+        if (response.status >= 200 && response.status < 300) {
           const result = response.data;
           console.log("FCM token sent successfully:", result);
         } else {

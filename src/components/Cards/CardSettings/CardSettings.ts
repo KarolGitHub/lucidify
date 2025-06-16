@@ -4,6 +4,9 @@ import AvatarUpload from "@/components/AvatarUpload/AvatarUpload.vue";
 
 export default defineComponent({
   name: "CardSettings",
+  components: {
+    AvatarUpload,
+  },
   setup() {
     // Reactive data
     const loading = ref(false);
@@ -62,7 +65,14 @@ export default defineComponent({
         currentInterests.some(
           (interest, index) => interest !== formData.interests[index],
         );
-
+      console.debug(
+        "💪 ~ hasChanges ~ formData.profilePicture:",
+        formData.profilePicture,
+      );
+      console.debug(
+        "💪 ~ hasChanges ~ userProfile.value.profilePicture:",
+        userProfile.value.profilePicture,
+      );
       return (
         formData.displayName !== (userProfile.value.displayName || "") ||
         formData.profilePicture !== (userProfile.value.profilePicture || "") ||
@@ -285,20 +295,40 @@ export default defineComponent({
 
     const handleImageError = () => {
       // Clear the invalid image URL
-      formData.profilePicture = "";
+      // formData.profilePicture = "";
     };
 
     // Avatar upload event handlers
-    const onAvatarUploaded = (avatarUrl: string) => {
+    const onAvatarUploaded = async (avatarUrl: string) => {
       formData.profilePicture = avatarUrl;
       success.value = "Avatar uploaded successfully!";
+
+      // The avatar URL is already saved to the server by the upload endpoint
+      // No need to refresh user data as it would overwrite the avatar URL
+
       setTimeout(() => {
         success.value = null;
       }, 3000);
     };
 
-    const onAvatarRemoved = () => {
+    const onAvatarRemoved = async () => {
       formData.profilePicture = "";
+
+      // Update the server to remove the avatar
+      try {
+        await userService.updateProfilePicture("");
+        await loadUserData(); // Refresh data from server
+        success.value = "Avatar removed successfully!";
+        setTimeout(() => {
+          success.value = null;
+        }, 3000);
+      } catch (err) {
+        console.error("Error removing avatar:", err);
+        error.value = "Failed to remove avatar";
+        setTimeout(() => {
+          error.value = null;
+        }, 3000);
+      }
     };
 
     // Load data on mount
