@@ -1,14 +1,15 @@
 {
   "name": "lucidify",
+  "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "node scripts/inject-sw-config.js && vite",
     "build": "node scripts/inject-sw-config.js && vite build",
     "start": "npm run dev",
-    "lint": "eslint . --ext .js,.ts,.vue",
-    "lint:fix": "eslint . --ext .js,.ts,.vue --fix",
-    "prebuild": "node scripts/inject-sw-config.js"
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview",
+    "prebuild": "npm run lint"
   },
   "dependencies": {
     "@bundled-es-modules/axios": "^0.27.2",
