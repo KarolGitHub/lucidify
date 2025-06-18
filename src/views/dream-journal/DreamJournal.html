@@ -1,164 +1,62 @@
-<template>
-  <div
-    class="dream-journal"
-    :class="{ 'mobile': isMobile, 'tablet': isTablet, 'desktop': isDesktop }"
-  >
-    <!-- Search and filters -->
-    <div class="controls">
-      <div class="search-container">
-        <input
-          ref="searchInputRef"
-          v-model="searchQuery"
-          type="text"
-          placeholder="Search dreams..."
-          class="search-input"
-        />
-        <i class="fas fa-search search-icon"></i>
-      </div>
-
-      <div class="filters">
-        <select v-model="filters.selectedFilter" @change="handleFilterChange">
-          <option value="all">All Dreams</option>
-          <option value="lucid">Lucid Dreams</option>
-          <option value="vivid">Vivid Dreams</option>
-          <option value="recurring">Recurring Dreams</option>
-          <option value="nightmare">Nightmares</option>
-        </select>
-      </div>
-
-      <button class="new-dream-btn" @click="openNewDreamModal">
-        <i class="fas fa-plus"></i>
-        New Dream
-      </button>
+<div
+  class="dream-journal"
+  :class="{ 'mobile': isMobile, 'tablet': isTablet, 'desktop': isDesktop }"
+>
+  <!-- Search and filters -->
+  <div class="controls">
+    <div class="search-container">
+      <input
+        ref="searchInputRef"
+        v-model="searchQuery"
+        type="text"
+        placeholder="Search dreams..."
+        class="search-input"
+      />
+      <i class="fas fa-search search-icon"></i>
     </div>
 
-    <!-- Dream list -->
-    <DreamList
-      :dreams="filteredDreams"
-      :is-loading="isLoading"
-      @load-more="loadMoreDreams"
-    />
+    <div class="filters">
+      <select v-model="selectedFilter">
+        <option value="all">All Dreams</option>
+        <option value="lucid">Lucid Dreams</option>
+        <option value="vivid">Vivid Dreams</option>
+        <option value="recurring">Recurring Dreams</option>
+        <option value="nightmare">Nightmares</option>
+      </select>
+    </div>
 
-    <!-- Modals -->
-    <NewDreamModal
-      v-if="showNewDreamModal"
-      :dream="newDream"
-      @close="closeNewDreamModal"
-      @save="handleSaveDream"
-    />
-
-    <EditDreamModal
-      v-if="showEditModal"
-      :dream="editingDream"
-      @close="closeEditModal"
-      @update="handleUpdateDream"
-    />
-
-    <DeleteConfirmModal
-      v-if="showDeleteConfirm"
-      :dream-id="dreamToDelete"
-      @confirm="confirmDeleteDream"
-      @cancel="cancelDeleteDream"
-    />
+    <button class="new-dream-btn" @click="openNewDreamModal">
+      <i class="fas fa-plus"></i>
+      New Dream
+    </button>
   </div>
-</template>
 
-<style scoped>
-  .dream-journal {
-    padding: 1rem;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
+  <!-- Dream list -->
+  <DreamList
+    :dreams="filteredDreams"
+    :is-loading="isLoading"
+    @load-more="loadMoreDreams"
+  />
 
-  .controls {
-    display: flex;
-    gap: 1rem;
-    align-items: center;
-    flex-wrap: wrap;
-  }
+  <!-- Modals -->
+  <NewDreamModal
+    v-if="showNewDreamModal"
+    :dream="newDream"
+    @close="closeNewDreamModal"
+    @save="handleSaveDream"
+  />
 
-  .search-container {
-    position: relative;
-    flex: 1;
-    min-width: 200px;
-  }
+  <EditDreamModal
+    v-if="showEditModal"
+    :dream="editingDream"
+    @close="closeEditModal"
+    @update="handleUpdateDream"
+  />
 
-  .search-input {
-    width: 100%;
-    padding: 0.75rem 1rem 0.75rem 2.5rem;
-    border: 1px solid #e2e8f0;
-    border-radius: 0.5rem;
-    font-size: 1rem;
-    transition: border-color 0.2s;
-  }
-
-  .search-input:focus {
-    outline: none;
-    border-color: #3498db;
-  }
-
-  .search-icon {
-    position: absolute;
-    left: 1rem;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #718096;
-  }
-
-  .filters select {
-    padding: 0.75rem 1rem;
-    border: 1px solid #e2e8f0;
-    border-radius: 0.5rem;
-    font-size: 1rem;
-    background-color: white;
-    cursor: pointer;
-  }
-
-  .new-dream-btn {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1.5rem;
-    background-color: #3498db;
-    color: white;
-    border: none;
-    border-radius: 0.5rem;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: background-color 0.2s;
-  }
-
-  .new-dream-btn:hover {
-    background-color: #2980b9;
-  }
-
-  /* Responsive styles */
-  .mobile .controls {
-    flex-direction: column;
-  }
-
-  .mobile .search-container,
-  .mobile .filters,
-  .mobile .new-dream-btn {
-    width: 100%;
-  }
-
-  .tablet .controls {
-    flex-wrap: wrap;
-  }
-
-  .tablet .search-container {
-    flex: 1 1 100%;
-  }
-
-  .tablet .filters,
-  .tablet .new-dream-btn {
-    flex: 1;
-  }
-
-  .desktop .controls {
-    flex-wrap: nowrap;
-  }
-</style>
+  <DeleteConfirmModal
+    v-if="showDeleteConfirm"
+    :dream-id="dreamToDelete"
+    @confirm="confirmDeleteDream"
+    @cancel="cancelDeleteDream"
+  />
+</div>

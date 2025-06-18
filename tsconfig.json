@@ -10,7 +10,7 @@
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "lib": ["ESNext", "DOM", "WebWorker"],
-    "types": ["vite/client", "node"],
+    "types": ["vite/client", "node", "@vueuse/core"],
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]

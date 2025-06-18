@@ -1,5 +1,12 @@
-import { defineComponent, ref, computed, onMounted, watch } from "vue";
-import { useVirtualList, useInfiniteScroll, useNetwork } from "@vueuse/core";
+import {
+  defineComponent,
+  ref,
+  computed,
+  onMounted,
+  watch,
+  type Ref,
+} from "vue";
+import { useScroll, useNetwork } from "@vueuse/core";
 import { Dream } from "@/interface/Dream";
 import DreamCard from "../DreamCard/DreamCard.vue";
 import { dreams } from "@/store";
@@ -18,8 +25,12 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
+    highlightedDreamId: {
+      type: String,
+      default: null,
+    },
   },
-  emits: ["load-more"],
+  emits: ["load-more", "view-dream"],
   setup(props, { emit }) {
     const containerRef = ref<HTMLElement | null>(null);
     const ITEM_HEIGHT = 180; // Approximate height of each dream card
@@ -37,23 +48,25 @@ export default defineComponent({
       }
     });
 
-    // Virtual list
-    const { list, containerProps, wrapperProps } = useVirtualList(
-      props.dreams,
-      {
-        itemHeight: ITEM_HEIGHT,
-        overscan: 5,
-      },
-    );
+    // Scroll handling
+    const { y: scrollY } = useScroll(containerRef);
+    const visibleDreams = computed(() => {
+      if (!containerRef.value) return props.dreams;
+
+      const containerHeight = containerRef.value.clientHeight;
+      const startIndex = Math.floor(scrollY.value / ITEM_HEIGHT);
+      const visibleCount = Math.ceil(containerHeight / ITEM_HEIGHT) + 2; // Add buffer
+
+      return props.dreams.slice(startIndex, startIndex + visibleCount);
+    });
 
     // Infinite scroll
     const isLoadingMore = ref(false);
     const hasMore = computed(() => {
-      // Implement your logic to determine if there are more dreams to load
-      return (
-        dreams.getters.getDreams().length <
-        dreams.getters.getStats()?.totalDreams
-      );
+      const stats = dreams.getters.getStats();
+      return stats
+        ? dreams.getters.getDreams().length < stats.totalDreams
+        : false;
     });
 
     const loadMore = async () => {
@@ -67,30 +80,43 @@ export default defineComponent({
       }
     };
 
-    useInfiniteScroll(containerRef, loadMore, { distance: 10 });
+    // Check if we're near the bottom
+    watch(scrollY, (y) => {
+      if (!containerRef.value) return;
+
+      const { scrollHeight, clientHeight } = containerRef.value;
+      if (scrollHeight - (y + clientHeight) < 100) {
+        loadMore();
+      }
+    });
+
+    const viewDream = (dream: Dream) => {
+      emit("view-dream", dream);
+    };
 
     const containerStyle = computed(() => ({
       height: "100%",
       overflow: "auto",
-      position: "relative",
+      position: "relative" as const,
     }));
 
     const wrapperStyle = computed(() => ({
-      position: "relative",
+      position: "relative" as const,
       width: "100%",
+      height: `${props.dreams.length * ITEM_HEIGHT}px`,
     }));
 
     return {
       containerRef,
-      containerProps,
-      wrapperProps,
       containerStyle,
       wrapperStyle,
-      list,
+      visibleDreams,
       isOnline,
       showOfflineWarning,
       isLoadingMore,
       hasMore,
+      ITEM_HEIGHT,
+      viewDream,
     };
   },
 });
