@@ -1,10 +1,11 @@
 import { defineComponent, computed, onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
-import { useDebounce } from "@vueuse/core";
+import { useDebounce, useBreakpoints, useKeyboardShortcut } from "@vueuse/core";
 import { auth, dreams } from "@/store";
 import { Dream } from "@/interface/Dream";
 import VoiceToText from "@/components/VoiceToText";
 import AIDreamAnalysis from "@/components/AIDreamAnalysis";
+import DreamList from "@/components/DreamList/DreamList.vue";
 
 // Extended Dream interface for editing
 interface EditingDream extends Dream {
@@ -16,9 +17,40 @@ export default defineComponent({
   components: {
     VoiceToText,
     AIDreamAnalysis,
+    DreamList,
   },
   setup() {
     const route = useRoute();
+    const searchInputRef = ref<HTMLInputElement | null>(null);
+
+    // Breakpoints for responsive design
+    const breakpoints = useBreakpoints({
+      sm: 640,
+      md: 768,
+      lg: 1024,
+      xl: 1280,
+    });
+
+    const isMobile = computed(() => breakpoints.smaller("md").value);
+    const isTablet = computed(() => breakpoints.between("md", "lg").value);
+    const isDesktop = computed(() => breakpoints.greater("lg").value);
+
+    // Keyboard shortcuts
+    useKeyboardShortcut(["ctrl", "n"], () => {
+      openNewDreamModal();
+    });
+
+    useKeyboardShortcut(["ctrl", "f"], () => {
+      searchInputRef.value?.focus();
+    });
+
+    useKeyboardShortcut(["escape"], () => {
+      if (showNewDreamModal.value) {
+        closeNewDreamModal();
+      } else if (showEditModal.value) {
+        closeEditModal();
+      }
+    });
 
     // Reactive data
     const emotions = ref([
@@ -425,6 +457,10 @@ export default defineComponent({
 
       // Debounced search
       searchQuery,
+      searchInputRef,
+      isMobile,
+      isTablet,
+      isDesktop,
     };
   },
 });
