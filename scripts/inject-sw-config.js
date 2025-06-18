@@ -13,6 +13,7 @@ dotenv.config();
 const swPath = path.resolve(__dirname, "../src/firebase-messaging-sw.js");
 let swContent = fs.readFileSync(swPath, "utf8");
 
+// Ensure all required Firebase config values are present
 const firebaseConfig = {
   apiKey: process.env.VITE_FIREBASE_API_KEY,
   authDomain: process.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -23,6 +24,22 @@ const firebaseConfig = {
   vapidKey: process.env.VITE_FIREBASE_VAPID_KEY,
 };
 
+// Validate required config values
+const requiredFields = [
+  "apiKey",
+  "authDomain",
+  "projectId",
+  "storageBucket",
+  "messagingSenderId",
+  "appId",
+];
+const missingFields = requiredFields.filter((field) => !firebaseConfig[field]);
+
+if (missingFields.length > 0) {
+  console.error("Missing required Firebase config values:", missingFields);
+  process.exit(1);
+}
+
 // Replace the config injection line with the actual config
 swContent = swContent.replace(
   "const firebaseConfig = self.__FIREBASE_CONFIG__;",
@@ -31,4 +48,4 @@ swContent = swContent.replace(
 
 fs.writeFileSync(swPath, swContent);
 
-console.log("✅ Service worker config injected");
+console.log("✅ Service worker config injected successfully");

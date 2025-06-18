@@ -27,7 +27,12 @@ export default tseslint.config(
     rules: {
       "vue/multi-word-component-names": "off",
       "vue/no-v-html": "off",
-      "prettier/prettier": "error",
+      "prettier/prettier": [
+        "error",
+        {
+          endOfLine: "auto",
+        },
+      ],
       "tailwindcss/classnames-order": "warn",
       "tailwindcss/enforces-negative-arbitrary-values": "warn",
       "tailwindcss/enforces-shorthand": "warn",
