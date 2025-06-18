@@ -1,4 +1,5 @@
 import { defineComponent, ref, computed, onMounted, watch } from "vue";
+import { useAsyncState } from "@vueuse/core";
 import aiService from "@/services/aiService";
 import {
   AIAnalysis,
@@ -36,22 +37,44 @@ export default defineComponent({
     "insights-complete",
   ],
   setup(props, { emit }) {
-    // Reactive state
-    const aiStatus = ref<AIStatus>({
-      available: false,
-      model: "",
-      configured: false,
-    });
+    // Async state for AI operations
+    const { state: aiStatus, isLoading: isCheckingStatus } = useAsyncState(
+      async () => {
+        const status = await aiService.getStatus();
+        return status;
+      },
+      { available: false, model: "", configured: false },
+    );
 
-    const analysis = ref<AIAnalysis | null>(null);
-    const interpretation = ref<AIIntepretation | null>(null);
-    const insights = ref<AIInsights | null>(null);
-    const completeAnalysisResult = ref<CompleteAIAnalysis | null>(null);
+    const {
+      state: analysis,
+      isLoading: isAnalyzing,
+      execute: analyzeDream,
+    } = useAsyncState(async () => {
+      if (!props.dreamData.description)
+        throw new Error("No dream description provided");
+      return await aiService.analyzeDream(props.dreamData.description);
+    }, null);
 
-    const isAnalyzing = ref(false);
-    const isInterpreting = ref(false);
-    const isCompleteAnalyzing = ref(false);
-    const error = ref("");
+    const {
+      state: interpretation,
+      isLoading: isInterpreting,
+      execute: interpretDream,
+    } = useAsyncState(async () => {
+      if (!props.dreamData.description)
+        throw new Error("No dream description provided");
+      return await aiService.interpretDream(props.dreamData.description);
+    }, null);
+
+    const {
+      state: insights,
+      isLoading: isGeneratingInsights,
+      execute: generateInsights,
+    } = useAsyncState(async () => {
+      if (!props.dreamData.description)
+        throw new Error("No dream description provided");
+      return await aiService.generateInsights(props.dreamData.description);
+    }, null);
 
     const activeTab = ref("analysis");
 
@@ -65,12 +88,7 @@ export default defineComponent({
     });
 
     const hasResults = computed(() => {
-      return (
-        analysis.value ||
-        interpretation.value ||
-        insights.value ||
-        completeAnalysisResult.value
-      );
+      return analysis.value || interpretation.value || insights.value;
     });
 
     const availableTabs = computed(() => {
@@ -108,97 +126,6 @@ export default defineComponent({
     });
 
     // Methods
-    const checkAIStatus = async () => {
-      try {
-        aiStatus.value = await aiService.getStatus();
-      } catch (error) {
-        console.error("Failed to check AI status:", error);
-        aiStatus.value = {
-          available: false,
-          model: "",
-          configured: false,
-        };
-      }
-    };
-
-    const analyzeDream = async () => {
-      if (!canAnalyze.value) return;
-
-      try {
-        isAnalyzing.value = true;
-        error.value = "";
-
-        analysis.value = await aiService.analyzeDream(
-          props.dreamData.description,
-          props.dreamData.title,
-        );
-
-        emit("analysis-complete", analysis.value);
-      } catch (err: any) {
-        error.value = err.message || "Failed to analyze dream";
-        console.error("AI Analysis Error:", err);
-      } finally {
-        isAnalyzing.value = false;
-      }
-    };
-
-    const interpretDream = async () => {
-      if (!canAnalyze.value) return;
-
-      try {
-        isInterpreting.value = true;
-        error.value = "";
-
-        interpretation.value = await aiService.interpretDream(
-          props.dreamData.description,
-          props.dreamData.title,
-          {
-            isLucid: props.dreamData.isLucid,
-            isNightmare: props.dreamData.isNightmare,
-          },
-        );
-
-        emit("interpretation-complete", interpretation.value);
-      } catch (err: any) {
-        error.value = err.message || "Failed to interpret dream";
-        console.error("AI Interpretation Error:", err);
-      } finally {
-        isInterpreting.value = false;
-      }
-    };
-
-    const performCompleteAnalysis = async () => {
-      if (!canAnalyze.value) return;
-
-      try {
-        isCompleteAnalyzing.value = true;
-        error.value = "";
-
-        const result = await aiService.completeAnalysis(
-          props.dreamData.description,
-          props.dreamData.title,
-          {
-            isLucid: props.dreamData.isLucid,
-            isNightmare: props.dreamData.isNightmare,
-          },
-        );
-
-        analysis.value = result.analysis;
-        interpretation.value = result.interpretation;
-        insights.value = result.insights;
-        completeAnalysisResult.value = result;
-
-        emit("analysis-complete", result.analysis);
-        emit("interpretation-complete", result.interpretation);
-        emit("insights-complete", result.insights);
-      } catch (err: any) {
-        error.value = err.message || "Failed to complete analysis";
-        console.error("Complete AI Analysis Error:", err);
-      } finally {
-        isCompleteAnalyzing.value = false;
-      }
-    };
-
     const applyTag = (tag: string) => {
       const updatedData = {
         ...props.dreamData,
@@ -282,8 +209,6 @@ export default defineComponent({
       analysis.value = null;
       interpretation.value = null;
       insights.value = null;
-      completeAnalysisResult.value = null;
-      error.value = "";
       activeTab.value = "analysis";
     };
 
@@ -308,12 +233,18 @@ export default defineComponent({
       analysis,
       interpretation,
       insights,
-      completeAnalysisResult,
+      activeTab,
+
+      // Loading states
+      isCheckingStatus,
       isAnalyzing,
       isInterpreting,
-      isCompleteAnalyzing,
-      error,
-      activeTab,
+      isGeneratingInsights,
+
+      // Methods
+      analyzeDream,
+      interpretDream,
+      generateInsights,
 
       // Computed
       canAnalyze,
@@ -322,9 +253,6 @@ export default defineComponent({
       canApplySuggestions,
 
       // Methods
-      analyzeDream,
-      interpretDream,
-      completeAnalysis: performCompleteAnalysis,
       applyTag,
       applyEmotion,
       applyTheme,

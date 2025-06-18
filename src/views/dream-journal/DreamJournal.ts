@@ -1,5 +1,6 @@
 import { defineComponent, computed, onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
+import { useDebounce } from "@vueuse/core";
 import { auth, dreams } from "@/store";
 import { Dream } from "@/interface/Dream";
 import VoiceToText from "@/components/VoiceToText";
@@ -168,6 +169,10 @@ export default defineComponent({
       dreams.getters.getShowNewDreamModal(),
     );
     const isLoading = computed(() => dreams.getters.getDreams().length === 0);
+
+    // Debounced search
+    const searchQuery = ref("");
+    const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
     // Helper function to convert ISO date to YYYY-MM-DD format for HTML date input
     const formatDateForInput = (dateString: string): string => {
@@ -362,6 +367,12 @@ export default defineComponent({
       { immediate: true },
     );
 
+    // Watch for debounced search changes
+    watch(debouncedSearchQuery, (newValue) => {
+      dreams.actions.setFilters({ searchQuery: newValue });
+      dreams.actions.searchDreams({ searchQuery: newValue });
+    });
+
     // Lifecycle
     onMounted(async () => {
       // Check if user is authenticated
@@ -411,6 +422,9 @@ export default defineComponent({
       closeEditModal,
       resetNewDreamForm,
       handleAISuggestionsApplied,
+
+      // Debounced search
+      searchQuery,
     };
   },
 });

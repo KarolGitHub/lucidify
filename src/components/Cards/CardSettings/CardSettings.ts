@@ -1,4 +1,5 @@
 import { defineComponent, ref, reactive, onMounted, computed } from "vue";
+import { useLocalStorage } from "@vueuse/core";
 import userService, { UserProfile, UserSettings } from "@/services/userService";
 import AvatarUpload from "@/components/AvatarUpload/AvatarUpload.vue";
 
@@ -17,8 +18,8 @@ export default defineComponent({
     const userProfile = ref<UserProfile | null>(null);
     const userSettings = ref<UserSettings | null>(null);
 
-    // Form data
-    const formData = reactive({
+    // Persistent form data with localStorage
+    const formData = useLocalStorage("user-settings", {
       displayName: "",
       email: "",
       profilePicture: "",
