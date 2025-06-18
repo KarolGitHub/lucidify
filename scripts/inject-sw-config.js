@@ -24,6 +24,16 @@ const firebaseConfig = {
   vapidKey: process.env.VITE_FIREBASE_VAPID_KEY,
 };
 
+// Log the config values (excluding sensitive data)
+console.log("Firebase Config Values:");
+Object.entries(firebaseConfig).forEach(([key, value]) => {
+  if (key === "apiKey") {
+    console.log(`${key}: ${value ? "***" + value.slice(-4) : "undefined"}`);
+  } else {
+    console.log(`${key}: ${value || "undefined"}`);
+  }
+});
+
 // Validate required config values
 const requiredFields = [
   "apiKey",
@@ -41,11 +51,15 @@ if (missingFields.length > 0) {
 }
 
 // Replace the config injection line with the actual config
+const configString = JSON.stringify(firebaseConfig, null, 2);
+console.log("\nInjected Config:");
+console.log(configString);
+
 swContent = swContent.replace(
   "const firebaseConfig = self.__FIREBASE_CONFIG__;",
-  `const firebaseConfig = ${JSON.stringify(firebaseConfig)};`,
+  `const firebaseConfig = ${configString};`,
 );
 
 fs.writeFileSync(swPath, swContent);
 
-console.log("✅ Service worker config injected successfully");
+console.log("\n✅ Service worker config injected successfully");
