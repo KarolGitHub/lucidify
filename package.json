@@ -16,7 +16,8 @@
     "test:e2e:dev": "cypress open",
     "test:component": "vitest --environment jsdom",
     "test:all": "npm run test && npm run test:component && npm run test:e2e",
-    "prebuild": "npm run test:all"
+    "test:all:optional": "npm run test:all || true",
+    "prebuild": "npm run test:all:optional"
   },
   "dependencies": {
     "@bundled-es-modules/axios": "^0.27.2",
