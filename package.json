@@ -3,11 +3,12 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "dev": "node scripts/inject-sw-config.js && vite",
+    "build": "node scripts/inject-sw-config.js && vite build",
     "start": "npm run dev",
     "lint": "eslint . --ext .js,.ts,.vue",
-    "lint:fix": "eslint . --ext .js,.ts,.vue --fix"
+    "lint:fix": "eslint . --ext .js,.ts,.vue --fix",
+    "prebuild": "node scripts/inject-sw-config.js"
   },
   "dependencies": {
     "@bundled-es-modules/axios": "^0.27.2",
@@ -43,6 +44,7 @@
     "@vue/eslint-config-typescript": "^14.5.0",
     "autoprefixer": "^10.4.21",
     "babel-eslint": "^10.1.0",
+    "dotenv": "^16.5.0",
     "eslint": "^9.28.0",
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-prettier": "^5.4.1",

@@ -129,22 +129,23 @@
 
 ### Setup Guides
 
-- [MongoDB Atlas Setup](./MONGODB_ATLAS_SETUP.md) - Configure cloud database
-- [MongoDB Local Setup](./MONGODB_LOCAL_SETUP.md) - Set up local database
-- [Firebase Auth Setup](./backend/FIREBASE_AUTH_SETUP.md) - Configure authentication
-- [Dream Journal Setup](./DREAM_JOURNAL_SETUP.md) - Complete setup guide
+- [MongoDB Atlas Setup](./docs/MONGODB_ATLAS_SETUP.md) - Configure cloud database
+- [MongoDB Local Setup](./docs/MONGODB_LOCAL_SETUP.md) - Set up local database
+- [Firebase Auth Setup](./docs/FIREBASE_AUTH_SETUP.md) - Configure authentication
+- [Dream Journal Setup](./docs/DREAM_JOURNAL_SETUP.md) - Complete setup guide
+- [Backend API Documentation](./docs/BACKEND_API.md) - Backend API documentation
 
 ### Feature Documentation
 
-- [AI Features](./AI_FEATURES.md) - AI-powered dream analysis
-- [Voice-to-Text Feature](./VOICE_TO_TEXT_FEATURE.md) - Speech recognition
-- [Avatar Feature](./AVATAR_FEATURE.md) - User profile pictures
-- [User Settings](./USER_SETTINGS_DOCUMENTATION.md) - User preferences
+- [AI Features](./docs/AI_FEATURES.md) - AI-powered dream analysis
+- [Voice-to-Text Feature](./docs/VOICE_TO_TEXT_FEATURE.md) - Speech recognition
+- [Avatar Feature](./docs/AVATAR_FEATURE.md) - User profile pictures
+- [User Settings](./docs/USER_SETTINGS_DOCUMENTATION.md) - User preferences
 
 ### API Documentation
 
-- [JWT Migration Guide](./backend/JWT_MIGRATION_GUIDE.md) - Authentication updates
-- [JWT Usage Examples](./backend/JWT_USAGE_EXAMPLES.md) - Implementation examples
+- [JWT Migration Guide](./docs/JWT_MIGRATION_GUIDE.md) - Authentication updates
+- [JWT Usage Examples](./docs/JWT_USAGE_EXAMPLES.md) - Implementation examples
 
 ## 🛠️ Development
 

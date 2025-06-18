@@ -15,13 +15,48 @@ const connectDB = async () => {
   try {
     const mongoURI =
       process.env.MONGODB_URI || "mongodb://localhost:27017/lucidify";
+    console.log("🔗 Attempting to connect to MongoDB...");
+    console.log("📍 URI:", mongoURI.replace(/\/\/.*@/, "//***:***@")); // Hide credentials
+
     await mongoose.connect(mongoURI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
+      serverSelectionTimeoutMS: 30000, // Increase timeout to 30 seconds
+      socketTimeoutMS: 45000,
+      family: 4,
+      retryWrites: true,
+      w: "majority",
+      ssl: true,
+      authSource: "admin",
     });
-    console.log("✅ MongoDB connected successfully");
+
+    // Add connection event listeners
+    mongoose.connection.on("connected", () => {
+      console.log("✅ MongoDB connected successfully");
+    });
+
+    mongoose.connection.on("error", (err) => {
+      console.error("❌ MongoDB connection error:", err);
+    });
+
+    mongoose.connection.on("disconnected", () => {
+      console.log("⚠️ MongoDB disconnected");
+    });
+
+    // Handle process termination
+    process.on("SIGINT", async () => {
+      await mongoose.connection.close();
+      console.log("MongoDB connection closed through app termination");
+      process.exit(0);
+    });
   } catch (error) {
     console.error("❌ MongoDB connection error:", error);
+    console.error("Error details:", {
+      name: error.name,
+      message: error.message,
+      code: error.code,
+      codeName: error.codeName,
+    });
     process.exit(1);
   }
 };
@@ -106,6 +141,10 @@ const aiRoutes = require("./routes/ai");
 const fcmTokens = new Map();
 
 // Routes
+app.get("/", (req, res) => {
+  res.redirect("/admin");
+});
+
 app.get("/api/health", (req, res) => {
   res.json({
     status: "OK",
