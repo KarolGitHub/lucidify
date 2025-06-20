@@ -98,13 +98,14 @@ export default defineConfig({
           home: ["./src/views/home/Home"],
           dashboard: ["./src/layout/Layout", "./src/views/dashboard/Dashboard"],
           auth: [
-            "./src/layout/Auth.vue",
+            "./src/layout/Auth",
             "./src/views/auth/login/Login",
             "./src/views/auth/register/Register",
           ],
           settings: ["./src/views/settings/Settings"],
-          about: ["./src/views/About.vue"],
+          about: ["./src/views/About"],
           dreamJournal: ["./src/views/dream-journal/DreamJournal"],
+          realityCheck: ["./src/views/RealityCheck"],
         },
         plugins: [
           visualizer({
