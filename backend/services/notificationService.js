@@ -125,7 +125,7 @@ class NotificationService {
     }
 
     // FCM tokens are typically 140+ characters long and contain alphanumeric characters, hyphens, and underscores
-    return /^[A-Za-z0-9_-]{140,}$/.test(token);
+    return /^[\w-:.]{140,}$/.test(token);
   }
 
   // Schedule reality check notifications for a user
