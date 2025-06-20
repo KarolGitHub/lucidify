@@ -16,6 +16,26 @@ const db = getFirestore(app);
 // Initialize Firebase Cloud Messaging and get a reference to the service
 const messaging = getMessaging(app);
 
+// Helper: Send FCM token to backend
+async function sendTokenToServer(token: string) {
+  try {
+    await fetch("/api/users/fcm-token", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        // Add auth header if needed
+      },
+      body: JSON.stringify({ token }),
+    });
+    console.log("FCM token sent to backend");
+  } catch (err) {
+    console.error("Failed to send FCM token to backend:", err);
+  }
+}
+
+// Store the last sent token in memory
+let lastSentToken: string | null = null;
+
 // Handle incoming messages when the app is in the foreground
 onMessage(messaging, (payload) => {
   console.log("Message received:", payload);
@@ -30,7 +50,7 @@ onMessage(messaging, (payload) => {
 });
 
 // Request permission and get FCM token
-async function requestPermission() {
+async function requestPermissionAndSendToken() {
   try {
     const permission = await Notification.requestPermission();
     if (permission === "granted") {
@@ -39,12 +59,10 @@ async function requestPermission() {
       const currentToken = await getToken(messaging, {
         vapidKey: firebaseConfig.vapidKey,
       });
-
-      if (currentToken) {
-        console.log("Current token:", currentToken);
-        // Send the token to your server
-        // await sendTokenToServer(currentToken);
-      } else {
+      if (currentToken && currentToken !== lastSentToken) {
+        await sendTokenToServer(currentToken);
+        lastSentToken = currentToken;
+      } else if (!currentToken) {
         console.log("No registration token available.");
       }
     } else {
@@ -55,6 +73,12 @@ async function requestPermission() {
   }
 }
 
-requestPermission();
+// Call on page load
+requestPermissionAndSendToken();
+
+// Also check token and send to backend when window regains focus (token may have rotated)
+window.addEventListener("focus", () => {
+  requestPermissionAndSendToken();
+});
 
 export { app, auth, db, messaging };

@@ -7,15 +7,23 @@ class NotificationService {
     this.scheduledJobs = new Map();
   }
 
-  // Store FCM token for a user
-  async storeFCMToken(userId, token) {
+  // Store FCM token for a user (add to fcmTokens array if not present)
+  async storeFCMToken(userId, token, deviceInfo = {}) {
     try {
       await User.findOneAndUpdate(
-        { firebaseUid: userId },
+        { firebaseUid: userId, "fcmTokens.token": { $ne: token } },
         {
-          fcmToken: token,
+          $push: {
+            fcmTokens: {
+              token,
+              deviceInfo,
+              createdAt: new Date(),
+              isActive: true,
+            },
+          },
           fcmTokenUpdatedAt: new Date(),
         },
+        { upsert: false },
       );
       console.log(`FCM token stored for user: ${userId}`);
     } catch (error) {
@@ -24,96 +32,98 @@ class NotificationService {
     }
   }
 
-  // Remove FCM token for a user
-  async removeFCMToken(userId) {
+  // Remove a specific FCM token for a user
+  async removeFCMToken(userId, token) {
     try {
       await User.findOneAndUpdate(
         { firebaseUid: userId },
         {
-          $unset: { fcmToken: 1, fcmTokenUpdatedAt: 1 },
+          $pull: { fcmTokens: { token } },
         },
       );
-      console.log(`FCM token removed for user: ${userId}`);
+      console.log(
+        `FCM token removed for user: ${userId} (token: ${token?.substring?.(0, 20)})`,
+      );
     } catch (error) {
       console.error("Error removing FCM token:", error);
       throw error;
     }
   }
 
-  // Send notification to a specific user
+  // Send notification to all active tokens for a user
   async sendNotification(userId, title, body, data = {}) {
     try {
       const user = await User.findOne({ firebaseUid: userId });
-      if (!user || !user.fcmToken) {
-        console.log(`No FCM token found for user: ${userId}`);
+      if (!user || !user.fcmTokens || user.fcmTokens.length === 0) {
+        console.log(`No FCM tokens found for user: ${userId}`);
         return false;
       }
 
-      console.log(
-        `Attempting to send notification to user: ${userId} with token: ${user.fcmToken.substring(0, 20)}...`,
-      );
-
-      const message = {
-        token: user.fcmToken,
-        notification: {
-          title,
-          body,
-        },
-        data: {
-          ...data,
-          click_action: "FLUTTER_NOTIFICATION_CLICK",
-        },
-        android: {
-          priority: "high",
+      let anySuccess = false;
+      for (const tokenObj of user.fcmTokens) {
+        const token = tokenObj.token;
+        if (!token) continue;
+        console.log(
+          `Attempting to send notification to user: ${userId} with token: ${token.substring(0, 20)}...`,
+        );
+        const message = {
+          token,
           notification: {
-            channelId: "reality-check",
-            priority: "high",
-            defaultSound: true,
-            defaultVibrateTimings: true,
+            title,
+            body,
           },
-        },
-        apns: {
-          payload: {
-            aps: {
-              sound: "default",
-              badge: 1,
+          data: {
+            ...data,
+            click_action: "FLUTTER_NOTIFICATION_CLICK",
+          },
+          android: {
+            priority: "high",
+            notification: {
+              channelId: "reality-check",
+              priority: "high",
+              defaultSound: true,
+              defaultVibrateTimings: true,
             },
           },
-        },
-      };
-
-      const response = await admin.messaging().send(message);
-      console.log(
-        `✅ Notification sent successfully to user ${userId}:`,
-        response,
-      );
-      return true;
-    } catch (error) {
-      console.error(
-        `❌ Error sending notification to user ${userId}:`,
-        error.message,
-      );
-      console.error("Error details:", {
-        code: error.code,
-        message: error.message,
-        errorInfo: error.errorInfo,
-      });
-
-      // If token is invalid, remove it and log the action
-      if (
-        error.code === "messaging/invalid-registration-token" ||
-        error.code === "messaging/registration-token-not-registered"
-      ) {
-        console.log(`🔄 Removing invalid FCM token for user: ${userId}`);
-        await this.removeFCMToken(userId);
-
-        // Also stop reality check scheduling for this user since they have no valid token
-        this.stopRealityChecks(userId);
-        console.log(
-          `⏹️ Stopped reality check scheduling for user: ${userId} due to invalid token`,
-        );
+          apns: {
+            payload: {
+              aps: {
+                sound: "default",
+                badge: 1,
+              },
+            },
+          },
+        };
+        try {
+          const response = await admin.messaging().send(message);
+          console.log(
+            `✅ Notification sent successfully to user ${userId}:`,
+            response,
+          );
+          anySuccess = true;
+        } catch (error) {
+          console.error(
+            `❌ Error sending notification to user ${userId}:`,
+            error.message,
+          );
+          console.error("Error details:", {
+            code: error.code,
+            message: error.message,
+            errorInfo: error.errorInfo,
+          });
+          // If token is invalid, remove only this token
+          if (
+            error.code === "messaging/invalid-registration-token" ||
+            error.code === "messaging/registration-token-not-registered"
+          ) {
+            console.log(`🔄 Removing invalid FCM token for user: ${userId}`);
+            await this.removeFCMToken(userId, token);
+          }
+        }
       }
-
+      return anySuccess;
+    } catch (error) {
+      console.error(`❌ Error sending notification to user ${userId}:`, error);
       return false;
     }
   }
@@ -144,9 +154,9 @@ class NotificationService {
       }
 
       // Validate FCM token before scheduling
-      if (!user.fcmToken || !this.validateFCMToken(user.fcmToken)) {
+      if (!user.fcmTokens || user.fcmTokens.length === 0) {
         console.log(
-          `⚠️ Skipping reality check scheduling for user ${userId}: Invalid or missing FCM token`,
+          `⚠️ Skipping reality check scheduling for user ${userId}: No active FCM tokens`,
         );
         return;
       }
@@ -269,7 +279,7 @@ class NotificationService {
 
       const users = await User.find({
         "preferences.notificationSettings.realityCheckScheduler.enabled": true,
-        fcmToken: { $exists: true, $ne: null },
+        fcmTokens: { $exists: true, $ne: [] },
       });
 
       console.log(
@@ -281,13 +291,16 @@ class NotificationService {
 
       for (const user of users) {
         try {
-          // Validate FCM token using the new validation method
-          if (!this.validateFCMToken(user.fcmToken)) {
-            console.log(
-              `⚠️ Skipping user ${user.firebaseUid}: Invalid FCM token format`,
-            );
-            skippedCount++;
-            continue;
+          // Validate FCM tokens using the new validation method
+          for (const tokenObj of user.fcmTokens) {
+            const token = tokenObj.token;
+            if (!token || !this.validateFCMToken(token)) {
+              console.log(
+                `⚠️ Skipping user ${user.firebaseUid}: Invalid FCM token format`,
+              );
+              skippedCount++;
+              continue;
+            }
           }
 
           await this.scheduleRealityChecks(user.firebaseUid);
