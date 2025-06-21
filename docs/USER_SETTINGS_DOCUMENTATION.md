@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Lucidifier app now includes a comprehensive user settings system that allows users to manage their profile information, preferences, and account settings. The settings are split into two main components: **CardSettings** for editing user data and **CardProfile** for viewing statistics and account information.
+The Lucidify app now includes a comprehensive user settings system that allows users to manage their profile information, preferences, and account settings. The settings are split into two main components: **CardSettings** for editing user data and **CardProfile** for viewing statistics and account information.
 
 ## Features
 

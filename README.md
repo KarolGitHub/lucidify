@@ -65,8 +65,8 @@
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/yourusername/lucidifier.git
-   cd lucidifier
+   git clone https://github.com/yourusername/lucidify.git
+   cd lucidify
    ```
 
 2. **Install frontend dependencies**
@@ -167,7 +167,7 @@ npm run dev         # Start with nodemon (development)
 ### Project Structure
 
 ```
-lucidifier/
+lucidify/
 ├── src/                    # Frontend source code
 │   ├── components/         # Vue components
 │   ├── views/             # Page components

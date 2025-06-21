@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Lucidifier dream journal app now includes AI-powered features for intelligent dream analysis, tagging, and interpretation using OpenAI's GPT models.
+The Lucidify dream journal app now includes AI-powered features for intelligent dream analysis, tagging, and interpretation using OpenAI's GPT models.
 
 ## Features
 
