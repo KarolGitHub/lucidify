@@ -3,7 +3,7 @@ const User = require("./models/User");
 
 // Connect to MongoDB
 mongoose.connect(
-  process.env.MONGODB_URI || "mongodb://localhost:27017/lucidifier",
+  process.env.MONGODB_URI || "mongodb://localhost:27017/lucidify",
   {
     useNewUrlParser: true,
     useUnifiedTopology: true,

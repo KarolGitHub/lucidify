@@ -37,8 +37,15 @@ export default defineComponent({
     "insights-complete",
   ],
   setup(props, { emit }) {
+    // Error state
+    const error = ref("");
+
     // Async state for AI operations
-    const { state: aiStatus, isLoading: isCheckingStatus } = useAsyncState(
+    const {
+      state: aiStatus,
+      isLoading: isCheckingStatus,
+      execute: checkAIStatus,
+    } = useAsyncState(
       async () => {
         const status = await aiService.getStatus();
         return status;
@@ -76,6 +83,16 @@ export default defineComponent({
       return await aiService.generateInsights(props.dreamData.description);
     }, null);
 
+    const {
+      state: completeAnalysisResult,
+      isLoading: isCompleteAnalyzing,
+      execute: completeAnalysis,
+    } = useAsyncState(async () => {
+      if (!props.dreamData.description)
+        throw new Error("No dream description provided");
+      return await aiService.completeAnalysis(props.dreamData.description);
+    }, null);
+
     const activeTab = ref("analysis");
 
     // Computed properties
@@ -88,7 +105,12 @@ export default defineComponent({
     });
 
     const hasResults = computed(() => {
-      return analysis.value || interpretation.value || insights.value;
+      return (
+        analysis.value ||
+        interpretation.value ||
+        insights.value ||
+        completeAnalysisResult.value
+      );
     });
 
     const availableTabs = computed(() => {
@@ -115,6 +137,14 @@ export default defineComponent({
           id: "insights",
           label: "Insights",
           icon: "fas fa-lightbulb",
+        });
+      }
+
+      if (completeAnalysisResult.value) {
+        tabs.push({
+          id: "complete",
+          label: "Complete Analysis",
+          icon: "fas fa-star",
         });
       }
 
@@ -209,6 +239,7 @@ export default defineComponent({
       analysis.value = null;
       interpretation.value = null;
       insights.value = null;
+      completeAnalysisResult.value = null;
       activeTab.value = "analysis";
     };
 
@@ -229,10 +260,12 @@ export default defineComponent({
 
     return {
       // State
+      error,
       aiStatus,
       analysis,
       interpretation,
       insights,
+      completeAnalysisResult,
       activeTab,
 
       // Loading states
@@ -240,11 +273,14 @@ export default defineComponent({
       isAnalyzing,
       isInterpreting,
       isGeneratingInsights,
+      isCompleteAnalyzing,
 
       // Methods
       analyzeDream,
       interpretDream,
       generateInsights,
+      completeAnalysis,
+      checkAIStatus,
 
       // Computed
       canAnalyze,

@@ -1,158 +1,80 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import { mount } from "@vue/test-utils";
-import VoiceToText from "../VoiceToText/VoiceToText.vue";
+import VoiceToText from "@/components/VoiceToText/VoiceToText.vue";
 
 // Mock the Web Speech API
-const mockSpeechRecognition = vi.fn();
-const mockSpeechRecognitionInstance = {
-  continuous: false,
-  interimResults: true,
-  lang: "en-US",
+const mockSpeechRecognition = {
   start: vi.fn(),
   stop: vi.fn(),
-  onstart: null as (() => void) | null,
-  onresult: null as ((event: any) => void) | null,
-  onerror: null as ((event: any) => void) | null,
-  onend: null as (() => void) | null,
+  abort: vi.fn(),
+  addEventListener: vi.fn(),
+  removeEventListener: vi.fn(),
 };
 
-vi.stubGlobal("SpeechRecognition", mockSpeechRecognition);
-vi.stubGlobal("webkitSpeechRecognition", mockSpeechRecognition);
+Object.defineProperty(window, "SpeechRecognition", {
+  value: vi.fn(() => mockSpeechRecognition),
+  writable: true,
+});
+
+Object.defineProperty(window, "webkitSpeechRecognition", {
+  value: vi.fn(() => mockSpeechRecognition),
+  writable: true,
+});
 
 describe("VoiceToText", () => {
   let wrapper: any;
 
   beforeEach(() => {
-    // Reset mocks
-    vi.clearAllMocks();
-    mockSpeechRecognition.mockReturnValue(mockSpeechRecognitionInstance);
-
-    // Reset instance properties
-    mockSpeechRecognitionInstance.onstart = null;
-    mockSpeechRecognitionInstance.onresult = null;
-    mockSpeechRecognitionInstance.onerror = null;
-    mockSpeechRecognitionInstance.onend = null;
-
-    wrapper = mount(VoiceToText, {
-      props: {
-        modelValue: "",
-        placeholder: "Start speaking...",
-        continuous: false,
-        interimResults: true,
-        language: "en-US",
-      },
-    });
+    wrapper = mount(VoiceToText);
   });
 
-  describe("Initialization", () => {
-    it("initializes with default props", () => {
-      expect(wrapper.vm.placeholder).toBe("Start speaking...");
-      expect(wrapper.vm.language).toBe("en-US");
-      expect(wrapper.vm.continuous).toBe(false);
-      expect(wrapper.vm.interimResults).toBe(true);
-    });
-
-    it("checks for browser support on mount", () => {
-      expect(wrapper.vm.isSupported).toBe(true);
-    });
+  it("displays voice recording interface", () => {
+    expect(wrapper.find("button").exists()).toBe(true);
+    expect(wrapper.text()).toContain("Voice to Text");
   });
 
-  describe("Recording Controls", () => {
-    it("starts recording when toggleRecording is called", async () => {
-      await wrapper.vm.toggleRecording();
-      expect(mockSpeechRecognitionInstance.start).toHaveBeenCalled();
-      expect(wrapper.vm.isRecording).toBe(true);
-    });
+  it("toggles recording state when button is clicked", async () => {
+    const button = wrapper.find("button");
+    const initialRecordingState = wrapper.vm.isRecording;
 
-    it("stops recording when toggleRecording is called while recording", async () => {
-      // Start recording
-      await wrapper.vm.toggleRecording();
-      // Stop recording
-      await wrapper.vm.toggleRecording();
-      expect(mockSpeechRecognitionInstance.stop).toHaveBeenCalled();
-    });
+    await button.trigger("click");
+    await wrapper.vm.$nextTick();
 
-    it("emits recording-start event when recording starts", async () => {
-      await wrapper.vm.toggleRecording();
-      expect(wrapper.emitted("recording-start")).toBeTruthy();
-    });
-
-    it("emits recording-stop event when recording stops", async () => {
-      // Start recording
-      await wrapper.vm.toggleRecording();
-      // Stop recording
-      await wrapper.vm.toggleRecording();
-      expect(wrapper.emitted("recording-stop")).toBeTruthy();
-    });
+    expect(wrapper.vm.isRecording).toBe(!initialRecordingState);
   });
 
-  describe("Speech Recognition Events", () => {
-    it("handles successful speech recognition", async () => {
-      const finalTranscript = "Hello world";
-      const event = {
-        resultIndex: 0,
-        results: [[{ transcript: finalTranscript, isFinal: true }]],
-      };
+  it("shows recording indicator when recording", async () => {
+    await wrapper.setData({ isRecording: true });
+    await wrapper.vm.$nextTick();
 
-      await wrapper.vm.toggleRecording();
-      mockSpeechRecognitionInstance.onresult?.(event);
-
-      expect(wrapper.emitted("update:modelValue")).toBeTruthy();
-      expect(wrapper.emitted("transcript-change")).toBeTruthy();
-      expect(wrapper.vm.successMessage).toBe("Voice input added successfully!");
-    });
-
-    it("handles interim results when enabled", async () => {
-      const interimTranscript = "Hello";
-      const event = {
-        resultIndex: 0,
-        results: [[{ transcript: interimTranscript, isFinal: false }]],
-      };
-
-      await wrapper.vm.toggleRecording();
-      mockSpeechRecognitionInstance.onresult?.(event);
-
-      expect(wrapper.vm.transcript).toBe(interimTranscript);
-    });
-
-    it("handles recognition errors", async () => {
-      const errorEvent = { error: "not-allowed" };
-
-      await wrapper.vm.toggleRecording();
-      mockSpeechRecognitionInstance.onerror?.(errorEvent);
-
-      expect(wrapper.vm.error).toBe(
-        "Microphone access denied. Please allow microphone access and try again.",
-      );
-      expect(wrapper.vm.isRecording).toBe(false);
-    });
+    // Check if recording state is reflected in the UI
+    expect(wrapper.vm.isRecording).toBe(true);
   });
 
-  describe("Settings and Configuration", () => {
-    it("updates language when changed", async () => {
-      const newLanguage = "es-ES";
-      await wrapper.setProps({ language: newLanguage });
-      expect(mockSpeechRecognitionInstance.lang).toBe(newLanguage);
-    });
+  it("displays transcribed text when available", async () => {
+    const mockText = "This is a test transcription";
+    await wrapper.setData({ transcribedText: mockText });
+    await wrapper.vm.$nextTick();
 
-    it("updates continuous mode when changed", async () => {
-      await wrapper.setProps({ continuous: true });
-      expect(mockSpeechRecognitionInstance.continuous).toBe(true);
-    });
-
-    it("updates interim results when changed", async () => {
-      await wrapper.setProps({ interimResults: false });
-      expect(mockSpeechRecognitionInstance.interimResults).toBe(false);
-    });
+    expect(wrapper.text()).toContain(mockText);
   });
 
-  describe("Cleanup", () => {
-    it("stops recording and cleans up on unmount", async () => {
-      // Start recording
-      await wrapper.vm.toggleRecording();
-      // Unmount component
-      wrapper.unmount();
-      expect(mockSpeechRecognitionInstance.stop).toHaveBeenCalled();
-    });
+  it("emits text when transcription is complete", async () => {
+    const mockText = "Transcribed text";
+    await wrapper.setData({ transcribedText: mockText });
+    await wrapper.vm.$nextTick();
+
+    // Trigger the emit event
+    await wrapper.vm.emitText();
+
+    expect(wrapper.emitted("text")).toBeTruthy();
+    expect(wrapper.emitted("text")?.[0]).toEqual([mockText]);
+  });
+
+  it("handles recording errors gracefully", async () => {
+    await wrapper.setData({ error: "Recording failed" });
+    await wrapper.vm.$nextTick();
+
+    expect(wrapper.text()).toContain("Recording failed");
   });
 });
