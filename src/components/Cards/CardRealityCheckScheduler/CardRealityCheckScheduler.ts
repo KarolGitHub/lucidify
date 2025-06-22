@@ -1,6 +1,11 @@
 import { defineComponent, ref, computed, onMounted, watch } from "vue";
 import { realityCheckScheduler } from "@/store";
 import { RealityCheckScheduler } from "@/interface/RealityCheckScheduler";
+import {
+  requestPermissionAndSendToken,
+  getCurrentToken,
+  refreshToken,
+} from "@/server/firebase/firebase";
 
 export default defineComponent({
   name: "CardRealityCheckScheduler",
@@ -54,120 +59,86 @@ export default defineComponent({
 
     // Methods
     const fetchSettings = async () => {
-      await store.actions.fetchSettings();
-      // Update local settings with fetched data
-      const settings = store.getters.getSettings();
-      if (settings) {
-        localSettings.value = { ...settings };
+      try {
+        await store.actions.fetchSettings();
+      } catch (error) {
+        console.error("Error fetching settings:", error);
       }
     };
 
     const saveSettings = async () => {
       try {
         await store.actions.updateSettings(localSettings.value);
-
-        // If settings are enabled and we don't have a valid FCM token, try to refresh it
-        if (
-          localSettings.value.enabled &&
-          !fcmToken.value &&
-          notificationPermission.value === "granted"
-        ) {
-          console.log(
-            "Settings enabled but no FCM token found, attempting to refresh...",
-          );
-          await refreshFCMToken();
-        }
-      } catch (error: any) {
-        // If the error is related to invalid FCM token, try to refresh it
-        if (
-          error.response?.data?.message?.includes("token") ||
-          error.response?.data?.message?.includes("notification")
-        ) {
-          console.log(
-            "Token-related error detected, attempting to refresh FCM token...",
-          );
-          await refreshFCMToken();
-          // Try saving settings again after token refresh
-          try {
-            await store.actions.updateSettings(localSettings.value);
-          } catch (retryError) {
-            console.error(
-              "Error saving settings after token refresh:",
-              retryError,
-            );
-          }
-        }
+      } catch (error) {
+        console.error("Error saving settings:", error);
       }
     };
 
     const requestPermission = async () => {
-      const granted = await store.actions.requestNotificationPermission();
-      if (granted) {
-        // Update local notification permission
-        notificationPermission.value = "granted";
-        // Initialize Firebase messaging and get FCM token
-        await initializeFirebaseMessaging();
-      }
-    };
-
-    const handleEnableChange = async () => {
-      if (
-        localSettings.value.enabled &&
-        notificationPermission.value !== "granted"
-      ) {
-        await requestPermission();
+      try {
+        const granted = await store.actions.requestNotificationPermission();
+        if (granted) {
+          notificationPermission.value = "granted";
+          await initializeFirebaseMessaging();
+        }
+      } catch (error) {
+        console.error("Error requesting permission:", error);
       }
     };
 
     const initializeFirebaseMessaging = async () => {
       try {
-        // Use the already-initialized Firebase messaging from firebase.ts
-        const { messaging } = await import("@/server/firebase/firebase");
-        const { getToken } = await import("firebase/messaging");
-        const { firebaseConfig } = await import("@/config");
+        console.log("Initializing Firebase messaging...");
 
-        // Get FCM token using the existing messaging instance
-        const token = await getToken(messaging, {
-          vapidKey: firebaseConfig.vapidKey,
-        });
+        // Check if we already have a valid token
+        const currentToken = await getCurrentToken();
+        if (currentToken) {
+          fcmToken.value = currentToken;
+          console.log("Using existing FCM token");
+          return;
+        }
 
-        if (token) {
-          await store.actions.storeFCMToken(token);
-          // Update local FCM token
-          fcmToken.value = token;
-          console.log("FCM token stored successfully");
+        // Request permission and get new token
+        const newToken = await requestPermissionAndSendToken();
+        if (newToken) {
+          fcmToken.value = newToken;
+          console.log("New FCM token obtained and sent to server");
         } else {
-          // Clear local FCM token if no token is available
-          fcmToken.value = null;
-          console.log("No FCM token available");
+          console.log("Failed to obtain FCM token");
         }
       } catch (error) {
-        console.error("Error getting FCM token:", error);
-        // Clear local FCM token on error
-        fcmToken.value = null;
+        console.error("Error initializing Firebase messaging:", error);
+      }
+    };
 
-        // If it's a token-related error, try to remove the invalid token
-        if (error && typeof error === "object" && "code" in error) {
-          const errorCode = (error as any).code;
-          if (
-            errorCode === "messaging/registration-token-not-registered" ||
-            errorCode === "messaging/invalid-registration-token"
-          ) {
-            try {
-              await store.actions.removeFCMToken();
-              console.log("Invalid FCM token removed from backend");
-            } catch (removeError) {
-              console.error("Error removing invalid FCM token:", removeError);
-            }
-          }
+    const handleEnableChange = async () => {
+      if (localSettings.value.enabled) {
+        // If enabling, ensure we have notification permission and FCM token
+        if (notificationPermission.value !== "granted") {
+          await requestPermission();
+        } else if (!fcmToken.value) {
+          await initializeFirebaseMessaging();
         }
       }
+
+      // Save settings after change
+      await saveSettings();
     };
 
     // Method to refresh FCM token
     const refreshFCMToken = async () => {
       console.log("Refreshing FCM token...");
-      await initializeFirebaseMessaging();
+      try {
+        const newToken = await refreshToken();
+        if (newToken) {
+          fcmToken.value = newToken;
+          console.log("FCM token refreshed successfully");
+        } else {
+          console.log("Failed to refresh FCM token");
+        }
+      } catch (error) {
+        console.error("Error refreshing FCM token:", error);
+      }
     };
 
     // Lifecycle
@@ -186,6 +157,17 @@ export default defineComponent({
         if (Notification.permission === "granted") {
           await initializeFirebaseMessaging();
         }
+      }
+
+      // Listen for permission changes
+      if ("Notification" in window) {
+        Notification.addEventListener("permissionchange", () => {
+          notificationPermission.value = Notification.permission;
+          store.mutations.setNotificationPermission(
+            store.state,
+            Notification.permission,
+          );
+        });
       }
     });
 
