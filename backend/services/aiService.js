@@ -218,7 +218,9 @@ Focus on constructive, growth-oriented insights.`;
    */
   parseAnalysisResponse(response) {
     try {
-      const parsed = JSON.parse(response);
+      // Remove Markdown code fences if present
+      const cleaned = response.replace(/```json|```/g, "").trim();
+      const parsed = JSON.parse(cleaned);
       return {
         suggestedTags: parsed.suggestedTags || [],
         suggestedEmotions: parsed.suggestedEmotions || [],
@@ -238,7 +240,9 @@ Focus on constructive, growth-oriented insights.`;
    */
   parseInterpretationResponse(response) {
     try {
-      const parsed = JSON.parse(response);
+      // Remove Markdown code fences if present
+      const cleaned = response.replace(/```json|```/g, "").trim();
+      const parsed = JSON.parse(cleaned);
       return {
         interpretation: parsed.interpretation || {},
         keySymbols: parsed.keySymbols || [],
@@ -256,7 +260,9 @@ Focus on constructive, growth-oriented insights.`;
    */
   parseInsightsResponse(response) {
     try {
-      const parsed = JSON.parse(response);
+      // Remove Markdown code fences if present
+      const cleaned = response.replace(/```json|```/g, "").trim();
+      const parsed = JSON.parse(cleaned);
       return {
         patternAnalysis: parsed.patternAnalysis || {},
         personalizedInsights: parsed.personalizedInsights || [],

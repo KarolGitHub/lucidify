@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Lucidifier app now supports configurable user avatars that can be set through the settings page. Users can upload their own profile pictures by providing an image URL.
+The Lucidify app now supports configurable user avatars that can be set through the settings page. Users can upload their own profile pictures by providing an image URL.
 
 ## Features
 

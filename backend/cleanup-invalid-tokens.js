@@ -57,7 +57,7 @@ async function cleanupInvalidTokens() {
         }
 
         // Check if token looks like a valid FCM token (starts with common patterns)
-        const isValidFormat = /^[A-Za-z0-9_-]{140,}$/.test(user.fcmToken);
+        const isValidFormat = /^[\w-:.]{140,}$/.test(user.fcmToken);
 
         if (!isValidFormat) {
           console.log(

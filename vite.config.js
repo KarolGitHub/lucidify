@@ -50,24 +50,80 @@ export default defineConfig({
         "android-chrome-512x512.png",
       ],
       manifest: {
-        name: "Lucidify",
+        name: "Lucidify - Dream Journal & Reality Check",
         short_name: "Lucidify",
+        description:
+          "Track your dreams and perform reality checks to achieve lucid dreaming",
         start_url: "./index.html",
         display: "standalone",
         background_color: "#000000",
         theme_color: "#4DBA87",
         gcm_sender_id: "1023426981171",
+        permissions: ["notifications", "background"],
+        categories: ["lifestyle", "productivity", "health"],
         icons: [
           {
             src: "./android-chrome-192x192.png",
             sizes: "192x192",
             type: "image/png",
+            purpose: "any",
           },
           {
             src: "./android-chrome-512x512.png",
             sizes: "512x512",
             type: "image/png",
             purpose: "any maskable",
+          },
+        ],
+        screenshots: [
+          {
+            src: "./android-chrome-512x512.png",
+            sizes: "512x512",
+            type: "image/png",
+            form_factor: "wide",
+          },
+        ],
+        shortcuts: [
+          {
+            name: "Reality Check",
+            short_name: "Check",
+            description: "Perform a reality check",
+            url: "/reality-check",
+            icons: [{ src: "./android-chrome-192x192.png", sizes: "192x192" }],
+          },
+          {
+            name: "Record Dream",
+            short_name: "Dream",
+            description: "Record a new dream",
+            url: "/dream-journal?new=1",
+            icons: [{ src: "./android-chrome-192x192.png", sizes: "192x192" }],
+          },
+        ],
+      },
+      workbox: {
+        globPatterns: ["**/*.{js,css,html,ico,png,svg}"],
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/www\.gstatic\.com\/firebasejs\/.*/,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "firebase-js-cache",
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
+              },
+            },
+          },
+          {
+            urlPattern: /^https:\/\/fcm\.googleapis\.com\/.*/,
+            handler: "NetworkFirst",
+            options: {
+              cacheName: "fcm-cache",
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 * 24, // 1 day
+              },
+            },
           },
         ],
       },
@@ -98,13 +154,14 @@ export default defineConfig({
           home: ["./src/views/home/Home"],
           dashboard: ["./src/layout/Layout", "./src/views/dashboard/Dashboard"],
           auth: [
-            "./src/layout/Auth.vue",
+            "./src/layout/Auth",
             "./src/views/auth/login/Login",
             "./src/views/auth/register/Register",
           ],
           settings: ["./src/views/settings/Settings"],
-          about: ["./src/views/About.vue"],
+          about: ["./src/views/About"],
           dreamJournal: ["./src/views/dream-journal/DreamJournal"],
+          realityCheck: ["./src/views/RealityCheck"],
         },
         plugins: [
           visualizer({

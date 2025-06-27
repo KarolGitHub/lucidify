@@ -2,7 +2,7 @@
 
 ## Overview
 
-The voice-to-text feature has been successfully implemented in the Lucidifier dream journal application. This feature allows users to describe their dreams using voice input, making it easier and faster to capture dream details.
+The voice-to-text feature has been successfully implemented in the Lucidify dream journal application. This feature allows users to describe their dreams using voice input, making it easier and faster to capture dream details.
 
 ## Features
 
