@@ -149,6 +149,22 @@
 
       <form @submit.prevent="handleSaveDream">
         <div class="space-y-6">
+          <!-- Forgotten Dream Checkbox -->
+          <div class="flex items-center mb-2">
+            <input
+              id="forgotten-dream-checkbox"
+              type="checkbox"
+              :checked="newDream.isForgotten"
+              @change="handleNewDreamChange('isForgotten', $event.target.checked)"
+              class="mr-2 h-4 w-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+            />
+            <label
+              for="forgotten-dream-checkbox"
+              class="text-sm text-gray-700 dark:text-gray-300"
+            >
+              I know I dreamed, but I don't remember the details
+            </label>
+          </div>
           <!-- Dream Title -->
           <div>
             <label
@@ -160,8 +176,9 @@
               :value="newDream.title"
               @input="handleNewDreamChange('title', $event.target.value)"
               type="text"
-              required
-              class="px-4 py-2 w-full rounded-lg border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white"
+              :required="!newDream.isForgotten"
+              :disabled="newDream.isForgotten"
+              :class="['px-4 py-2 w-full rounded-lg border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white', newDream.isForgotten ? 'bg-gray-100 dark:bg-gray-600 text-gray-400 dark:text-gray-400 cursor-not-allowed' : '']"
               placeholder="Give your dream a title..."
             />
           </div>
@@ -194,8 +211,9 @@
                 :value="newDream.description"
                 @input="handleNewDreamChange('description', $event.target.value)"
                 rows="6"
-                required
-                class="px-4 py-2 w-full rounded-lg border border-gray-300 resize-none dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white"
+                :required="!newDream.isForgotten"
+                :disabled="newDream.isForgotten"
+                :class="['px-4 py-2 w-full rounded-lg border border-gray-300 resize-none dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white', newDream.isForgotten ? 'bg-gray-100 dark:bg-gray-600 text-gray-400 dark:text-gray-400 cursor-not-allowed' : '']"
                 placeholder="Describe your dream in detail..."
               ></textarea>
 

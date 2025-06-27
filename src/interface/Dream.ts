@@ -7,6 +7,7 @@ export interface Dream {
   isVivid: boolean;
   isRecurring: boolean;
   isNightmare: boolean;
+  isForgotten?: boolean;
   tags: string[];
   emotions: string[];
   themes: string[];
@@ -25,6 +26,7 @@ export interface NewDream {
   isVivid: boolean;
   isRecurring: boolean;
   isNightmare: boolean;
+  isForgotten?: boolean;
   tagsInput: string;
   emotions: string[];
   themes: string[];
@@ -34,6 +36,7 @@ export interface NewDream {
 // EditingDream extends Dream for editing state
 export interface EditingDream extends Dream {
   tagsInput: string;
+  isForgotten?: boolean;
 }
 
 export interface DreamStats {

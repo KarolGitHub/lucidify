@@ -18,6 +18,7 @@ const state = reactive({
     isVivid: false,
     isRecurring: false,
     isNightmare: false,
+    isForgotten: false,
     tagsInput: "",
     emotions: [],
     themes: [],
