@@ -1,5 +1,5 @@
 <div
-  class="relative flex flex-col w-full min-w-0 mb-6 break-words border-0 rounded-lg shadow-lg bg-blueGray-100 dark:bg-gray-900"
+  class="flex relative flex-col mb-6 w-full min-w-0 break-words rounded-lg border-0 shadow-lg bg-blueGray-100 dark:bg-gray-900"
 >
   <div class="px-6 py-6 mb-0 bg-white rounded-t dark:bg-gray-800">
     <div class="flex justify-between text-center">
@@ -19,7 +19,7 @@
         <button
           v-if="localSettings.enabled && notificationPermission === 'granted'"
           @click="refreshFCMToken"
-          class="px-2 py-1 text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+          class="px-2 py-1 text-xs text-blue-600 transition-colors hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
           title="Refresh FCM token"
         >
           <i class="fas fa-sync-alt"></i>
@@ -31,7 +31,7 @@
   <div class="flex-auto px-4 py-10 pt-0 lg:px-10">
     <form @submit.prevent="saveSettings">
       <!-- Enable/Disable Toggle -->
-      <div class="flex items-center justify-between mt-3 mb-6">
+      <div class="flex justify-between items-center mt-3 mb-6">
         <div>
           <h6
             class="text-sm font-bold uppercase text-blueGray-400 dark:text-gray-400"
@@ -42,7 +42,7 @@
             Receive periodic reminders to check if you're dreaming
           </p>
         </div>
-        <label class="relative inline-flex items-center cursor-pointer">
+        <label class="inline-flex relative items-center cursor-pointer">
           <input
             type="checkbox"
             class="sr-only peer"
@@ -59,9 +59,9 @@
         <!-- Notification Permission -->
         <div
           v-if="notificationPermission !== 'granted'"
-          class="p-4 border border-yellow-200 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 dark:border-yellow-700"
+          class="p-4 bg-yellow-50 rounded-lg border border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-700"
         >
-          <div class="flex items-center justify-between">
+          <div class="flex justify-between items-center">
             <div>
               <h6 class="font-semibold text-yellow-800 dark:text-yellow-200">
                 Notification Permission Required
@@ -73,7 +73,7 @@
             <button
               type="button"
               @click="requestPermission"
-              class="px-4 py-2 text-sm font-medium text-white transition-colors bg-yellow-500 rounded-lg hover:bg-yellow-600"
+              class="px-4 py-2 text-sm font-medium text-white bg-yellow-500 rounded-lg transition-colors hover:bg-yellow-600"
             >
               Enable Notifications
             </button>
@@ -95,7 +95,7 @@
               >
               <select
                 v-model="localSettings.frequency"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                class="px-3 py-2 w-full rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
               >
                 <option value="hourly">Every Hour</option>
                 <option value="every_1_5_hours">Every 1.5 Hours</option>
@@ -117,7 +117,7 @@
                 v-model.number="localSettings.customInterval"
                 min="15"
                 max="1440"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                class="px-3 py-2 w-full rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                 placeholder="240"
               />
             </div>
@@ -140,7 +140,7 @@
               <input
                 type="time"
                 v-model="localSettings.startTime"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                class="px-3 py-2 w-full rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
               />
             </div>
             <div>
@@ -151,7 +151,7 @@
               <input
                 type="time"
                 v-model="localSettings.endTime"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                class="px-3 py-2 w-full rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
               />
             </div>
           </div>
@@ -174,7 +174,7 @@
                 type="checkbox"
                 :value="day.value"
                 v-model="localSettings.daysOfWeek"
-                class="text-blue-600 border-gray-300 rounded focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600"
+                class="text-blue-600 rounded border-gray-300 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600"
               />
               <span class="text-sm text-blueGray-700 dark:text-gray-300"
                 >{{ day.label }}</span
@@ -199,7 +199,7 @@
               type="text"
               v-model="localSettings.message"
               maxlength="100"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+              class="px-3 py-2 w-full rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
               placeholder="Are you dreaming?"
             />
             <p class="mt-1 text-xs text-blueGray-500 dark:text-gray-400">
@@ -213,7 +213,7 @@
           <button
             type="submit"
             :disabled="loading"
-            class="flex items-center px-6 py-2 space-x-2 font-medium text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700 disabled:bg-gray-400"
+            class="flex items-center px-6 py-2 space-x-2 font-medium text-white bg-blue-600 rounded-lg transition-colors hover:bg-blue-700 disabled:bg-gray-400"
           >
             <svg
               v-if="loading"
@@ -243,7 +243,7 @@
       <!-- Error Message -->
       <div
         v-if="error"
-        class="p-4 mt-4 border border-red-200 rounded-lg bg-red-50 dark:bg-red-900/20 dark:border-red-700"
+        class="p-4 mt-4 bg-red-50 rounded-lg border border-red-200 dark:bg-red-900/20 dark:border-red-700"
       >
         <p class="text-sm text-red-800 dark:text-red-200">{{ error }}</p>
       </div>
