@@ -10,6 +10,8 @@ const About = () => import("@/views/About.vue");
 const Auth = () => import("@/layout/Auth.vue");
 const Layout = () => import("@/layout/Layout.vue");
 const Home = () => import("@/views/home/Home.vue");
+const CustomNotifications = () =>
+  import("@/components/CustomNotifications.vue");
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -40,6 +42,11 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: "/settings",
         component: Settings,
+      },
+      {
+        path: "/notifications",
+        name: "CustomNotifications",
+        component: CustomNotifications,
       },
     ],
   },

@@ -26,12 +26,10 @@
         </div>
       </li>
     </ul>
-    <!-- Add/Edit Modal (stub) -->
+    <!-- Add/Edit Modal -->
     <div v-if="showModal" class="modal-backdrop">
       <div class="modal">
-        <h3>{{ editingNotification ? 'Edit' : 'Add' }} Notification</h3>
-        <!-- Form goes here -->
-        <button class="btn" @click="closeModal">Close</button>
+        <CustomNotificationForm :notification="editingNotification" @save="handleSave" @cancel="closeModal" />
       </div>
     </div>
   </div>
@@ -40,6 +38,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
+import CustomNotificationForm from './CustomNotificationForm.vue';
 
 const notifications = ref([]);
 const loading = ref(false);
@@ -72,6 +71,18 @@ const openEditModal = (n) => {
 const closeModal = () => {
   showModal.value = false;
   editingNotification.value = null;
+};
+
+const handleSave = async (formData) => {
+  if (editingNotification.value && editingNotification.value._id) {
+    // Edit
+    await axios.put(`/api/notifications/${editingNotification.value._id}`, formData);
+  } else {
+    // Add
+    await axios.post('/api/notifications', formData);
+  }
+  await fetchNotifications();
+  closeModal();
 };
 
 const deleteNotification = async (id) => {
