@@ -38,14 +38,25 @@ const parseDate = (dateString) => {
 
 // Validation rules
 const dreamValidation = [
-  body("title")
-    .trim()
-    .isLength({ min: 1, max: 200 })
-    .withMessage("Dream title must be between 1 and 200 characters"),
-  body("description")
-    .trim()
-    .isLength({ min: 1, max: 10000 })
-    .withMessage("Dream description must be between 1 and 10,000 characters"),
+  body("isForgotten").isBoolean().optional(),
+  body(["title", "description"]).custom((value, { req, path }) => {
+    if (req.body.isForgotten) {
+      // Allow empty title/description if isForgotten is true
+      return true;
+    }
+    if (!value || value.trim().length < 1) {
+      throw new Error(
+        `${path.charAt(0).toUpperCase() + path.slice(1)} is required unless this is a forgotten dream`,
+      );
+    }
+    if (path === "title" && value.length > 200) {
+      throw new Error("Dream title cannot exceed 200 characters");
+    }
+    if (path === "description" && value.length > 10000) {
+      throw new Error("Dream description cannot exceed 10,000 characters");
+    }
+    return true;
+  }),
   body("date").isISO8601().withMessage("Invalid date format"),
   body("isLucid").isBoolean().optional(),
   body("isVivid").isBoolean().optional(),

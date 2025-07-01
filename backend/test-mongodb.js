@@ -166,6 +166,32 @@ async function testDatabaseOperations() {
           : 0,
     });
 
+    // Forgotten dream test
+    console.log("\n🧪 Creating and testing forgotten dream...");
+    const forgottenDream = new Dream({
+      isForgotten: true,
+      date: new Date(),
+      userId: "test-user-123",
+      // No title or description
+    });
+    await forgottenDream.save();
+    console.log("✅ Forgotten dream saved");
+
+    // Fetch stats again
+    const statsAfter = await Dream.getUserStats("test-user-123");
+    console.log("✅ Stats after forgotten dream:", {
+      totalDreams: statsAfter.totalDreams,
+      forgottenDreams: statsAfter.forgottenDreams,
+      forgetRate: statsAfter.forgetRate,
+    });
+
+    // Check that forgottenDreams increased
+    if (statsAfter.forgottenDreams > (stats.forgottenDreams || 0)) {
+      console.log("🎉 Forgotten dream counted in stats!");
+    } else {
+      console.error("❌ Forgotten dream NOT counted in stats!");
+    }
+
     return true;
   } catch (error) {
     console.error("❌ Error testing database operations:", error.message);

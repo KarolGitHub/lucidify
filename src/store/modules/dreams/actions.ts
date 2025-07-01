@@ -111,8 +111,11 @@ export default {
         isVivid: state.newDream.isVivid,
         isRecurring: state.newDream.isRecurring,
         isNightmare: state.newDream.isNightmare,
+        isForgotten: state.newDream.isForgotten,
         tags,
         emotions: state.newDream.emotions,
+        themes: state.newDream.themes,
+        symbols: state.newDream.symbols,
         userId,
       };
 

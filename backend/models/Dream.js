@@ -36,6 +36,11 @@ const dreamSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    // New field for forgotten dreams
+    isForgotten: {
+      type: Boolean,
+      default: false,
+    },
     // Tags for categorization
     tags: [
       {
@@ -385,6 +390,7 @@ dreamSchema.statics.getUserStats = async function (userId) {
         vividDreams: { $sum: { $cond: ["$isVivid", 1, 0] } },
         recurringDreams: { $sum: { $cond: ["$isRecurring", 1, 0] } },
         nightmares: { $sum: { $cond: ["$isNightmare", 1, 0] } },
+        forgottenDreams: { $sum: { $cond: ["$isForgotten", 1, 0] } },
         averageRating: { $avg: "$rating" },
         firstDream: { $min: "$date" },
         lastDream: { $max: "$date" },
@@ -392,18 +398,36 @@ dreamSchema.statics.getUserStats = async function (userId) {
     },
   ]);
 
-  return (
-    stats[0] || {
-      totalDreams: 0,
-      lucidDreams: 0,
-      vividDreams: 0,
-      recurringDreams: 0,
-      nightmares: 0,
-      averageRating: 0,
-      firstDream: null,
-      lastDream: null,
-    }
-  );
+  const s = stats[0] || {
+    totalDreams: 0,
+    lucidDreams: 0,
+    vividDreams: 0,
+    recurringDreams: 0,
+    nightmares: 0,
+    forgottenDreams: 0,
+    averageRating: 0,
+    firstDream: null,
+    lastDream: null,
+  };
+
+  // Calculate dreams per day and forget rate
+  let dreamsPerDay = 0;
+  let forgetRate = 0;
+  if (s.firstDream && s.lastDream && s.totalDreams > 0) {
+    const days = Math.max(
+      1,
+      Math.ceil((s.lastDream - s.firstDream) / (1000 * 60 * 60 * 24)) + 1,
+    );
+    dreamsPerDay = s.totalDreams / days;
+    forgetRate =
+      s.totalDreams > 0 ? (s.forgottenDreams / s.totalDreams) * 100 : 0;
+  }
+
+  return {
+    ...s,
+    dreamsPerDay,
+    forgetRate,
+  };
 };
 
 // Instance method to calculate lucid percentage

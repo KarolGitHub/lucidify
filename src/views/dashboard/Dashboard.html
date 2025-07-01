@@ -130,6 +130,56 @@
                   <div class="text-3xl">📝</div>
                 </div>
               </div>
+
+              <!-- Forgotten Dreams Card -->
+              <div
+                class="p-4 text-white rounded-lg bg-gradient-to-r from-blue-400 to-blue-700"
+              >
+                <div class="flex items-center justify-between">
+                  <div>
+                    <p class="text-sm opacity-75">Forgotten Dreams</p>
+                    <p class="text-2xl font-bold">
+                      {{ stats?.forgottenDreams || 0 }}
+                    </p>
+                    <p class="text-xs opacity-75">not remembered</p>
+                  </div>
+                  <div class="text-3xl">💤</div>
+                </div>
+              </div>
+
+              <!-- Dreams per Day Card -->
+              <div
+                class="p-4 text-white rounded-lg bg-gradient-to-r from-green-400 to-green-700"
+              >
+                <div class="flex items-center justify-between">
+                  <div>
+                    <p class="text-sm opacity-75">Dreams per Day</p>
+                    <p class="text-2xl font-bold">
+                      {{ stats?.dreamsPerDay ? stats.dreamsPerDay.toFixed(2) :
+                      '0.00' }}
+                    </p>
+                    <p class="text-xs opacity-75">average</p>
+                  </div>
+                  <div class="text-3xl">📅</div>
+                </div>
+              </div>
+
+              <!-- Forget Rate Card -->
+              <div
+                class="p-4 text-white rounded-lg bg-gradient-to-r from-yellow-400 to-yellow-700"
+              >
+                <div class="flex items-center justify-between">
+                  <div>
+                    <p class="text-sm opacity-75">Forget Rate</p>
+                    <p class="text-2xl font-bold">
+                      {{ stats?.forgetRate ? stats.forgetRate.toFixed(1) : '0.0'
+                      }}%
+                    </p>
+                    <p class="text-xs opacity-75">of dreams</p>
+                  </div>
+                  <div class="text-3xl">🧠</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
