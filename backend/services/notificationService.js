@@ -5,6 +5,7 @@ const User = require("../models/User");
 class NotificationService {
   constructor() {
     this.scheduledJobs = new Map();
+    this.scheduledCustomJobs = new Map(); // userId -> Map(notificationId -> job)
     this.lastNotificationTime = new Map(); // Track last notification time per user
     this.notificationCooldown = 5 * 60 * 1000; // 5 minutes cooldown
   }
@@ -402,12 +403,127 @@ class NotificationService {
     }
   }
 
+  // Schedule all enabled custom notifications for a user
+  async scheduleCustomNotifications(userId) {
+    try {
+      this.stopCustomNotifications(userId);
+      const user = await User.findOne({ firebaseUid: userId });
+      if (!user || !user.fcmTokens || user.fcmTokens.length === 0) return;
+      if (!user.customNotifications || user.customNotifications.length === 0)
+        return;
+      const userJobs = new Map();
+      for (const notification of user.customNotifications) {
+        if (!notification.enabled) continue;
+        // Calculate interval in minutes
+        let intervalMinutes;
+        switch (notification.frequency) {
+          case "hourly":
+            intervalMinutes = 60;
+            break;
+          case "every_1_5_hours":
+            intervalMinutes = 90;
+            break;
+          case "every_2_hours":
+            intervalMinutes = 120;
+            break;
+          case "every_4_hours":
+            intervalMinutes = 240;
+            break;
+          case "every_6_hours":
+            intervalMinutes = 360;
+            break;
+          case "daily":
+            intervalMinutes = 1440;
+            break;
+          case "custom":
+            intervalMinutes = notification.customInterval;
+            break;
+          default:
+            intervalMinutes = 240;
+        }
+        const cronExpression = this.createCronExpression(
+          notification,
+          intervalMinutes,
+        );
+        const job = cron.schedule(
+          cronExpression,
+          async () => {
+            if (
+              !this.isWithinTimeWindow(notification) ||
+              !this.isAllowedDay(notification)
+            )
+              return;
+            await this.sendCustomNotification(userId, notification);
+          },
+          {
+            scheduled: false,
+            timezone: notification.timezone || "UTC",
+          },
+        );
+        job.start();
+        userJobs.set(String(notification._id), job);
+      }
+      if (userJobs.size > 0) {
+        this.scheduledCustomJobs.set(userId, userJobs);
+      }
+    } catch (error) {
+      console.error("Error scheduling custom notifications:", error);
+    }
+  }
+
+  // Stop all custom notification jobs for a user
+  stopCustomNotifications(userId) {
+    const userJobs = this.scheduledCustomJobs.get(userId);
+    if (userJobs) {
+      for (const job of userJobs.values()) {
+        job.stop();
+      }
+      this.scheduledCustomJobs.delete(userId);
+    }
+  }
+
+  // Send a custom notification
+  async sendCustomNotification(userId, notification) {
+    const title = notification.title || "Notification";
+    const body = notification.message || "You have a notification.";
+    await this.sendNotification(userId, title, body, {
+      type: "custom-notification",
+      notificationId: String(notification._id),
+      timestamp: new Date().toISOString(),
+    });
+  }
+
+  // Initialize all custom notification schedules for all users
+  async initializeAllCustomNotificationSchedules() {
+    try {
+      const users = await User.find({
+        customNotifications: { $exists: true, $ne: [] },
+        fcmTokens: { $exists: true, $ne: [] },
+      });
+      for (const user of users) {
+        await this.scheduleCustomNotifications(user.firebaseUid);
+      }
+      console.log("✅ Custom notification schedules initialized for all users");
+    } catch (error) {
+      console.error(
+        "❌ Error initializing custom notification schedules:",
+        error,
+      );
+    }
+  }
+
   // Clean up all scheduled jobs
   cleanup() {
     for (const [userId, job] of this.scheduledJobs) {
       job.stop();
     }
     this.scheduledJobs.clear();
+    for (const [userId, userJobs] of this.scheduledCustomJobs) {
+      for (const job of userJobs.values()) {
+        job.stop();
+      }
+    }
+    this.scheduledCustomJobs.clear();
     this.lastNotificationTime.clear();
     console.log("All scheduled jobs cleaned up");
   }

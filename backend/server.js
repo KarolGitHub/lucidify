@@ -137,6 +137,7 @@ const authRoutes = require("./routes/auth");
 const userRoutes = require("./routes/users");
 const aiRoutes = require("./routes/ai");
 const notificationsRoutes = require("./routes/notifications");
+const notificationService = require("./services/notificationService");
 
 // In-memory storage for FCM tokens (replace with database in production)
 const fcmTokens = new Map();
@@ -168,6 +169,9 @@ app.use("/api/ai", aiRoutes);
 
 // Notifications Routes
 app.use("/api/notifications", notificationsRoutes);
+
+// Initialize custom notification schedules after server starts
+notificationService.initializeAllCustomNotificationSchedules();
 
 // Serve admin panel
 app.get("/admin", (req, res) => {
