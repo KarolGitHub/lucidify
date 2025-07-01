@@ -33,26 +33,36 @@
       </div>
     </div>
   </div>
+  <Toast />
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import CustomNotificationForm from './CustomNotificationForm.vue';
+import { notifications } from '@/store';
 
-const notifications = ref([]);
+const notificationsList = ref([]);
 const loading = ref(false);
 const showModal = ref(false);
 const editingNotification = ref(null);
+
+const showToast = (body, type = 'success') => {
+  notifications.actions.presentToast({
+    show: true,
+    body,
+    type,
+  }, 2500);
+};
 
 const fetchNotifications = async () => {
   loading.value = true;
   try {
     const res = await axios.get('/api/notifications');
-    notifications.value = res.data;
+    notificationsList.value = res.data;
   } catch (err) {
-    // handle error
-    notifications.value = [];
+    notificationsList.value = [];
+    showToast('Failed to load notifications', 'error');
   } finally {
     loading.value = false;
   }
@@ -74,26 +84,40 @@ const closeModal = () => {
 };
 
 const handleSave = async (formData) => {
-  if (editingNotification.value && editingNotification.value._id) {
-    // Edit
-    await axios.put(`/api/notifications/${editingNotification.value._id}`, formData);
-  } else {
-    // Add
-    await axios.post('/api/notifications', formData);
+  try {
+    if (editingNotification.value && editingNotification.value._id) {
+      await axios.put(`/api/notifications/${editingNotification.value._id}`, formData);
+      showToast('Notification updated');
+    } else {
+      await axios.post('/api/notifications', formData);
+      showToast('Notification added');
+    }
+    await fetchNotifications();
+    closeModal();
+  } catch (err) {
+    showToast('Failed to save notification', 'error');
   }
-  await fetchNotifications();
-  closeModal();
 };
 
 const deleteNotification = async (id) => {
   if (!confirm('Delete this notification?')) return;
-  await axios.delete(`/api/notifications/${id}`);
-  await fetchNotifications();
+  try {
+    await axios.delete(`/api/notifications/${id}`);
+    showToast('Notification deleted');
+    await fetchNotifications();
+  } catch (err) {
+    showToast('Failed to delete notification', 'error');
+  }
 };
 
 const toggleEnabled = async (n) => {
-  await axios.put(`/api/notifications/${n._id}`, { enabled: !n.enabled });
-  await fetchNotifications();
+  try {
+    await axios.put(`/api/notifications/${n._id}`, { enabled: !n.enabled });
+    showToast(n.enabled ? 'Notification disabled' : 'Notification enabled');
+    await fetchNotifications();
+  } catch (err) {
+    showToast('Failed to update notification', 'error');
+  }
 };
 
 onMounted(fetchNotifications);
