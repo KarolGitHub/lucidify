@@ -199,14 +199,58 @@ const userSchema = new mongoose.Schema(
           userAgent: String,
           platform: String,
         },
-        createdAt: {
+        addedAt: {
           type: Date,
           default: Date.now,
         },
-        isActive: {
-          type: Boolean,
-          default: true,
+      },
+    ],
+    // Custom user notifications (unlimited)
+    customNotifications: [
+      {
+        title: { type: String, required: true, maxlength: 100 },
+        message: { type: String, required: true, maxlength: 200 },
+        frequency: {
+          type: String,
+          enum: [
+            "hourly",
+            "every_1_5_hours",
+            "every_2_hours",
+            "every_4_hours",
+            "every_6_hours",
+            "daily",
+            "custom",
+          ],
+          required: true,
         },
+        customInterval: { type: Number }, // minutes, if frequency is 'custom'
+        startTime: { type: String, default: "09:00" }, // HH:MM
+        endTime: { type: String, default: "22:00" }, // HH:MM
+        daysOfWeek: {
+          type: [String],
+          enum: [
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday",
+            "sunday",
+          ],
+          default: [
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday",
+            "sunday",
+          ],
+        },
+        timezone: { type: String, default: "UTC" },
+        enabled: { type: Boolean, default: true },
+        createdAt: { type: Date, default: Date.now },
+        updatedAt: { type: Date, default: Date.now },
       },
     ],
     // FCM token for push notifications
