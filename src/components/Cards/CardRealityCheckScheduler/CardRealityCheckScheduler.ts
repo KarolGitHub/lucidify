@@ -147,26 +147,9 @@ export default defineComponent({
 
       // Check notification permission on mount
       if ("Notification" in window) {
-        notificationPermission.value = Notification.permission;
-        store.mutations.setNotificationPermission(
-          store.state,
-          Notification.permission,
-        );
-
-        // If user has already granted permission, initialize Firebase messaging
-        if (Notification.permission === "granted") {
-          await initializeFirebaseMessaging();
-        }
-      }
-
-      // Listen for permission changes
-      if ("Notification" in window) {
-        Notification.addEventListener("permissionchange", () => {
-          notificationPermission.value = Notification.permission;
-          store.mutations.setNotificationPermission(
-            store.state,
-            Notification.permission,
-          );
+        Notification.requestPermission().then((permission) => {
+          notificationPermission.value = permission;
+          store.mutations.setNotificationPermission(store.state, permission);
         });
       }
     });

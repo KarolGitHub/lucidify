@@ -16,7 +16,7 @@
           </button>
         </div>
         <!-- Dream Statistics -->
-        <div class="flex flex-wrap gap-4 mb-6">
+        <div v-if="stats" class="flex flex-wrap gap-4 mb-6">
           <div
             class="p-4 bg-purple-50 dark:bg-purple-900 rounded-lg flex-1 min-w-[180px]"
           >
@@ -203,7 +203,7 @@
               type="checkbox"
               :checked="newDream.isForgotten"
               @change="handleNewDreamChange('isForgotten', $event.target.checked)"
-              class="mr-2 h-4 w-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+              class="mr-2 w-4 h-4 text-purple-600 rounded border-gray-300 focus:ring-purple-500"
             />
             <label
               for="forgotten-dream-checkbox"
