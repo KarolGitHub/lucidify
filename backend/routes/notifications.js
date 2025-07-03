@@ -65,4 +65,19 @@ router.delete("/:id", authenticateUser, async (req, res) => {
   }
 });
 
+// Get notification logs for the authenticated user
+router.get("/logs", authenticateUser, async (req, res) => {
+  try {
+    const user = await User.findOne({ firebaseUid: req.user.firebaseUid });
+    if (!user) return res.status(404).json({ error: "User not found" });
+    // Return logs sorted by most recent first
+    const logs = (user.notificationLogs || [])
+      .slice()
+      .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    res.json(logs);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;

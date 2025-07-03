@@ -7,7 +7,7 @@ class NotificationService {
     this.scheduledJobs = new Map();
     this.scheduledCustomJobs = new Map(); // userId -> Map(notificationId -> job)
     this.lastNotificationTime = new Map(); // Track last notification time per user
-    this.notificationCooldown = 5 * 60 * 1000; // 5 minutes cooldown
+    this.notificationCooldown = 0; // No cooldown
   }
 
   // Store FCM token for a user (add to fcmTokens array if not present)
@@ -53,12 +53,43 @@ class NotificationService {
     }
   }
 
+  // Log a notification attempt for a user (keep only the most recent 50 logs)
+  async _logNotificationAttempt(userId, { type, title, body, success, error }) {
+    try {
+      const user = await User.findOne({ firebaseUid: userId });
+      if (!user) return;
+      user.notificationLogs = user.notificationLogs || [];
+      user.notificationLogs.push({
+        type,
+        title,
+        body,
+        timestamp: new Date(),
+        success,
+        error: error ? String(error) : undefined,
+      });
+      // Keep only the most recent 50 logs
+      if (user.notificationLogs.length > 50) {
+        user.notificationLogs = user.notificationLogs.slice(-50);
+      }
+      await user.save();
+    } catch (err) {
+      console.error("Error logging notification attempt:", err);
+    }
+  }
+
   // Send notification to all active tokens for a user
-  async sendNotification(userId, title, body, data = {}) {
+  async sendNotification(userId, title, body, data = {}, type = "generic") {
     try {
       const user = await User.findOne({ firebaseUid: userId });
       if (!user || !user.fcmTokens || user.fcmTokens.length === 0) {
         console.log(`No FCM tokens found for user: ${userId}`);
+        await this._logNotificationAttempt(userId, {
+          type,
+          title,
+          body,
+          success: false,
+          error: "No FCM tokens",
+        });
         return false;
       }
 
@@ -72,6 +103,13 @@ class NotificationService {
         console.log(
           `⏰ Skipping notification for user ${userId}: Cooldown period active`,
         );
+        await this._logNotificationAttempt(userId, {
+          type,
+          title,
+          body,
+          success: false,
+          error: "Cooldown active",
+        });
         return false;
       }
 
@@ -81,6 +119,13 @@ class NotificationService {
       );
       if (activeTokens.length === 0) {
         console.log(`No active FCM tokens found for user: ${userId}`);
+        await this._logNotificationAttempt(userId, {
+          type,
+          title,
+          body,
+          success: false,
+          error: "No active FCM tokens",
+        });
         return false;
       }
 
@@ -129,9 +174,13 @@ class NotificationService {
           `✅ Notification sent successfully to user ${userId}:`,
           response,
         );
-
-        // Update last notification time
         this.lastNotificationTime.set(userId, now);
+        await this._logNotificationAttempt(userId, {
+          type,
+          title,
+          body,
+          success: true,
+        });
         return true;
       } catch (error) {
         console.error(
@@ -143,7 +192,6 @@ class NotificationService {
           message: error.message,
           errorInfo: error.errorInfo,
         });
-        // If token is invalid, remove only this token
         if (
           error.code === "messaging/invalid-registration-token" ||
           error.code === "messaging/registration-token-not-registered"
@@ -151,10 +199,24 @@ class NotificationService {
           console.log(`🔄 Removing invalid FCM token for user: ${userId}`);
           await this.removeFCMToken(userId, mostRecentToken.token);
         }
+        await this._logNotificationAttempt(userId, {
+          type,
+          title,
+          body,
+          success: false,
+          error: error.message,
+        });
         return false;
       }
     } catch (error) {
       console.error(`❌ Error sending notification to user ${userId}:`, error);
+      await this._logNotificationAttempt(userId, {
+        type,
+        title,
+        body,
+        success: false,
+        error,
+      });
       return false;
     }
   }

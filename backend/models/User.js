@@ -205,6 +205,17 @@ const userSchema = new mongoose.Schema(
         },
       },
     ],
+    // Notification logs (most recent N entries)
+    notificationLogs: [
+      {
+        type: { type: String }, // e.g., 'reality_check', 'custom', etc.
+        title: String,
+        body: String,
+        timestamp: { type: Date, default: Date.now },
+        success: Boolean,
+        error: String,
+      },
+    ],
     // Custom user notifications (unlimited)
     customNotifications: [
       {
