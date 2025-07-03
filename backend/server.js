@@ -145,10 +145,6 @@ const notificationService = require("./services/notificationService");
 const fcmTokens = new Map();
 
 // Routes
-app.get("/", (req, res) => {
-  res.redirect("/admin");
-});
-
 app.get("/api/health", (req, res) => {
   res.json({
     status: "OK",
