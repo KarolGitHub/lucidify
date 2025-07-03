@@ -5,6 +5,8 @@ const morgan = require("morgan");
 const rateLimit = require("express-rate-limit");
 const mongoose = require("mongoose");
 const path = require("path");
+const swaggerUi = require("swagger-ui-express");
+const swaggerJSDoc = require("swagger-jsdoc");
 require("dotenv").config();
 
 // Initialize Firebase Admin SDK
@@ -395,6 +397,42 @@ app.post("/api/notifications/broadcast", async (req, res) => {
     });
   }
 });
+
+// Swagger setup
+const swaggerDefinition = {
+  openapi: "3.0.0",
+  info: {
+    title: "Lucidify Backend API",
+    version: "1.0.0",
+    description: "API documentation for Lucidify backend",
+  },
+  servers: [
+    {
+      url: `http://localhost:${PORT}/api`,
+      description: "Local server",
+    },
+  ],
+  components: {
+    securitySchemes: {
+      bearerAuth: {
+        type: "http",
+        scheme: "bearer",
+        bearerFormat: "JWT",
+      },
+    },
+  },
+  security: [{ bearerAuth: [] }],
+};
+
+const options = {
+  swaggerDefinition,
+  // Scan all backend route files for JSDoc comments
+  apis: [path.join(__dirname, "routes", "*.js")],
+};
+const swaggerSpec = swaggerJSDoc(options);
+
+// Serve Swagger UI at root
+app.use("/", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Error handling middleware
 app.use((err, req, res, next) => {

@@ -4,6 +4,40 @@ const User = require("../models/User");
 const { authenticateUser } = require("../middleware/auth");
 const notificationService = require("../services/notificationService");
 
+/**
+ * @swagger
+ * /notifications/logs:
+ *   get:
+ *     summary: Get notification logs for the authenticated user
+ *     tags: [Notifications]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of notification logs
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   type:
+ *                     type: string
+ *                   title:
+ *                     type: string
+ *                   body:
+ *                     type: string
+ *                   timestamp:
+ *                     type: string
+ *                     format: date-time
+ *                   success:
+ *                     type: boolean
+ *                   error:
+ *                     type: string
+ *       401:
+ *         description: Unauthorized
+ */
 // Get all custom notifications for the authenticated user
 router.get("/", authenticateUser, async (req, res) => {
   try {
@@ -15,6 +49,42 @@ router.get("/", authenticateUser, async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /notifications:
+ *   get:
+ *     summary: Get all custom notifications for the authenticated user
+ *     tags: [Notifications]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of custom notifications
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *       401:
+ *         description: Unauthorized
+ *   post:
+ *     summary: Create a new custom notification
+ *     tags: [Notifications]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       201:
+ *         description: Custom notification created
+ *       401:
+ *         description: Unauthorized
+ */
 // Create a new custom notification
 router.post("/", authenticateUser, async (req, res) => {
   try {
@@ -31,6 +101,54 @@ router.post("/", authenticateUser, async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /notifications/{id}:
+ *   put:
+ *     summary: Update a custom notification
+ *     tags: [Notifications]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Notification ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       200:
+ *         description: Custom notification updated
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Notification not found
+ *   delete:
+ *     summary: Delete a custom notification
+ *     tags: [Notifications]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Notification ID
+ *     responses:
+ *       200:
+ *         description: Custom notification deleted
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Notification not found
+ */
 // Update a custom notification
 router.put("/:id", authenticateUser, async (req, res) => {
   try {

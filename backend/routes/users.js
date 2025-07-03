@@ -8,6 +8,50 @@ const path = require("path");
 const fs = require("fs");
 const router = express.Router();
 
+/**
+ * @swagger
+ * tags:
+ *   name: Users
+ *   description: User profile and settings management
+ */
+
+/**
+ * @swagger
+ * /users/profile:
+ *   get:
+ *     summary: Get current user profile
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Current user profile
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Failed to fetch user profile
+ *   put:
+ *     summary: Update user profile
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       200:
+ *         description: User profile updated
+ *       400:
+ *         description: Validation failed
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Failed to update user profile
+ */
+
 // Multer setup for avatar uploads
 const avatarStorage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -253,6 +297,43 @@ router.put(
   },
 );
 
+/**
+ * @swagger
+ * /users/settings:
+ *   get:
+ *     summary: Get user settings
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User settings
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Failed to fetch user settings
+ *   put:
+ *     summary: Update user settings
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       200:
+ *         description: User settings updated
+ *       400:
+ *         description: Validation failed
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Failed to update user settings
+ */
+
 // GET /api/users/settings - Get user settings
 router.get("/settings", authenticateUser, async (req, res) => {
   try {
@@ -382,6 +463,23 @@ router.put(
   },
 );
 
+/**
+ * @swagger
+ * /users/account:
+ *   delete:
+ *     summary: Delete user account
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Account deleted
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Failed to delete account
+ */
+
 // DELETE /api/users/account - Delete user account
 router.delete("/account", authenticateUser, async (req, res) => {
   try {
@@ -441,6 +539,23 @@ router.delete("/account", authenticateUser, async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /users/export:
+ *   get:
+ *     summary: Export user data
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User data exported
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Failed to export user data
+ */
+
 // GET /api/users/export - Export user data
 router.get("/export", authenticateUser, async (req, res) => {
   try {
@@ -466,6 +581,43 @@ router.get("/export", authenticateUser, async (req, res) => {
     res.status(500).json({ error: "Failed to export user data" });
   }
 });
+
+/**
+ * @swagger
+ * /users/reality-check-scheduler:
+ *   get:
+ *     summary: Get reality check scheduler settings
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Reality check scheduler settings
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Failed to fetch scheduler settings
+ *   put:
+ *     summary: Update reality check scheduler settings
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       200:
+ *         description: Scheduler settings updated
+ *       400:
+ *         description: Validation failed
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Failed to update scheduler settings
+ */
 
 // Update reality check scheduler settings
 router.put("/reality-check-scheduler", authenticateUser, async (req, res) => {
@@ -547,6 +699,57 @@ router.get("/reality-check-scheduler", authenticateUser, async (req, res) => {
       .json({ message: "Error fetching reality check scheduler settings" });
   }
 });
+
+/**
+ * @swagger
+ * /users/fcm-token:
+ *   post:
+ *     summary: Register FCM token for push notifications
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - token
+ *             properties:
+ *               token:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: FCM token registered
+ *       400:
+ *         description: Invalid token
+ *       500:
+ *         description: Failed to register token
+ *   delete:
+ *     summary: Remove FCM token
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - token
+ *             properties:
+ *               token:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: FCM token removed
+ *       400:
+ *         description: Invalid token
+ *       500:
+ *         description: Failed to remove token
+ */
 
 // Store FCM token for push notifications
 router.post("/fcm-token", authenticateUser, async (req, res) => {

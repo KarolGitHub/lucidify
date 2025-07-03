@@ -19,9 +19,42 @@ const { authenticateJWT } = require("../middleware/jwtAuth");
 const router = express.Router();
 
 /**
- * @route   POST /api/auth/register
- * @desc    Register a new user
- * @access  Public
+ * @swagger
+ * tags:
+ *   name: Auth
+ *   description: Authentication and user session management
+ */
+
+/**
+ * @swagger
+ * /auth/register:
+ *   post:
+ *     summary: Register a new user
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *               - displayName
+ *             properties:
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *               displayName:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: User registered successfully
+ *       400:
+ *         description: Missing required fields or user already exists
+ *       500:
+ *         description: Registration failed
  */
 router.post("/register", async (req, res) => {
   try {
@@ -87,9 +120,34 @@ router.post("/register", async (req, res) => {
 });
 
 /**
- * @route   POST /api/auth/login
- * @desc    Login user
- * @access  Public
+ * @swagger
+ * /auth/login:
+ *   post:
+ *     summary: Login user
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Login successful
+ *       400:
+ *         description: Missing credentials
+ *       401:
+ *         description: Invalid credentials or account deactivated
+ *       500:
+ *         description: Login failed
  */
 router.post("/login", async (req, res) => {
   try {
@@ -162,9 +220,18 @@ router.post("/login", async (req, res) => {
 });
 
 /**
- * @route   POST /api/auth/refresh
- * @desc    Refresh JWT token
- * @access  Private
+ * @swagger
+ * /auth/refresh:
+ *   post:
+ *     summary: Refresh JWT token
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Token refreshed successfully
+ *       500:
+ *         description: Token refresh failed
  */
 router.post("/refresh", authenticateJWT, async (req, res) => {
   try {
@@ -188,9 +255,18 @@ router.post("/refresh", authenticateJWT, async (req, res) => {
 });
 
 /**
- * @route   GET /api/auth/me
- * @desc    Get current user profile
- * @access  Private
+ * @swagger
+ * /auth/me:
+ *   get:
+ *     summary: Get current user profile
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Current user profile
+ *       500:
+ *         description: Failed to fetch user profile
  */
 router.get("/me", authenticateJWT, async (req, res) => {
   try {
@@ -222,9 +298,18 @@ router.get("/me", authenticateJWT, async (req, res) => {
 });
 
 /**
- * @route   POST /api/auth/logout
- * @desc    Logout user (client-side token removal)
- * @access  Private
+ * @swagger
+ * /auth/logout:
+ *   post:
+ *     summary: Logout user
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Logout successful
+ *       500:
+ *         description: Logout failed
  */
 router.post("/logout", authenticateJWT, async (req, res) => {
   try {

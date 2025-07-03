@@ -5,6 +5,66 @@ const User = require("../models/User");
 const { authenticateUser } = require("../middleware/auth");
 const router = express.Router();
 
+/**
+ * @swagger
+ * tags:
+ *   name: Dreams
+ *   description: Dream journal management
+ */
+
+/**
+ * @swagger
+ * /dreams:
+ *   get:
+ *     summary: Get all dreams for the authenticated user
+ *     tags: [Dreams]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *         description: Page number
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         description: Number of dreams per page
+ *       - in: query
+ *         name: sort
+ *         schema:
+ *           type: string
+ *         description: Sort order (e.g., -date)
+ *       - in: query
+ *         name: filter
+ *         schema:
+ *           type: string
+ *         description: Filter by lucid, vivid, recurring, nightmare
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Text search
+ *       - in: query
+ *         name: startDate
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Start date filter
+ *       - in: query
+ *         name: endDate
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: End date filter
+ *     responses:
+ *       200:
+ *         description: List of dreams with pagination
+ *       401:
+ *         description: Unauthorized
+ */
+
 // Helper function to parse dd.mm.rrrr format
 const parseDate = (dateString) => {
   if (!dateString) return null;
@@ -187,6 +247,29 @@ router.get("/", authenticateUser, async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /dreams/{id}:
+ *   get:
+ *     summary: Get a specific dream by ID
+ *     tags: [Dreams]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Dream ID
+ *     responses:
+ *       200:
+ *         description: Dream found
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Dream not found
+ */
 // GET /api/dreams/:id - Get a specific dream
 router.get("/:id", authenticateUser, async (req, res) => {
   try {
@@ -206,6 +289,28 @@ router.get("/:id", authenticateUser, async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /dreams:
+ *   post:
+ *     summary: Create a new dream
+ *     tags: [Dreams]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       201:
+ *         description: Dream created
+ *       400:
+ *         description: Validation failed
+ *       401:
+ *         description: Unauthorized
+ */
 // POST /api/dreams - Create a new dream
 router.post("/", authenticateUser, dreamValidation, async (req, res) => {
   try {
@@ -251,6 +356,35 @@ router.post("/", authenticateUser, dreamValidation, async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /dreams/{id}:
+ *   put:
+ *     summary: Update a dream by ID
+ *     tags: [Dreams]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Dream ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       200:
+ *         description: Dream updated
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Dream not found
+ */
 // PUT /api/dreams/:id - Update a dream
 router.put("/:id", authenticateUser, dreamValidation, async (req, res) => {
   try {
@@ -308,6 +442,29 @@ router.put("/:id", authenticateUser, dreamValidation, async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /dreams/{id}:
+ *   delete:
+ *     summary: Delete a dream by ID
+ *     tags: [Dreams]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Dream ID
+ *     responses:
+ *       200:
+ *         description: Dream deleted
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Dream not found
+ */
 // DELETE /api/dreams/:id - Delete a dream
 router.delete("/:id", authenticateUser, async (req, res) => {
   try {
@@ -339,6 +496,20 @@ router.delete("/:id", authenticateUser, async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /dreams/stats/user:
+ *   get:
+ *     summary: Get dream statistics for the authenticated user
+ *     tags: [Dreams]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Dream statistics
+ *       401:
+ *         description: Unauthorized
+ */
 // GET /api/dreams/stats/user - Get user's dream statistics
 router.get("/stats/user", authenticateUser, async (req, res) => {
   try {
@@ -427,6 +598,26 @@ router.get("/stats/user", authenticateUser, async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /dreams/search/advanced:
+ *   get:
+ *     summary: Advanced dream search
+ *     tags: [Dreams]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: query
+ *         schema:
+ *           type: string
+ *         description: Search query
+ *     responses:
+ *       200:
+ *         description: Search results
+ *       401:
+ *         description: Unauthorized
+ */
 // GET /api/dreams/search - Advanced search
 router.get("/search/advanced", authenticateUser, async (req, res) => {
   try {
