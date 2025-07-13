@@ -1,4 +1,21 @@
 const mongoose = require("mongoose");
+const CryptoJS = require("crypto-js");
+const ENCRYPTION_KEY = process.env.DREAMS_ENCRYPTION_KEY;
+
+function encryptField(value) {
+  if (!value || !ENCRYPTION_KEY) return value;
+  return CryptoJS.AES.encrypt(JSON.stringify(value), ENCRYPTION_KEY).toString();
+}
+
+function decryptField(value) {
+  if (!value || !ENCRYPTION_KEY) return value;
+  try {
+    const bytes = CryptoJS.AES.decrypt(value, ENCRYPTION_KEY);
+    return JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+  } catch {
+    return value;
+  }
+}
 
 const dreamSchema = new mongoose.Schema(
   {
@@ -375,7 +392,54 @@ dreamSchema.pre("save", function (next) {
     this.date = parsedDate;
   }
 
+  // Encrypt sensitive fields before saving
+  if (this.isModified("title")) {
+    this.title = encryptField(this.title);
+  }
+  if (this.isModified("description")) {
+    this.description = encryptField(this.description);
+  }
+  if (this.isModified("emotions")) {
+    this.emotions = encryptField(this.emotions);
+  }
+  if (this.isModified("themes")) {
+    this.themes = encryptField(this.themes);
+  }
+  if (this.isModified("symbols")) {
+    this.symbols = encryptField(this.symbols);
+  }
+  if (this.isModified("tags")) {
+    this.tags = encryptField(this.tags);
+  }
+
   next();
+});
+
+// Decrypt after finding
+function decryptDream(doc) {
+  if (!doc) return;
+  if (doc.title) doc.title = decryptField(doc.title);
+  if (doc.description) doc.description = decryptField(doc.description);
+  if (doc.emotions) doc.emotions = decryptField(doc.emotions);
+  if (doc.themes) doc.themes = decryptField(doc.themes);
+  if (doc.symbols) doc.symbols = decryptField(doc.symbols);
+  if (doc.tags) doc.tags = decryptField(doc.tags);
+}
+
+dreamSchema.post("init", function (doc) {
+  decryptDream(doc);
+});
+dreamSchema.post("find", function (docs) {
+  docs.forEach(decryptDream);
+});
+dreamSchema.post("findOne", function (doc) {
+  decryptDream(doc);
+});
+dreamSchema.post("findOneAndUpdate", function (doc) {
+  decryptDream(doc);
+});
+dreamSchema.post("save", function (doc) {
+  decryptDream(doc);
 });
 
 // Static method to get dream statistics for a user
@@ -433,6 +497,26 @@ dreamSchema.statics.getUserStats = async function (userId) {
 // Instance method to calculate lucid percentage
 dreamSchema.methods.getLucidPercentage = function () {
   return this.isLucid ? 100 : 0;
+};
+
+// Instance methods for manual decryption (if needed)
+dreamSchema.methods.getDecryptedTitle = function () {
+  return decryptField(this.title);
+};
+dreamSchema.methods.getDecryptedDescription = function () {
+  return decryptField(this.description);
+};
+dreamSchema.methods.getDecryptedEmotions = function () {
+  return decryptField(this.emotions);
+};
+dreamSchema.methods.getDecryptedThemes = function () {
+  return decryptField(this.themes);
+};
+dreamSchema.methods.getDecryptedSymbols = function () {
+  return decryptField(this.symbols);
+};
+dreamSchema.methods.getDecryptedTags = function () {
+  return decryptField(this.tags);
 };
 
 module.exports = mongoose.model("Dream", dreamSchema);
