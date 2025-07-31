@@ -25,8 +25,15 @@ function decryptField(value) {
 
   try {
     const bytes = CryptoJS.AES.decrypt(value, ENCRYPTION_KEY);
-    return JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
-  } catch (error) {
+    const decrypted = bytes.toString(CryptoJS.enc.Utf8);
+    try {
+      // Try to parse as JSON (for arrays/objects)
+      return JSON.parse(decrypted);
+    } catch (e) {
+      // If not JSON, return as string
+      return decrypted;
+    }
+  } catch {
     return value;
   }
 }
@@ -211,6 +218,11 @@ dreamSchema.pre("validate", function (next) {
       this.symbols.length === 0 ? "" : JSON.stringify(this.symbols);
   }
   if (Array.isArray(this.tags)) {
+    // Clean up tags
+    this.tags = this.tags
+      .map((tag) => tag.trim().toLowerCase())
+      .filter((tag) => tag.length > 0)
+      .filter((tag, index, arr) => arr.indexOf(tag) === index); // Remove duplicates
     this.tags = this.tags.length === 0 ? "" : JSON.stringify(this.tags);
   }
   next();
@@ -218,14 +230,6 @@ dreamSchema.pre("validate", function (next) {
 
 // Encrypt sensitive fields before saving
 dreamSchema.pre("save", function (next) {
-  // Clean up tags
-  if (this.tags) {
-    this.tags = this.tags
-      .map((tag) => tag.trim().toLowerCase())
-      .filter((tag) => tag.length > 0)
-      .filter((tag, index, arr) => arr.indexOf(tag) === index); // Remove duplicates
-  }
-
   // Ensure date is a proper Date object
   if (this.date) {
     let parsedDate = null;

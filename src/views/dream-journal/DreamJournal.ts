@@ -76,7 +76,7 @@ export default defineComponent({
       editingDream.value = {
         ...dream,
         date: formatDateForInput(dream.date),
-        tagsInput: dream.tags.join(", "),
+        tagsInput: dream.tags ? dream.tags.join(", ") : "",
       };
       showEditModal.value = true;
     };
@@ -200,7 +200,7 @@ export default defineComponent({
       editingDream.value = {
         ...dream,
         date: formatDateForInput(dream.date),
-        tagsInput: dream.tags.join(", "),
+        tagsInput: dream.tags ? dream.tags.join(", ") : "",
       };
       showEditModal.value = true;
     };

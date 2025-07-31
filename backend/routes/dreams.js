@@ -198,17 +198,12 @@ router.get("/", authenticateUser, async (req, res) => {
       const decryptedDream = dream.toObject();
 
       // Always decrypt these fields since they're stored as encrypted strings
-      if (decryptedDream.title)
-        decryptedDream.title = dream.getDecryptedTitle();
-      if (decryptedDream.description)
-        decryptedDream.description = dream.getDecryptedDescription();
-      if (decryptedDream.emotions)
-        decryptedDream.emotions = dream.getDecryptedEmotions();
-      if (decryptedDream.themes)
-        decryptedDream.themes = dream.getDecryptedThemes();
-      if (decryptedDream.symbols)
-        decryptedDream.symbols = dream.getDecryptedSymbols();
-      if (decryptedDream.tags) decryptedDream.tags = dream.getDecryptedTags();
+      decryptedDream.title = dream.getDecryptedTitle();
+      decryptedDream.description = dream.getDecryptedDescription();
+      decryptedDream.emotions = dream.getDecryptedEmotions();
+      decryptedDream.themes = dream.getDecryptedThemes();
+      decryptedDream.symbols = dream.getDecryptedSymbols();
+      decryptedDream.tags = dream.getDecryptedTags();
 
       return decryptedDream;
     });
@@ -275,16 +270,12 @@ router.get("/:id", authenticateUser, async (req, res) => {
     const decryptedDream = dream.toObject();
 
     // Always decrypt these fields since they're stored as encrypted strings
-    if (decryptedDream.title) decryptedDream.title = dream.getDecryptedTitle();
-    if (decryptedDream.description)
-      decryptedDream.description = dream.getDecryptedDescription();
-    if (decryptedDream.emotions)
-      decryptedDream.emotions = dream.getDecryptedEmotions();
-    if (decryptedDream.themes)
-      decryptedDream.themes = dream.getDecryptedThemes();
-    if (decryptedDream.symbols)
-      decryptedDream.symbols = dream.getDecryptedSymbols();
-    if (decryptedDream.tags) decryptedDream.tags = dream.getDecryptedTags();
+    decryptedDream.title = dream.getDecryptedTitle();
+    decryptedDream.description = dream.getDecryptedDescription();
+    decryptedDream.emotions = dream.getDecryptedEmotions();
+    decryptedDream.themes = dream.getDecryptedThemes();
+    decryptedDream.symbols = dream.getDecryptedSymbols();
+    decryptedDream.tags = dream.getDecryptedTags();
 
     res.json({ success: true, data: decryptedDream });
   } catch (error) {
@@ -573,8 +564,7 @@ router.get("/stats/user", authenticateUser, async (req, res) => {
     const decryptedRecentDreams = recentDreams.map((dream) => {
       const decryptedDream = dream.toObject();
 
-      if (decryptedDream.title && !Array.isArray(decryptedDream.title))
-        decryptedDream.title = dream.getDecryptedTitle();
+      decryptedDream.title = dream.getDecryptedTitle();
 
       return decryptedDream;
     });
@@ -671,17 +661,12 @@ router.get("/search/advanced", authenticateUser, async (req, res) => {
       const decryptedDream = dream.toObject();
 
       // Always decrypt these fields since they're stored as encrypted strings
-      if (decryptedDream.title)
-        decryptedDream.title = dream.getDecryptedTitle();
-      if (decryptedDream.description)
-        decryptedDream.description = dream.getDecryptedDescription();
-      if (decryptedDream.emotions)
-        decryptedDream.emotions = dream.getDecryptedEmotions();
-      if (decryptedDream.themes)
-        decryptedDream.themes = dream.getDecryptedThemes();
-      if (decryptedDream.symbols)
-        decryptedDream.symbols = dream.getDecryptedSymbols();
-      if (decryptedDream.tags) decryptedDream.tags = dream.getDecryptedTags();
+      decryptedDream.title = dream.getDecryptedTitle();
+      decryptedDream.description = dream.getDecryptedDescription();
+      decryptedDream.emotions = dream.getDecryptedEmotions();
+      decryptedDream.themes = dream.getDecryptedThemes();
+      decryptedDream.symbols = dream.getDecryptedSymbols();
+      decryptedDream.tags = dream.getDecryptedTags();
 
       return decryptedDream;
     });
