@@ -59,8 +59,7 @@ fi
 echo "🔍 Checking MongoDB connection..."
 
 # Test MongoDB connection
-node test-mongodb.js
-
+node tests/test-mongodb.js
 if [ $? -eq 0 ]; then
     echo "✅ MongoDB is working correctly!"
 else
