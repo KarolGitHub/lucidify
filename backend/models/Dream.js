@@ -4,7 +4,6 @@ const ENCRYPTION_KEY = process.env.DREAMS_ENCRYPTION_KEY;
 
 function encryptField(value) {
   if (!ENCRYPTION_KEY) return value;
-  if (!value) return value; // Return null/undefined as-is
 
   // Handle empty arrays
   if (Array.isArray(value) && value.length === 0) {
@@ -20,8 +19,8 @@ function encryptField(value) {
 }
 
 function decryptField(value) {
-  if (!value || !ENCRYPTION_KEY) return value;
-  if (value === "") return []; // Return empty array for empty strings
+  if (!ENCRYPTION_KEY) return value;
+  if (value === "") return ""; // Return empty string for empty strings
 
   try {
     const bytes = CryptoJS.AES.decrypt(value, ENCRYPTION_KEY);
@@ -272,24 +271,12 @@ dreamSchema.pre("save", function (next) {
   }
 
   // Encrypt sensitive fields before saving
-  if (this.isModified("title")) {
-    this.title = encryptField(this.title);
-  }
-  if (this.isModified("description")) {
-    this.description = encryptField(this.description);
-  }
-  if (this.isModified("emotions")) {
-    this.emotions = encryptField(this.emotions);
-  }
-  if (this.isModified("themes")) {
-    this.themes = encryptField(this.themes);
-  }
-  if (this.isModified("symbols")) {
-    this.symbols = encryptField(this.symbols);
-  }
-  if (this.isModified("tags")) {
-    this.tags = encryptField(this.tags);
-  }
+  this.title = encryptField(this.title);
+  this.description = encryptField(this.description);
+  this.emotions = encryptField(this.emotions);
+  this.themes = encryptField(this.themes);
+  this.symbols = encryptField(this.symbols);
+  this.tags = encryptField(this.tags);
 
   next();
 });
@@ -306,21 +293,22 @@ function decryptDream(doc) {
   if (doc.tags) doc.tags = decryptField(doc.tags);
 }
 
-dreamSchema.post("init", function (doc) {
-  decryptDream(doc);
-});
-dreamSchema.post("find", function (docs) {
-  docs.forEach(decryptDream);
-});
-dreamSchema.post("findOne", function (doc) {
-  decryptDream(doc);
-});
-dreamSchema.post("findOneAndUpdate", function (doc) {
-  decryptDream(doc);
-});
-dreamSchema.post("save", function (doc) {
-  decryptDream(doc);
-});
+// Disabled automatic decryption hooks since we handle decryption manually in routes
+// dreamSchema.post("init", function (doc) {
+//   decryptDream(doc);
+// });
+// dreamSchema.post("find", function (docs) {
+//   docs.forEach(decryptDream);
+// });
+// dreamSchema.post("findOne", function (doc) {
+//   decryptDream(doc);
+// });
+// dreamSchema.post("findOneAndUpdate", function (doc) {
+//   decryptDream(doc);
+// });
+// dreamSchema.post("save", function (doc) {
+//   decryptDream(doc);
+// });
 
 // Static method to get dream statistics for a user
 dreamSchema.statics.getUserStats = async function (userId) {

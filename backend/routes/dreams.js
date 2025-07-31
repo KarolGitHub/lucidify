@@ -360,10 +360,19 @@ router.post("/", authenticateUser, dreamValidation, async (req, res) => {
     // Update user's lucid progress
     await req.user.updateLucidProgress(dream.isLucid);
 
+    // Ensure decryption is applied for response
+    const decryptedDream = dream.toObject();
+    decryptedDream.title = dream.getDecryptedTitle();
+    decryptedDream.description = dream.getDecryptedDescription();
+    decryptedDream.emotions = dream.getDecryptedEmotions();
+    decryptedDream.themes = dream.getDecryptedThemes();
+    decryptedDream.symbols = dream.getDecryptedSymbols();
+    decryptedDream.tags = dream.getDecryptedTags();
+
     res.status(201).json({
       success: true,
       message: "Dream saved successfully",
-      data: dream,
+      data: decryptedDream,
     });
   } catch (error) {
     console.error("Error creating dream:", error);
@@ -468,10 +477,19 @@ router.put("/:id", authenticateUser, dreamValidation, async (req, res) => {
       await req.user.updateLucidProgress(isNowLucid);
     }
 
+    // Ensure decryption is applied for response
+    const decryptedDream = dream.toObject();
+    decryptedDream.title = dream.getDecryptedTitle();
+    decryptedDream.description = dream.getDecryptedDescription();
+    decryptedDream.emotions = dream.getDecryptedEmotions();
+    decryptedDream.themes = dream.getDecryptedThemes();
+    decryptedDream.symbols = dream.getDecryptedSymbols();
+    decryptedDream.tags = dream.getDecryptedTags();
+
     res.json({
       success: true,
       message: "Dream updated successfully",
-      data: dream,
+      data: decryptedDream,
     });
   } catch (error) {
     console.error("Error updating dream:", error);
