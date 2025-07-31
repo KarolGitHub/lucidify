@@ -3,16 +3,30 @@ const CryptoJS = require("crypto-js");
 const ENCRYPTION_KEY = process.env.DREAMS_ENCRYPTION_KEY;
 
 function encryptField(value) {
-  if (!value || !ENCRYPTION_KEY) return value;
-  return CryptoJS.AES.encrypt(JSON.stringify(value), ENCRYPTION_KEY).toString();
+  if (!ENCRYPTION_KEY) return value;
+  if (!value) return value; // Return null/undefined as-is
+
+  // Handle empty arrays
+  if (Array.isArray(value) && value.length === 0) {
+    return ""; // Store empty arrays as empty strings
+  }
+
+  // Always stringify arrays/objects before encrypting
+  const toEncrypt =
+    Array.isArray(value) || typeof value === "object"
+      ? JSON.stringify(value)
+      : value;
+  return CryptoJS.AES.encrypt(toEncrypt, ENCRYPTION_KEY).toString();
 }
 
 function decryptField(value) {
   if (!value || !ENCRYPTION_KEY) return value;
+  if (value === "") return []; // Return empty array for empty strings
+
   try {
     const bytes = CryptoJS.AES.decrypt(value, ENCRYPTION_KEY);
     return JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
-  } catch {
+  } catch (error) {
     return value;
   }
 }
@@ -182,7 +196,27 @@ dreamSchema.virtual("ageInDays").get(function () {
   return Math.floor((Date.now() - this.date) / (1000 * 60 * 60 * 24));
 });
 
-// Pre-save middleware to clean up tags and handle date conversion
+// Convert arrays to strings before validation
+dreamSchema.pre("validate", function (next) {
+  // Convert arrays to JSON strings before validation
+  if (Array.isArray(this.emotions)) {
+    this.emotions =
+      this.emotions.length === 0 ? "" : JSON.stringify(this.emotions);
+  }
+  if (Array.isArray(this.themes)) {
+    this.themes = this.themes.length === 0 ? "" : JSON.stringify(this.themes);
+  }
+  if (Array.isArray(this.symbols)) {
+    this.symbols =
+      this.symbols.length === 0 ? "" : JSON.stringify(this.symbols);
+  }
+  if (Array.isArray(this.tags)) {
+    this.tags = this.tags.length === 0 ? "" : JSON.stringify(this.tags);
+  }
+  next();
+});
+
+// Encrypt sensitive fields before saving
 dreamSchema.pre("save", function (next) {
   // Clean up tags
   if (this.tags) {
@@ -259,6 +293,7 @@ dreamSchema.pre("save", function (next) {
 // Decrypt after finding
 function decryptDream(doc) {
   if (!doc) return;
+
   if (doc.title) doc.title = decryptField(doc.title);
   if (doc.description) doc.description = decryptField(doc.description);
   if (doc.emotions) doc.emotions = decryptField(doc.emotions);
@@ -333,6 +368,29 @@ dreamSchema.statics.getUserStats = async function (userId) {
     dreamsPerDay,
     forgetRate,
   };
+};
+
+// Static method to find dreams with automatic decryption
+dreamSchema.statics.findDecrypted = async function (
+  query = {},
+  projection = null,
+  options = {},
+) {
+  const dreams = await this.find(query, projection, options);
+  dreams.forEach(decryptDream);
+  return dreams;
+};
+
+// Static method to find one dream with automatic decryption
+dreamSchema.statics.findOneDecrypted = async function (
+  query = {},
+  options = {},
+) {
+  const dream = await this.findOne(query, null, options);
+  if (dream) {
+    decryptDream(dream);
+  }
+  return dream;
 };
 
 // Instance method to calculate lucid percentage

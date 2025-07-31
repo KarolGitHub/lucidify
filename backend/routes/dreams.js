@@ -174,40 +174,9 @@ router.get("/", authenticateUser, async (req, res) => {
       if (endDate) query.date.$lte = new Date(endDate);
     }
 
-    // Tags filter
-    if (tags) {
-      const tagArray = tags.split(",").map((tag) => tag.trim().toLowerCase());
-      query.tags = { $in: tagArray };
-    }
-
-    // Emotions filter
-    if (emotions) {
-      const emotionArray = emotions.split(",").map((emotion) => emotion.trim());
-      query.emotions = { $in: emotionArray };
-    }
-
-    // Themes filter
-    if (themes) {
-      const themeArray = themes.split(",").map((theme) => theme.trim());
-      query.themes = { $in: themeArray };
-    }
-
-    // Symbols filter
-    if (symbols) {
-      const symbolArray = symbols.split(",").map((symbol) => symbol.trim());
-      query.symbols = { $in: symbolArray };
-    }
-
-    // Text search
-    if (search) {
-      query.$or = [
-        { title: { $regex: search, $options: "i" } },
-        { description: { $regex: search, $options: "i" } },
-        { tags: { $in: [new RegExp(search, "i")] } },
-        { themes: { $in: [new RegExp(search, "i")] } },
-        { symbols: { $in: [new RegExp(search, "i")] } },
-      ];
-    }
+    // Note: Filtering by tags, emotions, themes, symbols and text search are temporarily disabled
+    // due to encryption. These fields are now stored as encrypted strings, not searchable text.
+    // TODO: Implement filtering and search functionality that works with encrypted data if needed.
 
     // Calculate pagination
     const pageNum = parseInt(page);
@@ -224,6 +193,26 @@ router.get("/", authenticateUser, async (req, res) => {
       .limit(limitNum)
       .populate("userId", "displayName email");
 
+    // Ensure decryption is applied
+    const decryptedDreams = dreams.map((dream) => {
+      const decryptedDream = dream.toObject();
+
+      // Always decrypt these fields since they're stored as encrypted strings
+      if (decryptedDream.title)
+        decryptedDream.title = dream.getDecryptedTitle();
+      if (decryptedDream.description)
+        decryptedDream.description = dream.getDecryptedDescription();
+      if (decryptedDream.emotions)
+        decryptedDream.emotions = dream.getDecryptedEmotions();
+      if (decryptedDream.themes)
+        decryptedDream.themes = dream.getDecryptedThemes();
+      if (decryptedDream.symbols)
+        decryptedDream.symbols = dream.getDecryptedSymbols();
+      if (decryptedDream.tags) decryptedDream.tags = dream.getDecryptedTags();
+
+      return decryptedDream;
+    });
+
     // Calculate pagination info
     const totalPages = Math.ceil(totalDocs / limitNum);
     const hasNextPage = pageNum < totalPages;
@@ -231,7 +220,7 @@ router.get("/", authenticateUser, async (req, res) => {
 
     res.json({
       success: true,
-      data: dreams,
+      data: decryptedDreams,
       pagination: {
         page: pageNum,
         limit: limitNum,
@@ -282,7 +271,22 @@ router.get("/:id", authenticateUser, async (req, res) => {
       return res.status(404).json({ error: "Dream not found" });
     }
 
-    res.json({ success: true, data: dream });
+    // Ensure decryption is applied
+    const decryptedDream = dream.toObject();
+
+    // Always decrypt these fields since they're stored as encrypted strings
+    if (decryptedDream.title) decryptedDream.title = dream.getDecryptedTitle();
+    if (decryptedDream.description)
+      decryptedDream.description = dream.getDecryptedDescription();
+    if (decryptedDream.emotions)
+      decryptedDream.emotions = dream.getDecryptedEmotions();
+    if (decryptedDream.themes)
+      decryptedDream.themes = dream.getDecryptedThemes();
+    if (decryptedDream.symbols)
+      decryptedDream.symbols = dream.getDecryptedSymbols();
+    if (decryptedDream.tags) decryptedDream.tags = dream.getDecryptedTags();
+
+    res.json({ success: true, data: decryptedDream });
   } catch (error) {
     console.error("Error fetching dream:", error);
     res.status(500).json({ error: "Failed to fetch dream" });
@@ -324,6 +328,26 @@ router.post("/", authenticateUser, dreamValidation, async (req, res) => {
       ...req.body,
       userId: req.user.firebaseUid,
     };
+
+    // Convert arrays to strings for encrypted fields
+    if (Array.isArray(dreamData.emotions)) {
+      dreamData.emotions =
+        dreamData.emotions.length === 0
+          ? ""
+          : JSON.stringify(dreamData.emotions);
+    }
+    if (Array.isArray(dreamData.themes)) {
+      dreamData.themes =
+        dreamData.themes.length === 0 ? "" : JSON.stringify(dreamData.themes);
+    }
+    if (Array.isArray(dreamData.symbols)) {
+      dreamData.symbols =
+        dreamData.symbols.length === 0 ? "" : JSON.stringify(dreamData.symbols);
+    }
+    if (Array.isArray(dreamData.tags)) {
+      dreamData.tags =
+        dreamData.tags.length === 0 ? "" : JSON.stringify(dreamData.tags);
+    }
 
     // Convert date string to Date object if provided
     if (dreamData.date) {
@@ -408,6 +432,28 @@ router.put("/:id", authenticateUser, dreamValidation, async (req, res) => {
 
     // Prepare update data with proper date handling
     const updateData = { ...req.body };
+
+    // Convert arrays to strings for encrypted fields
+    if (Array.isArray(updateData.emotions)) {
+      updateData.emotions =
+        updateData.emotions.length === 0
+          ? ""
+          : JSON.stringify(updateData.emotions);
+    }
+    if (Array.isArray(updateData.themes)) {
+      updateData.themes =
+        updateData.themes.length === 0 ? "" : JSON.stringify(updateData.themes);
+    }
+    if (Array.isArray(updateData.symbols)) {
+      updateData.symbols =
+        updateData.symbols.length === 0
+          ? ""
+          : JSON.stringify(updateData.symbols);
+    }
+    if (Array.isArray(updateData.tags)) {
+      updateData.tags =
+        updateData.tags.length === 0 ? "" : JSON.stringify(updateData.tags);
+    }
 
     // Convert date string to Date object if provided
     if (updateData.date) {
@@ -516,72 +562,36 @@ router.get("/stats/user", authenticateUser, async (req, res) => {
     const stats = await Dream.getUserStats(req.user.firebaseUid);
 
     // Get recent activity
-    const recentDreams = await Dream.find({ userId: req.user.firebaseUid })
+    const recentDreams = await Dream.find({
+      userId: req.user.firebaseUid,
+    })
       .sort({ date: -1 })
       .limit(5)
       .select("title date isLucid");
 
-    // Get most common tags
-    const tagStats = await Dream.aggregate([
-      { $match: { userId: req.user.firebaseUid } },
-      { $unwind: "$tags" },
-      {
-        $group: {
-          _id: "$tags",
-          count: { $sum: 1 },
-        },
-      },
-      { $sort: { count: -1 } },
-      { $limit: 10 },
-    ]);
+    // Ensure decryption is applied
+    const decryptedRecentDreams = recentDreams.map((dream) => {
+      const decryptedDream = dream.toObject();
 
-    // Get most common emotions
-    const emotionStats = await Dream.aggregate([
-      { $match: { userId: req.user.firebaseUid } },
-      { $unwind: "$emotions" },
-      {
-        $group: {
-          _id: "$emotions",
-          count: { $sum: 1 },
-        },
-      },
-      { $sort: { count: -1 } },
-      { $limit: 10 },
-    ]);
+      if (decryptedDream.title && !Array.isArray(decryptedDream.title))
+        decryptedDream.title = dream.getDecryptedTitle();
 
-    // Get most common themes
-    const themeStats = await Dream.aggregate([
-      { $match: { userId: req.user.firebaseUid } },
-      { $unwind: "$themes" },
-      {
-        $group: {
-          _id: "$themes",
-          count: { $sum: 1 },
-        },
-      },
-      { $sort: { count: -1 } },
-      { $limit: 10 },
-    ]);
+      return decryptedDream;
+    });
 
-    // Get most common symbols
-    const symbolStats = await Dream.aggregate([
-      { $match: { userId: req.user.firebaseUid } },
-      { $unwind: "$symbols" },
-      {
-        $group: {
-          _id: "$symbols",
-          count: { $sum: 1 },
-        },
-      },
-      { $sort: { count: -1 } },
-      { $limit: 10 },
-    ]);
+    // Note: Aggregation stats for tags, emotions, themes, symbols are temporarily disabled
+    // due to encryption. These fields are now stored as encrypted strings, not arrays.
+    // TODO: Implement stats calculation from decrypted data if needed.
+    const tagStats = [];
+    const emotionStats = [];
+    const themeStats = [];
+    const symbolStats = [];
 
     res.json({
       success: true,
       data: {
         ...stats,
-        recentDreams,
+        recentDreams: decryptedRecentDreams,
         tagStats,
         emotionStats,
         themeStats,
@@ -636,44 +646,15 @@ router.get("/search/advanced", authenticateUser, async (req, res) => {
 
     const query = { userId: req.user.firebaseUid };
 
-    // Text search
-    if (q) {
-      query.$or = [
-        { title: { $regex: q, $options: "i" } },
-        { description: { $regex: q, $options: "i" } },
-        { tags: { $in: [new RegExp(q, "i")] } },
-        { themes: { $in: [new RegExp(q, "i")] } },
-        { symbols: { $in: [new RegExp(q, "i")] } },
-      ];
-    }
+    // Note: Text search and filtering by tags, emotions, themes, symbols are temporarily disabled
+    // due to encryption. These fields are now stored as encrypted strings, not searchable text.
+    // TODO: Implement search functionality that works with encrypted data if needed.
 
-    // Filters
+    // Only boolean filters work with encrypted data
     if (lucidOnly === "true") query.isLucid = true;
     if (vividOnly === "true") query.isVivid = true;
     if (recurringOnly === "true") query.isRecurring = true;
     if (nightmareOnly === "true") query.isNightmare = true;
-
-    // Tags and emotions
-    if (tags) {
-      const tagArray = tags.split(",").map((tag) => tag.trim().toLowerCase());
-      query.tags = { $in: tagArray };
-    }
-
-    if (emotions) {
-      const emotionArray = emotions.split(",").map((emotion) => emotion.trim());
-      query.emotions = { $in: emotionArray };
-    }
-
-    // Themes and symbols
-    if (themes) {
-      const themeArray = themes.split(",").map((theme) => theme.trim());
-      query.themes = { $in: themeArray };
-    }
-
-    if (symbols) {
-      const symbolArray = symbols.split(",").map((symbol) => symbol.trim());
-      query.symbols = { $in: symbolArray };
-    }
 
     // Date range
     if (dateRange) {
@@ -685,10 +666,30 @@ router.get("/search/advanced", authenticateUser, async (req, res) => {
 
     const dreams = await Dream.find(query).sort({ date: -1 }).limit(50);
 
+    // Ensure decryption is applied
+    const decryptedDreams = dreams.map((dream) => {
+      const decryptedDream = dream.toObject();
+
+      // Always decrypt these fields since they're stored as encrypted strings
+      if (decryptedDream.title)
+        decryptedDream.title = dream.getDecryptedTitle();
+      if (decryptedDream.description)
+        decryptedDream.description = dream.getDecryptedDescription();
+      if (decryptedDream.emotions)
+        decryptedDream.emotions = dream.getDecryptedEmotions();
+      if (decryptedDream.themes)
+        decryptedDream.themes = dream.getDecryptedThemes();
+      if (decryptedDream.symbols)
+        decryptedDream.symbols = dream.getDecryptedSymbols();
+      if (decryptedDream.tags) decryptedDream.tags = dream.getDecryptedTags();
+
+      return decryptedDream;
+    });
+
     res.json({
       success: true,
-      data: dreams,
-      count: dreams.length,
+      data: decryptedDreams,
+      count: decryptedDreams.length,
     });
   } catch (error) {
     console.error("Error searching dreams:", error);
